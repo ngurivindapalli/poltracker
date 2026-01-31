@@ -1,11 +1,9 @@
 const CONGRESS_API_BASE = 'https://api.congress.gov/v3'
 
 function requireApiKey(): string {
-  const key = process.env.API_DATA_GOV_KEY || process.env.CONGRESS_API_KEY
+  const key = process.env.API_DATA_GOV_KEY
   if (!key) {
-    throw new Error(
-      'Missing API key. Set API_DATA_GOV_KEY in .env.local (api.data.gov key).'
-    )
+    throw new Error('Missing API key. Set API_DATA_GOV_KEY environment variable.')
   }
   return key
 }

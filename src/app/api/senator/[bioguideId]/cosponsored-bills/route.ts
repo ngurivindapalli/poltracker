@@ -20,6 +20,14 @@ export async function GET(
   _req: Request,
   { params }: { params: { bioguideId: string } }
 ) {
+  // Check for API key before processing
+  if (!process.env.API_DATA_GOV_KEY) {
+    return NextResponse.json(
+      { error: 'API_DATA_GOV_KEY environment variable is not set' },
+      { status: 500 }
+    )
+  }
+
   try {
     const data = await fetchCosponsoredLegislation(params.bioguideId, 20)
     const bills = (data?.cosponsoredLegislation?.bills ?? data?.bills ?? data?.cosponsoredLegislation ?? []).map(
