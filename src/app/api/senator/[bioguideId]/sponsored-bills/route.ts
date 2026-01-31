@@ -3,6 +3,8 @@ import { fetchSponsoredLegislation } from '@/lib/congress'
 import { getPublicBillUrl } from '@/lib/bills'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 function simplify(b: any) {
   return {

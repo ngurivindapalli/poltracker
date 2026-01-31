@@ -3,6 +3,8 @@ import { fetchMember } from '@/lib/congress'
 import { senatorImageUrl } from '@/lib/images'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 export async function GET(
   _req: Request,
