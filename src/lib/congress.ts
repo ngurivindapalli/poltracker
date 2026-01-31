@@ -6,6 +6,7 @@ type FetchParams = Record<string, string | number | boolean | undefined>
  * Centralized Congress.gov fetch helper
  * REQUIRED:
  * - api_key query param
+ * - X-API-Key header (api.data.gov gateway)
  * - User-Agent header
  */
 async function congressFetch<T>(
@@ -29,11 +30,14 @@ async function congressFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers: {
-      // REQUIRED by Congress.gov (especially in production / Vercel)
+      // REQUIRED by api.data.gov in production (Vercel)
+      'X-API-Key': API_KEY,
+
+      // REQUIRED by Congress.gov
       'User-Agent': 'PolTracker/1.0 (contact: dev@poltracker.app)',
       'Accept': 'application/json'
     },
-    // cache on server (safe for public gov data)
+    // cache on server (safe for public government data)
     next: { revalidate: 3600 }
   })
 
