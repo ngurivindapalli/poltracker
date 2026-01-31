@@ -81,10 +81,13 @@ export async function fetchAllCurrentMembers(): Promise<any[]> {
 }
 
 export async function fetchMember(bioguideId: string): Promise<any> {
+  // Official Congress.gov v3 endpoint: /member/{bioguideId}
   return congressFetch<any>(`/member/${encodeURIComponent(bioguideId)}`)
 }
 
 export async function fetchSponsoredLegislation(bioguideId: string, limit = 20): Promise<any> {
+  // Official Congress.gov v3 endpoint: /member/{bioguideId}/sponsored-legislation
+  // Note: The correct endpoint is /sponsored-legislation (NOT /sponsored-bills)
   return congressFetch<any>(`/member/${encodeURIComponent(bioguideId)}/sponsored-legislation`, {
     limit,
     offset: 0
@@ -92,6 +95,8 @@ export async function fetchSponsoredLegislation(bioguideId: string, limit = 20):
 }
 
 export async function fetchCosponsoredLegislation(bioguideId: string, limit = 20): Promise<any> {
+  // Official Congress.gov v3 endpoint: /member/{bioguideId}/cosponsored-legislation
+  // Note: The correct endpoint is /cosponsored-legislation (NOT /cosponsored-bills)
   return congressFetch<any>(`/member/${encodeURIComponent(bioguideId)}/cosponsored-legislation`, {
     limit,
     offset: 0
