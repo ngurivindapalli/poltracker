@@ -14,8 +14,11 @@ async function congressFetch<T>(
 ): Promise<T> {
   const api_key = requireApiKey()
   const url = new URL(`${CONGRESS_API_BASE}${path}`)
+  
+  // Append API key as query parameter (required by Congress.gov API)
   url.searchParams.set('api_key', api_key)
   url.searchParams.set('format', 'json')
+  
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined) continue
     url.searchParams.set(k, String(v))
@@ -28,7 +31,9 @@ async function congressFetch<T>(
 
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`Congress API error ${res.status}: ${text}`)
+    // Log non-OK responses for debugging
+    console.error(`Congress API error ${res.status} for ${path}:`, text.substring(0, 200))
+    throw new Error(`Congress API error ${res.status}: ${text.substring(0, 200)}`)
   }
 
   return (await res.json()) as T
