@@ -1,13 +1,15 @@
-const CONGRESS_API_BASE = 'http://api.congress.gov/v3'
+const CONGRESS_API_BASE = 'https://api.congress.gov/v3'
 
 type FetchParams = Record<string, string | number | boolean | undefined>
 
 /**
  * Centralized Congress.gov fetch helper
- * REQUIRED:
- * - api_key query param
- * - X-API-Key header (api.data.gov gateway)
- * - User-Agent header
+ *
+ * Congress.gov requirements:
+ * - HTTPS ONLY
+ * - api_key as QUERY PARAM ONLY
+ * - NO X-API-Key header
+ * - NO forced caching
  */
 async function congressFetch<T>(
   path: string,
@@ -30,15 +32,11 @@ async function congressFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers: {
-      // REQUIRED by api.data.gov in production (Vercel)
-      'X-API-Key': API_KEY,
-
-      // REQUIRED by Congress.gov
       'User-Agent': 'PolTracker/1.0 (contact: dev@poltracker.app)',
       'Accept': 'application/json'
     },
-    // cache on server (safe for public government data)
-    next: { revalidate: 3600 }
+    // IMPORTANT: Congress.gov breaks with cached/server revalidation
+    cache: 'no-store'
   })
 
   if (!res.ok) {
@@ -69,10 +67,6 @@ export type CongressMemberListResponse = {
    MEMBERS
 ========================= */
 
-/**
- * Fetch all current members of Congress
- * (filtered client-side to Senate)
- */
 export async function fetchAllCurrentMembers(): Promise<any[]> {
   const all: any[] = []
   let offset = 0
@@ -95,9 +89,6 @@ export async function fetchAllCurrentMembers(): Promise<any[]> {
   return all
 }
 
-/**
- * Fetch a single member by Bioguide ID
- */
 export async function fetchMember(bioguideId: string): Promise<any> {
   return congressFetch<any>(`/member/${encodeURIComponent(bioguideId)}`)
 }
@@ -106,34 +97,22 @@ export async function fetchMember(bioguideId: string): Promise<any> {
    LEGISLATION
 ========================= */
 
-/**
- * Fetch sponsored legislation for a member
- */
 export async function fetchSponsoredLegislation(
   bioguideId: string,
   limit = 20
 ): Promise<any> {
   return congressFetch<any>(
     `/member/${encodeURIComponent(bioguideId)}/sponsored-legislation`,
-    {
-      limit,
-      offset: 0
-    }
+    { limit }
   )
 }
 
-/**
- * Fetch cosponsored legislation for a member
- */
 export async function fetchCosponsoredLegislation(
   bioguideId: string,
   limit = 20
 ): Promise<any> {
   return congressFetch<any>(
     `/member/${encodeURIComponent(bioguideId)}/cosponsored-legislation`,
-    {
-      limit,
-      offset: 0
-    }
+    { limit }
   )
 }
