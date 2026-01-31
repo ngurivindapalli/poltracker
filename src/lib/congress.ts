@@ -1,4 +1,4 @@
-const CONGRESS_API_BASE = 'https://api.congress.gov/v3'
+const CONGRESS_API_BASE = 'http://api.congress.gov/v3'
 
 type FetchParams = Record<string, string | number | boolean | undefined>
 
