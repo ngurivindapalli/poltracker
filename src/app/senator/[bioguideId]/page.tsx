@@ -3,20 +3,46 @@ import { getBaseUrl } from '@/lib/getBaseUrl'
 import BillSection from '@/components/BillSection'
 
 async function getJson(path: string) {
-  const res = await fetch(path, { cache: 'no-store' })
-  const json = await res.json()
-  if (!res.ok) throw new Error(json?.error ?? 'Request failed')
-  return json
+  try {
+    const res = await fetch(path, { cache: 'no-store' })
+    const json = await res.json()
+    
+    if (!res.ok) {
+      console.error(`API error ${res.status} for ${path}:`, json?.error ?? 'Request failed')
+      return null
+    }
+    
+    return json
+  } catch (error) {
+    console.error(`Failed to fetch ${path}:`, error)
+    return null
+  }
 }
 
 export default async function SenatorPage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
+  const baseUrl = getBaseUrl()
 
-  const senator = await getJson(`${getBaseUrl()}/api/senator/${bioguideId}`)
-  const sponsored = await getJson(`${getBaseUrl()}/api/senator/${bioguideId}/sponsored-bills`)
-  const cosponsored = await getJson(`${getBaseUrl()}/api/senator/${bioguideId}/cosponsored-bills`)
+  // Fetch all data with error handling
+  const senator = await getJson(`${baseUrl}/api/senator/${bioguideId}`)
+  const sponsored = await getJson(`${baseUrl}/api/senator/${bioguideId}/sponsored-bills`)
+  const cosponsored = await getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`)
+
+  // If senator data failed to load, show error message
+  if (!senator || !senator.profile) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <div className="text-lg font-semibold text-red-800">Unable to load senator data right now.</div>
+          <div className="mt-2 text-sm text-red-700">Please try again later.</div>
+        </div>
+      </div>
+    )
+  }
 
   const profile = senator.profile
+  const sponsoredBills = sponsored?.bills ?? []
+  const cosponsoredBills = cosponsored?.bills ?? []
 
   return (
     <div className="space-y-6">
@@ -47,8 +73,8 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         </div>
       </div>
 
-      <BillSection title="Sponsored legislation (recent)" bills={sponsored.bills ?? []} />
-      <BillSection title="Cosponsored legislation (recent)" bills={cosponsored.bills ?? []} />
+      <BillSection title="Sponsored legislation (recent)" bills={sponsoredBills} />
+      <BillSection title="Cosponsored legislation (recent)" bills={cosponsoredBills} />
     </div>
   )
 }
