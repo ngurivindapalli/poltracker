@@ -1,41 +1,49 @@
 const CONGRESS_API_BASE = 'https://api.congress.gov/v3'
 
-function requireApiKey(): string {
-  const key = process.env.API_DATA_GOV_KEY
-  if (!key) {
-    throw new Error('Missing API key. Set API_DATA_GOV_KEY environment variable.')
-  }
-  return key
-}
-
 async function congressFetch<T>(
   path: string,
   params: Record<string, string | number | boolean | undefined> = {}
 ): Promise<T> {
-  const api_key = requireApiKey()
+  // Read API key from environment variable
+  const API_KEY = process.env.API_DATA_GOV_KEY
+  
+  // Throw error if API key is missing
+  if (!API_KEY) {
+    throw new Error('Missing API key. Set API_DATA_GOV_KEY environment variable.')
+  }
+
+  // Construct URL with base path
   const url = new URL(`${CONGRESS_API_BASE}${path}`)
   
-  // Append API key as query parameter (required by Congress.gov API)
-  url.searchParams.set('api_key', api_key)
+  // Append API key as query parameter (REQUIRED by Congress.gov API)
+  url.searchParams.set('api_key', API_KEY)
   url.searchParams.set('format', 'json')
   
+  // Preserve any existing query params (limit, offset, etc)
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined) continue
     url.searchParams.set(k, String(v))
   }
 
+  // Make request to Congress.gov API
   const res = await fetch(url.toString(), {
     // cache on server for performance; change if you want "always live"
     next: { revalidate: 3600 }
   })
 
+  // Check if response is OK
   if (!res.ok) {
+    // Read response as text (never assume JSON on failed response)
     const text = await res.text().catch(() => '')
-    // Log non-OK responses for debugging
-    console.error(`Congress API error ${res.status} for ${path}:`, text.substring(0, 200))
+    
+    // Log error for debugging
+    console.error(`Congress API error ${res.status} for ${path}:`, text.substring(0, 500))
+    
+    // Throw error with status code
     throw new Error(`Congress API error ${res.status}: ${text.substring(0, 200)}`)
   }
 
+  // Return JSON ONLY on successful responses
   return (await res.json()) as T
 }
 
