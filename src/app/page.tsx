@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import SenatorCard from '@/components/SenatorCard'
 import SearchBar from '@/components/SearchBar'
 import type { SenatorLite } from '@/lib/types'
-import { getBaseUrl } from '@/lib/getBaseUrl'
 
 export default function HomePage() {
   const [senators, setSenators] = useState<SenatorLite[]>([])
@@ -17,12 +16,34 @@ export default function HomePage() {
     ;(async () => {
       try {
         setLoading(true)
-        const res = await fetch(`${getBaseUrl()}/api/senators`)
+        setError(null)
+        const res = await fetch('/api/senators')
+        
+        if (!res.ok) {
+          // Try to read error message from JSON response
+          let errorMessage = 'Unable to load senators at the moment.'
+          try {
+            const errorJson = await res.json()
+            if (errorJson?.error) {
+              errorMessage = errorJson.error
+            }
+          } catch {
+            // If JSON parsing fails, use default message
+          }
+          console.error('Failed to fetch senators:', res.status, errorMessage)
+          if (alive) setError(errorMessage)
+          return
+        }
+
+        // Parse JSON response
         const json = await res.json()
-        if (!res.ok) throw new Error(json?.error ?? 'Failed to load senators')
-        if (alive) setSenators(json.senators ?? [])
+        if (alive) {
+          setSenators(json.senators ?? [])
+          setError(null)
+        }
       } catch (e: any) {
-        if (alive) setError(e?.message ?? String(e))
+        console.error('Error fetching senators:', e)
+        if (alive) setError('Unable to load senators at the moment.')
       } finally {
         if (alive) setLoading(false)
       }
@@ -64,9 +85,6 @@ export default function HomePage() {
       {error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
-          <div className="mt-2 text-xs text-red-700">
-            Make sure you created <code>.env.local</code> with <code>API_DATA_GOV_KEY</code>.
-          </div>
         </div>
       ) : null}
 
