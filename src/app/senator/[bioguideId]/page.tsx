@@ -23,12 +23,14 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const { bioguideId } = params
   const baseUrl = getBaseUrl()
 
-  // Fetch all data with error handling
-  const senator = await getJson(`${baseUrl}/api/senator/${bioguideId}`)
-  const sponsored = await getJson(`${baseUrl}/api/senator/${bioguideId}/sponsored-bills`)
-  const cosponsored = await getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`)
+  // Fetch all data independently with error handling
+  const [senator, sponsored, cosponsored] = await Promise.all([
+    getJson(`${baseUrl}/api/senator/${bioguideId}`),
+    getJson(`${baseUrl}/api/senator/${bioguideId}/sponsored-bills`).catch(() => null),
+    getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`).catch(() => null)
+  ])
 
-  // If senator data failed to load, show error message
+  // If senator profile failed to load, show full-page error (page cannot render)
   if (!senator || !senator.profile) {
     return (
       <div className="space-y-6">
@@ -43,6 +45,8 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const profile = senator.profile
   const sponsoredBills = sponsored?.bills ?? []
   const cosponsoredBills = cosponsored?.bills ?? []
+  const sponsoredFailed = sponsored === null
+  const cosponsoredFailed = cosponsored === null
 
   return (
     <div className="space-y-6">
@@ -73,8 +77,33 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         </div>
       </div>
 
-      <BillSection title="Sponsored legislation (recent)" bills={sponsoredBills} />
-      <BillSection title="Cosponsored legislation (recent)" bills={cosponsoredBills} />
+      {sponsoredFailed ? (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Sponsored legislation (recent)</h2>
+            <div className="text-xs text-zinc-600">Top 20</div>
+          </div>
+          <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+            Unable to load sponsored bills.
+          </div>
+        </section>
+      ) : (
+        <BillSection title="Sponsored legislation (recent)" bills={sponsoredBills} />
+      )}
+
+      {cosponsoredFailed ? (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Cosponsored legislation (recent)</h2>
+            <div className="text-xs text-zinc-600">Top 20</div>
+          </div>
+          <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+            Unable to load cosponsored bills.
+          </div>
+        </section>
+      ) : (
+        <BillSection title="Cosponsored legislation (recent)" bills={cosponsoredBills} />
+      )}
     </div>
   )
 }
