@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
-import { fetchSponsoredLegislation } from '@/lib/congress'
-import { getPublicBillUrl } from '@/lib/bills'
-
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
+
+import { NextResponse } from 'next/server'
+import { fetchSponsoredLegislation } from '@/lib/congress'
+import { getPublicBillUrl } from '@/lib/bills'
 
 function simplify(b: any) {
   return {
@@ -24,10 +24,7 @@ export async function GET(
 ) {
   // Check for API key before processing
   if (!process.env.API_DATA_GOV_KEY) {
-    return NextResponse.json(
-      { error: 'API_DATA_GOV_KEY environment variable is not set' },
-      { status: 500 }
-    )
+    throw new Error('Missing API_DATA_GOV_KEY')
   }
 
   try {

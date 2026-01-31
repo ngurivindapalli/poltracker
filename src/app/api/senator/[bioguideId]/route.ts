@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
-import { fetchMember } from '@/lib/congress'
-import { senatorImageUrl } from '@/lib/images'
-
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
+
+import { NextResponse } from 'next/server'
+import { fetchMember } from '@/lib/congress'
+import { senatorImageUrl } from '@/lib/images'
 
 export async function GET(
   _req: Request,
@@ -12,10 +12,7 @@ export async function GET(
 ) {
   // Check for API key before processing
   if (!process.env.API_DATA_GOV_KEY) {
-    return NextResponse.json(
-      { error: 'API_DATA_GOV_KEY environment variable is not set' },
-      { status: 500 }
-    )
+    throw new Error('Missing API_DATA_GOV_KEY')
   }
 
   try {
