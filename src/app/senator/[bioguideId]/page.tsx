@@ -5,14 +5,36 @@ import BillSection from '@/components/BillSection'
 async function getJson(path: string) {
   try {
     const res = await fetch(path, { cache: 'no-store' })
-    const json = await res.json()
     
-    if (!res.ok) {
-      console.error(`API error ${res.status} for ${path}:`, json?.error ?? 'Request failed')
+    // Read response as text first to check if it's HTML
+    const text = await res.text()
+    
+    // Check if response is HTML (API route returned error page)
+    if (text.trim().startsWith('<!') || text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE')) {
+      console.error(`API route returned HTML instead of JSON for ${path}. Status: ${res.status}`)
       return null
     }
     
-    return json
+    // Check if response is OK
+    if (!res.ok) {
+      // Try to parse as JSON to get error message
+      try {
+        const json = JSON.parse(text)
+        console.error(`API error ${res.status} for ${path}:`, json?.error ?? 'Request failed')
+      } catch {
+        console.error(`API error ${res.status} for ${path}: Non-JSON error response`)
+      }
+      return null
+    }
+    
+    // Safely parse JSON
+    try {
+      const json = JSON.parse(text)
+      return json
+    } catch (parseError) {
+      console.error(`Failed to parse JSON response from ${path}:`, parseError)
+      return null
+    }
   } catch (error) {
     console.error(`Failed to fetch ${path}:`, error)
     return null
