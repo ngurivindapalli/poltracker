@@ -21,8 +21,30 @@ export async function GET(
     const member = data?.member ?? data
 
     const name = member?.directOrderName ?? member?.name ?? member?.fullName
-    const party = member?.currentParty ?? member?.partyName ?? member?.party
-    const state = member?.state
+    
+    // Match the homepage logic exactly: partyName first, then party
+    // Check both the member object and the top-level data object
+    let party = member?.partyName ?? member?.party ?? data?.partyName ?? data?.party
+    
+    // If party not found, check all terms (the single member endpoint may store it in terms)
+    if (!party) {
+      const terms = (member?.terms?.item ?? member?.terms ?? data?.terms?.item ?? data?.terms ?? []) as any[]
+      // Check current term first
+      const currentTerm = terms.find((t: any) => {
+        const endYear = t?.endYear ?? t?.endDate
+        return !endYear // Current term has no end date
+      })
+      if (currentTerm) {
+        party = currentTerm?.partyName ?? currentTerm?.party ?? party
+      }
+      // If still not found, check the most recent term
+      if (!party && terms.length > 0) {
+        const mostRecentTerm = terms[terms.length - 1]
+        party = mostRecentTerm?.partyName ?? mostRecentTerm?.party ?? party
+      }
+    }
+    
+    const state = member?.state ?? data?.state
     const depiction = senatorImageUrl(bioguideId, '450x550')
 
     return NextResponse.json({

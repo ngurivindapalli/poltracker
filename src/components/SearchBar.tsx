@@ -36,7 +36,7 @@ export default function SearchBar({
           debounced(next)
         }}
         placeholder={placeholder}
-        className="w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-zinc-200"
+        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-primary placeholder:text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors"
       />
     </div>
   )

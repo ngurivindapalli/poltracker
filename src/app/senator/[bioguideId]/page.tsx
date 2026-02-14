@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { getBaseUrl } from '@/lib/getBaseUrl'
 import BillSection from '@/components/BillSection'
+import NewsSection from '@/components/NewsSection'
 
 async function getJson(path: string) {
   try {
@@ -46,10 +47,11 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const baseUrl = getBaseUrl()
 
   // Fetch all data independently with error handling
-  const [senator, sponsored, cosponsored] = await Promise.all([
+  const [senator, sponsored, cosponsored, news] = await Promise.all([
     getJson(`${baseUrl}/api/senator/${bioguideId}`),
     getJson(`${baseUrl}/api/senator/${bioguideId}/sponsored-bills`).catch(() => null),
-    getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`).catch(() => null)
+    getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`).catch(() => null),
+    getJson(`${baseUrl}/api/senator/${bioguideId}/news`).catch(() => null)
   ])
 
   // If senator profile failed to load, show full-page error (page cannot render)
@@ -67,32 +69,42 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const profile = senator.profile
   const sponsoredBills = sponsored?.bills ?? []
   const cosponsoredBills = cosponsored?.bills ?? []
+  const newsArticles = news?.articles ?? []
   const sponsoredFailed = sponsored === null
   const cosponsoredFailed = cosponsored === null
+  const newsFailed = news === null
 
   return (
-    <div className="space-y-6">
+    <div className="page-transition space-y-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-start">
-        <div className="relative h-[220px] w-[180px] shrink-0 overflow-hidden rounded-2xl border bg-zinc-100">
+        <div className="relative h-[220px] w-[180px] shrink-0 overflow-hidden rounded-xl border border-border bg-background">
           <Image src={profile.imageUrl} alt={profile.name} fill sizes="180px" className="object-cover" />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="text-3xl font-bold tracking-tight">{profile.name}</div>
-          <div className="mt-2 text-sm text-zinc-700">
+          <div className="text-3xl font-semibold tracking-tight text-primary">{profile.name}</div>
+          <div className="mt-2 text-sm text-muted">
             {profile.party ?? '—'} • {profile.state ?? '—'} • Bioguide: <span className="font-mono">{profile.bioguideId}</span>
           </div>
 
-          <div className="mt-4 grid gap-2 rounded-2xl border bg-zinc-50 p-4 text-sm">
-            <div className="text-xs font-semibold text-zinc-600">Profile snapshot</div>
-            <div className="grid gap-2 sm:grid-cols-2">
+          <div className="mt-6 grid gap-3 rounded-xl border border-border bg-background p-5 text-sm">
+            <div className="text-xs font-semibold text-primary uppercase tracking-wide">Profile snapshot</div>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <div className="text-xs text-zinc-500">Official site</div>
-                <div className="truncate">{senator.member?.officialWebsiteUrl ? <a href={senator.member.officialWebsiteUrl} target="_blank" className="no-underline hover:underline">{senator.member.officialWebsiteUrl}</a> : '—'}</div>
+                <div className="text-xs text-muted mb-1">Party</div>
+                <div className="font-medium text-primary">{profile.party || '—'}</div>
               </div>
               <div>
-                <div className="text-xs text-zinc-500">Contact</div>
-                <div className="truncate">{senator.member?.addressInformation?.phoneNumber ?? senator.member?.phoneNumber ?? '—'}</div>
+                <div className="text-xs text-muted mb-1">State</div>
+                <div className="font-medium text-primary">{profile.state || '—'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted mb-1">Official site</div>
+                <div className="truncate text-muted">{senator.member?.officialWebsiteUrl ? <a href={senator.member.officialWebsiteUrl} target="_blank" className="text-accent hover:text-accent/80 no-underline transition-colors">{senator.member.officialWebsiteUrl}</a> : '—'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted mb-1">Contact</div>
+                <div className="truncate text-muted">{senator.member?.addressInformation?.phoneNumber ?? senator.member?.phoneNumber ?? '—'}</div>
               </div>
             </div>
           </div>
@@ -100,12 +112,12 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
       </div>
 
       {sponsoredFailed ? (
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Sponsored legislation (recent)</h2>
-            <div className="text-xs text-zinc-600">Top 20</div>
+            <h2 className="text-2xl font-semibold text-primary">Sponsored legislation (recent)</h2>
+            <div className="text-xs text-muted">Top 20</div>
           </div>
-          <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
             Unable to load sponsored bills.
           </div>
         </section>
@@ -114,17 +126,34 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
       )}
 
       {cosponsoredFailed ? (
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Cosponsored legislation (recent)</h2>
-            <div className="text-xs text-zinc-600">Top 20</div>
+            <h2 className="text-2xl font-semibold text-primary">Cosponsored legislation (recent)</h2>
+            <div className="text-xs text-muted">Top 20</div>
           </div>
-          <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
             Unable to load cosponsored bills.
           </div>
         </section>
       ) : (
         <BillSection title="Cosponsored legislation (recent)" bills={cosponsoredBills} />
+      )}
+
+      {newsFailed ? (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-primary">Recent News</h2>
+          </div>
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+            Unable to load recent news.
+          </div>
+        </section>
+      ) : (
+        <NewsSection
+          bioguideId={bioguideId}
+          initialArticles={newsArticles}
+          initialSourceType={news?.sourceType || 'major'}
+        />
       )}
     </div>
   )

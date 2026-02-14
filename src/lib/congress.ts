@@ -4,12 +4,9 @@ type FetchParams = Record<string, string | number | boolean | undefined>
 
 /**
  * Centralized Congress.gov fetch helper
- *
- * Congress.gov requirements:
- * - HTTPS ONLY
- * - api_key as QUERY PARAM ONLY
- * - NO X-API-Key header
- * - NO forced caching
+ * REQUIRED:
+ * - api_key query param
+ * - User-Agent header
  */
 async function congressFetch<T>(
   path: string,
@@ -32,11 +29,12 @@ async function congressFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers: {
+      // REQUIRED by Congress.gov (especially in production / Vercel)
       'User-Agent': 'PolTracker/1.0 (contact: dev@poltracker.app)',
       'Accept': 'application/json'
     },
-    // IMPORTANT: Congress.gov breaks with cached/server revalidation
-    cache: 'no-store'
+    // cache on server (safe for public gov data)
+    next: { revalidate: 3600 }
   })
 
   if (!res.ok) {
@@ -67,6 +65,10 @@ export type CongressMemberListResponse = {
    MEMBERS
 ========================= */
 
+/**
+ * Fetch all current members of Congress
+ * (filtered client-side to Senate)
+ */
 export async function fetchAllCurrentMembers(): Promise<any[]> {
   const all: any[] = []
   let offset = 0
@@ -89,30 +91,83 @@ export async function fetchAllCurrentMembers(): Promise<any[]> {
   return all
 }
 
+/**
+ * Fetch a single member by Bioguide ID
+ */
 export async function fetchMember(bioguideId: string): Promise<any> {
   return congressFetch<any>(`/member/${encodeURIComponent(bioguideId)}`)
+}
+
+/**
+ * Fetch all current members by state
+ * Returns both senators and representatives
+ */
+export async function fetchMembersByState(stateCode: string): Promise<any[]> {
+  const all: any[] = []
+  let offset = 0
+  const limit = 250
+
+  for (let i = 0; i < 10; i++) {
+    const data = await congressFetch<CongressMemberListResponse>('/member', {
+      currentMember: true,
+      state: stateCode,
+      limit,
+      offset
+    })
+
+    const members = data.members ?? []
+    all.push(...members)
+
+    if (members.length < limit) break
+    offset += limit
+  }
+
+  return all
 }
 
 /* =========================
    LEGISLATION
 ========================= */
 
+/**
+ * Fetch sponsored legislation for a member
+ */
 export async function fetchSponsoredLegislation(
   bioguideId: string,
   limit = 20
 ): Promise<any> {
   return congressFetch<any>(
     `/member/${encodeURIComponent(bioguideId)}/sponsored-legislation`,
-    { limit }
+    {
+      limit,
+      offset: 0
+    }
   )
 }
 
+/**
+ * Fetch cosponsored legislation for a member
+ */
 export async function fetchCosponsoredLegislation(
   bioguideId: string,
   limit = 20
 ): Promise<any> {
   return congressFetch<any>(
     `/member/${encodeURIComponent(bioguideId)}/cosponsored-legislation`,
-    { limit }
+    {
+      limit,
+      offset: 0
+    }
   )
+}
+
+/**
+ * Fetch a single bill by congress, type, and number
+ */
+export async function fetchBill(
+  congress: string,
+  type: string,
+  number: string
+): Promise<any> {
+  return congressFetch<any>(`/bill/${congress}/${type}/${number}`)
 }

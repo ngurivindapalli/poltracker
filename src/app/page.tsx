@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import SenatorCard from '@/components/SenatorCard'
 import SearchBar from '@/components/SearchBar'
+import USStateMap from '@/components/USStateMap'
 import type { SenatorLite } from '@/lib/types'
 
 export default function HomePage() {
@@ -10,6 +11,7 @@ export default function HomePage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let alive = true
@@ -20,7 +22,6 @@ export default function HomePage() {
         const res = await fetch('/api/senators')
         
         if (!res.ok) {
-          // Try to read error message from JSON response
           let errorMessage = 'Unable to load senators at the moment.'
           try {
             const errorJson = await res.json()
@@ -35,7 +36,6 @@ export default function HomePage() {
           return
         }
 
-        // Parse JSON response
         const json = await res.json()
         if (alive) {
           setSenators(json.senators ?? [])
@@ -53,6 +53,36 @@ export default function HomePage() {
     }
   }, [])
 
+  // Scroll animation observer
+  useEffect(() => {
+    if (loading || !gridRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible')
+          }
+        })
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    )
+
+    const cards = gridRef.current.querySelectorAll('.senator-card')
+    cards.forEach((card) => {
+      observer.observe(card)
+    })
+
+    return () => {
+      cards.forEach((card) => {
+        observer.unobserve(card)
+      })
+    }
+  }, [loading, senators, query])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return senators
@@ -66,24 +96,42 @@ export default function HomePage() {
   }, [query, senators])
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">U.S. Senators</h1>
-        <p className="text-sm text-zinc-700">
-          Search senators, open a profile, and see recent sponsored/cosponsored legislation via official U.S.
-          government APIs.
+    <div className="page-transition space-y-12">
+      {/* Hero Section */}
+      <section className="space-y-6 py-12 text-center">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-semibold tracking-tight text-primary sm:text-5xl md:text-6xl">
+            Everything you need to understand U.S. legislation — in one place.
+          </h1>
+          <p className="mx-auto max-w-2xl text-lg text-muted leading-relaxed">
+            Track lawmakers, explore bills, and understand policy through verified data and AI-powered summaries.
+          </p>
+        </div>
+      </section>
+
+      {/* Interactive US Map */}
+      <USStateMap />
+
+      {/* Main Content */}
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-primary">U.S. Senators</h2>
+            <p className="mt-2 text-sm text-muted">
+              Search senators, open a profile, and see recent sponsored/cosponsored legislation via official U.S. government APIs.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
         <SearchBar placeholder="Search by name, state, or party…" value={query} onChange={setQuery} />
-        <div className="text-sm text-zinc-600 md:text-right">
+            <div className="text-sm text-muted md:text-right">
           {loading ? 'Loading…' : `${filtered.length} shown`}
+            </div>
         </div>
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
         </div>
       ) : null}
@@ -91,19 +139,25 @@ export default function HomePage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="h-[142px] animate-pulse rounded-2xl border bg-zinc-50" />
+              <div key={i} className="h-[142px] animate-pulse rounded-xl border border-border bg-white" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((s) => (
-            <SenatorCard key={s.bioguideId} senator={s} />
+          <div ref={gridRef} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((s, index) => (
+              <div
+                key={s.bioguideId}
+                className={`senator-card fade-in-up ${index < 18 ? `stagger-${(index % 6) + 1}` : ''}`}
+              >
+                <SenatorCard senator={s} />
+              </div>
           ))}
         </div>
       )}
 
-      <div className="rounded-2xl border bg-zinc-50 p-4 text-xs text-zinc-700">
+        <div className="rounded-xl border border-border bg-white p-4 text-xs text-muted">
         Tip: try searching by a state like <b>NY</b>, or a party like <b>Democrat</b>.
+        </div>
       </div>
     </div>
   )
