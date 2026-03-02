@@ -40,29 +40,28 @@ function billLabel(b: any) {
   return parts || 'Bill'
 }
 
-function getBillStatus(b: any): { label: string; className: string } {
+function getBillStatus(b: any): { label: string; color: string; bgColor: string; borderColor: string } {
   const latestAction = (b.latestAction || '').toLowerCase()
   
   // Check for common status indicators in latestAction
-  // Using subtle, professional colors that fit the slate blue theme
   if (latestAction.includes('passed') || latestAction.includes('enacted')) {
-    return { label: 'Enacted', className: 'bg-green-50 text-green-800 border-green-200' }
+    return { label: 'Enacted', color: '#065F46', bgColor: '#D1FAE5', borderColor: '#6EE7B7' }
   }
   if (latestAction.includes('signed')) {
-    return { label: 'Signed', className: 'bg-blue-50 text-blue-800 border-blue-200' }
+    return { label: 'Signed', color: '#1E40AF', bgColor: '#DBEAFE', borderColor: '#93C5FD' }
   }
   if (latestAction.includes('vetoed')) {
-    return { label: 'Vetoed', className: 'bg-red-50 text-red-800 border-red-200' }
+    return { label: 'Vetoed', color: '#991B1B', bgColor: '#FEE2E2', borderColor: '#FCA5A5' }
   }
   if (latestAction.includes('referred') || latestAction.includes('committee')) {
-    return { label: 'In Committee', className: 'bg-amber-50 text-amber-800 border-amber-200' }
+    return { label: 'In Committee', color: '#92400E', bgColor: '#FEF3C7', borderColor: '#FCD34D' }
   }
   if (latestAction.includes('passed house') || latestAction.includes('passed senate')) {
-    return { label: 'Passed', className: 'bg-indigo-50 text-indigo-800 border-indigo-200' }
+    return { label: 'Passed', color: '#3730A3', bgColor: '#E0E7FF', borderColor: '#A5B4FC' }
   }
   
-  // Default to "Introduced" if no clear status
-  return { label: 'Introduced', className: 'bg-background text-muted border-border' }
+  // Default to "Introduced"
+  return { label: 'Introduced', color: '#6B7280', bgColor: '#F9FAFB', borderColor: '#E5E7EB' }
 }
 
 interface BillSectionProps {
@@ -126,79 +125,161 @@ export default function BillSection({ title, bills, showToggle = true }: BillSec
 
   if (displayedBills.length === 0) {
     return (
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-primary">{title}</h2>
-          <div className="text-xs text-muted">Top 20</div>
-        </div>
-        <div className="grid gap-3">
-          <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted">No legislation with recorded activity yet.</div>
+      <section style={{ marginBottom: "3rem" }}>
+        <h2 style={{ fontSize: "1.6rem", marginBottom: "1rem", fontWeight: 600 }}>
+          {title}
+        </h2>
+        <div style={{ 
+          padding: "1.5rem", 
+          backgroundColor: "#F9FAFB", 
+          border: "1px solid #E5E7EB", 
+          borderRadius: "8px",
+          color: "#555",
+          fontSize: "0.9rem"
+        }}>
+          No legislation with recorded activity yet.
         </div>
       </section>
     )
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-primary">{title}</h2>
-        <div className="flex items-center gap-3">
+    <section style={{ marginBottom: "3rem" }}>
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "space-between",
+        marginBottom: "1rem"
+      }}>
+        <h2 style={{ fontSize: "1.6rem", fontWeight: 600 }}>
+          {title}
+        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           {showToggle && hasUntitledBills && (
-            <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
+            <label style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "0.5rem", 
+              fontSize: "0.75rem", 
+              color: "#6B7280",
+              cursor: "pointer"
+            }}>
               <input
                 type="checkbox"
                 checked={showUntitled}
                 onChange={(e) => setShowUntitled(e.target.checked)}
-                className="rounded border-border text-accent focus:ring-accent"
+                style={{
+                  cursor: "pointer"
+                }}
               />
               <span>Show placeholder filings</span>
             </label>
           )}
-          <div className="text-xs text-muted">Top 20</div>
+          <div style={{ fontSize: "0.75rem", color: "#6B7280" }}>Top 20</div>
         </div>
       </div>
-      <div className="grid gap-3">
+      
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {displayedBills.map((b: any) => {
           const displayTitle = b.title || b.shortTitle || `${b.type?.toUpperCase()}.${b.number} – ${b.congress}th Congress`
           const status = getBillStatus(b)
           
           const billId = getBillId(b)
           const billKey = `${b.type}-${b.number}`
+          const isHovered = hoveredBill === billKey
           
           return (
             <div
               key={billKey}
-              className="group relative card-hover rounded-xl border border-border bg-white p-5"
+              style={{
+                background: "#FFFFFF",
+                borderRadius: "10px",
+                padding: "1.5rem",
+                border: "1px solid #E5E7EB",
+                boxShadow: isHovered ? "0 2px 8px rgba(0,0,0,0.1)" : "0 1px 3px rgba(0,0,0,0.08)",
+                transition: "all 0.2s ease"
+              }}
               onMouseEnter={() => setHoveredBill(billKey)}
               onMouseLeave={() => setHoveredBill(null)}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="text-xs text-muted">{billLabel(b)}</div>
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${status.className}`}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "0.75rem", color: "#6B7280" }}>{billLabel(b)}</div>
+                    <span style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "6px",
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      color: status.color,
+                      backgroundColor: status.bgColor,
+                      border: `1px solid ${status.borderColor}`
+                    }}>
                       {status.label}
                     </span>
                   </div>
-                  <h3 className="mt-1 text-sm font-semibold text-primary leading-snug">{displayTitle}</h3>
-                  <div className="mt-3 text-xs text-muted">
+                  <h3 style={{ 
+                    fontSize: "1rem", 
+                    fontWeight: 600, 
+                    color: "#111827",
+                    marginBottom: "0.75rem",
+                    lineHeight: 1.4
+                  }}>
+                    {displayTitle}
+                  </h3>
+                  <div style={{ fontSize: "0.875rem", color: "#6B7280", marginBottom: "0.5rem" }}>
                     Introduced: {b.introducedDate ?? '—'}
                     {b.latestAction ? ` • Latest: ${b.latestAction}` : ''}
                   </div>
-                  {b.url ? (
-                    <div className="mt-3 text-xs">
-                      <a href={b.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent/80 no-underline transition-colors">
+                  {b.url && (
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <a 
+                        href={b.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ 
+                          color: "#2563EB", 
+                          textDecoration: "none",
+                          fontSize: "0.875rem"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.textDecoration = "underline"
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.textDecoration = "none"
+                        }}
+                      >
                         View on Congress.gov →
                       </a>
                     </div>
-                  ) : null}
+                  )}
                 </div>
                 
                 {/* Summarize button - appears on hover */}
-                {hoveredBill === billKey && billId && (
+                {isHovered && billId && (
                   <button
                     onClick={(e) => handleSummarize(b, e)}
-                    className="shrink-0 px-4 py-2 text-xs font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
+                    style={{
+                      flexShrink: 0,
+                      padding: "0.5rem 1rem",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      color: "#FFFFFF",
+                      backgroundColor: "#2563EB",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                      whiteSpace: "nowrap"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#1D4ED8"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#2563EB"
+                    }}
                   >
                     Summarize
                   </button>
@@ -208,7 +289,12 @@ export default function BillSection({ title, bills, showToggle = true }: BillSec
           )
         })}
         {hiddenCount > 0 && (
-          <div className="text-xs text-muted italic">
+          <div style={{ 
+            fontSize: "0.75rem", 
+            color: "#6B7280", 
+            fontStyle: "italic",
+            padding: "0.5rem 0"
+          }}>
             {hiddenCount} newly introduced {hiddenCount === 1 ? 'filing' : 'filings'} hidden.
           </div>
         )}

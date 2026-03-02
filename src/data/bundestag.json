@@ -1,0 +1,32 @@
+[
+  {
+    "id": "scholz",
+    "name": "Olaf Scholz",
+    "party": "SPD",
+    "state": "Hamburg"
+  },
+  {
+    "id": "merz",
+    "name": "Friedrich Merz",
+    "party": "CDU",
+    "state": "North Rhine-Westphalia"
+  },
+  {
+    "id": "weidel",
+    "name": "Alice Weidel",
+    "party": "AfD",
+    "state": "Baden-Württemberg"
+  },
+  {
+    "id": "bremen-test",
+    "name": "Test Bremen Member",
+    "party": "SPD",
+    "state": "Bremen"
+  },
+  {
+    "id": "berlin-test",
+    "name": "Test Berlin Member",
+    "party": "CDU",
+    "state": "Berlin"
+  }
+]

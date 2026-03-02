@@ -1,140 +1,149 @@
 import Link from 'next/link'
 import { getBaseUrl } from '@/lib/getBaseUrl'
-import BillSection from '@/components/BillSection'
-import NewsSection from '@/components/NewsSection'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { Button } from '@/components/ui/Button'
+import StateElectionsSection from '@/components/state/StateElectionsSection'
+import StateNewsSection from '@/components/state/StateNewsSection'
+import CountySelector from '@/components/state/CountySelector'
+import { Section } from '@/components/ui/Section'
+import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { getCountiesForState, STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
 
 async function getJson(path: string) {
   try {
-    const baseUrl = getBaseUrl()
-    const res = await fetch(`${baseUrl}${path}`, {
+    const base = getBaseUrl()
+    const res = await fetch(base + path, {
       cache: 'no-store'
     })
     if (!res.ok) return null
     return await res.json()
-  } catch {
+  } catch (e) {
+    console.error("Fetch error:", path, e)
     return null
   }
 }
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const { stateCode } = params
-  const baseUrl = getBaseUrl()
-
   const stateData = await getJson(`/api/state/${stateCode.toUpperCase()}`)
+  
+  // Get counties for this state
+  const counties = getCountiesForState(stateCode)
+  const fullStateName = STATE_CODE_TO_NAME[stateCode.toUpperCase()] || stateData?.stateName || stateCode
 
   if (!stateData || stateData.error) {
     return (
-      <div className="page-transition space-y-6">
-        <div>
-          <Link
-            href="/"
-            className="text-sm text-muted hover:text-primary underline transition-colors"
-          >
-            ← Back to Home
-          </Link>
-        </div>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-          <div className="text-lg font-semibold text-red-800">
+      <main className="max-w-[1000px] mx-auto px-6 py-12">
+        <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Link>
+        <Card className="p-12 text-center bg-red-50 border-red-100">
+          <h2 className="text-[20px] font-bold text-red-800 mb-2">
             {stateData?.error || 'Unable to load state data right now.'}
-          </div>
-          <div className="mt-2 text-sm text-red-700">Please try again later.</div>
-        </div>
-      </div>
+          </h2>
+          <p className="text-red-600">Please try again later.</p>
+        </Card>
+      </main>
     )
   }
 
-  const { stateName, members, news, bills } = stateData
-  const senators = members.filter((m: any) => 
-    (m.chamber || '').toLowerCase().includes('senate')
-  )
-  const representatives = members.filter((m: any) => 
-    (m.chamber || '').toLowerCase().includes('house')
-  )
+  const { stateName, bills } = stateData
 
   return (
-    <div className="page-transition space-y-8">
-      <div>
-        <Link
-          href="/"
-          className="text-sm text-muted hover:text-primary underline transition-colors"
-        >
-          ← Back to Home
-        </Link>
-      </div>
+    <main className="max-w-[1300px] mx-auto px-6 py-12">
+      <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Home
+      </Link>
 
-      <div className="space-y-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-primary">
-          {stateName}
-        </h1>
-        <div className="text-sm text-muted">
-          {senators.length} Senator{senators.length !== 1 ? 's' : ''} • {representatives.length} Representative{representatives.length !== 1 ? 's' : ''}
+      <PageHeader 
+        title={stateName || fullStateName} 
+        subtitle="State Overview: Legislation, Elections, Local Government, and Political News"
+        action={
+          <Button variant="outline">
+            Follow State Updates
+          </Button>
+        }
+      />
+
+      {/* County Selector Section */}
+      {counties.length > 0 && (
+        <Section title="Local Government" subtitle="Select a county to view local elections, events, and news">
+          <CountySelector 
+            stateCode={stateCode} 
+            stateName={fullStateName} 
+            counties={counties} 
+          />
+        </Section>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-12">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-12">
+           {/* Upcoming Elections */}
+           <StateElectionsSection stateCode={stateCode} />
+
+           {/* State Political News */}
+           <StateNewsSection stateCode={stateCode} stateName={stateName || fullStateName} />
+        </div>
+
+        {/* Sidebar / Legislation */}
+        <div className="space-y-8">
+            <h2 className="text-[20px] font-bold text-[#1E3A5F] pb-4 border-b border-[#E2E8F0]">
+              Recent Legislation
+            </h2>
+
+            {bills?.sponsored && bills.sponsored.length > 0 ? (
+                <div className="space-y-4">
+                  <h3 className="text-[14px] font-semibold text-[#64748B] uppercase tracking-wide">
+                    Sponsored Bills
+                  </h3>
+                  {bills.sponsored.slice(0, 5).map((bill: any, i: number) => (
+                    <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>
+                        <span className="text-[10px] text-[#94A3B8]">{bill.date || 'Recent'}</span>
+                      </div>
+                      <h4 className="text-[14px] font-semibold text-[#1E3A5F] leading-snug group-hover:text-[#2563EB] line-clamp-2">
+                        {bill.title}
+                      </h4>
+                    </Card>
+                  ))}
+                </div>
+            ) : null}
+
+            {bills?.cosponsored && bills.cosponsored.length > 0 ? (
+                <div className="space-y-4">
+                  <h3 className="text-[14px] font-semibold text-[#64748B] uppercase tracking-wide">
+                    Cosponsored Bills
+                  </h3>
+                   {bills.cosponsored.slice(0, 3).map((bill: any, i: number) => (
+                    <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>
+                        <span className="text-[10px] text-[#94A3B8]">{bill.date || 'Recent'}</span>
+                      </div>
+                      <h4 className="text-[14px] font-semibold text-[#1E3A5F] leading-snug group-hover:text-[#2563EB] line-clamp-2">
+                        {bill.title}
+                      </h4>
+                    </Card>
+                  ))}
+                </div>
+            ) : null}
+
+            {(!bills?.sponsored?.length && !bills?.cosponsored?.length) && (
+              <Card className="p-6 text-center text-[#64748B] italic bg-[#F8FAFC]">
+                No recent legislation data available for {stateName || fullStateName}.
+              </Card>
+            )}
         </div>
       </div>
-
-      {/* Members List */}
-      {members.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-primary">Members of Congress</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {members.map((member: any) => (
-              <div
-                key={member.bioguideId}
-                className="rounded-xl border border-border bg-white p-4"
-              >
-                <div className="text-base font-semibold text-primary">{member.name}</div>
-                <div className="mt-1 text-sm text-muted">
-                  {member.party || '—'} • {member.chamber || '—'}
-                </div>
-                {member.bioguideId && (
-                  <div className="mt-2">
-                    <Link
-                      href={`/senator/${member.bioguideId}`}
-                      className="text-xs text-accent hover:text-primary underline transition-colors"
-                    >
-                      View profile →
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* News Section */}
-      {news && news.length > 0 ? (
-        <NewsSection
-          bioguideId={stateCode}
-          initialArticles={news}
-          initialSourceType="major"
-          isStatePage={true}
-        />
-      ) : (
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-primary">Recent News</h2>
-          <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted">
-            No recent news found for {stateName}.
-          </div>
-        </section>
-      )}
-
-      {/* Bills Section */}
-      {bills?.sponsored && bills.sponsored.length > 0 && (
-        <BillSection title="Sponsored Legislation" bills={bills.sponsored} showToggle={false} />
-      )}
-
-      {bills?.cosponsored && bills.cosponsored.length > 0 && (
-        <BillSection title="Cosponsored Legislation" bills={bills.cosponsored} showToggle={false} />
-      )}
-
-      {(!bills?.sponsored?.length && !bills?.cosponsored?.length) && (
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-primary">Legislation</h2>
-          <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted">
-            No recent legislation data available for {stateName}.
-          </div>
-        </section>
-      )}
-    </div>
+    </main>
   )
 }

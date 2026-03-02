@@ -5,22 +5,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Slate Blue + Warm Gray palette
         primary: {
-          DEFAULT: '#1E293B', // Slate 800 - Primary text/headings
+          DEFAULT: '#1E3A5F', // Deep Blue
+          hover: '#152C4E',
+        },
+        secondary: {
+          DEFAULT: '#64748B', // Slate Gray
         },
         accent: {
-          DEFAULT: '#2563EB', // Blue 600 - Links, buttons, active states
-        },
-        muted: {
-          DEFAULT: '#64748B', // Slate 500 - Muted text
+          DEFAULT: '#2563EB', // Blue 600
+          hover: '#1D4ED8',
         },
         border: {
-          DEFAULT: '#E5E7EB', // Gray 200 - Borders/dividers
+          DEFAULT: '#E2E8F0',
         },
         background: {
-          DEFAULT: '#F8FAFC', // Slate 50 - Page background
+          DEFAULT: '#F8FAFC',
         },
+        card: {
+          DEFAULT: '#FFFFFF',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

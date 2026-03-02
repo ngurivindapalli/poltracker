@@ -1,0 +1,92 @@
+{
+  "Sweet Grass County": [
+    {
+      "name": "County Commissioner Election",
+      "date": "2026-06-02"
+    },
+    {
+      "name": "School Board Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Los Angeles County": [
+    {
+      "name": "County Supervisor Election",
+      "date": "2026-11-03"
+    },
+    {
+      "name": "District Attorney Election",
+      "date": "2026-06-02"
+    }
+  ],
+  "Cook County": [
+    {
+      "name": "County Board Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Harris County": [
+    {
+      "name": "County Judge Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Maricopa County": [
+    {
+      "name": "Board of Supervisors Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "San Diego County": [
+    {
+      "name": "County Supervisor Election",
+      "date": "2026-06-02"
+    }
+  ],
+  "Orange County": [
+    {
+      "name": "Board of Supervisors Election",
+      "date": "2026-06-02"
+    }
+  ],
+  "Miami-Dade County": [
+    {
+      "name": "County Mayor Election",
+      "date": "2026-08-20"
+    }
+  ],
+  "Kings County": [
+    {
+      "name": "District Attorney Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Clark County": [
+    {
+      "name": "County Commission Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Worcester County": [
+    {
+      "name": "County Commissioner Election",
+      "date": "2026-11-03"
+    },
+    {
+      "name": "Sheriff Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Suffolk County": [
+    {
+      "name": "District Attorney Election",
+      "date": "2026-11-03"
+    }
+  ],
+  "Middlesex County": [
+    {
+      "name": "Register of Deeds Election",
+      "date": "2026-11-03"
+    }
+  ]
+}

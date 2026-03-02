@@ -1,0 +1,74 @@
+{
+  "A000360": [
+    {
+      "asset_name": "Apple Inc. (AAPL)",
+      "asset_type": "stock",
+      "value_range": {
+        "min": 50000,
+        "max": 100000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2024-01-15",
+      "source": "Senate Financial Disclosure"
+    },
+    {
+      "asset_name": "Vanguard S&P 500 ETF (VOO)",
+      "asset_type": "ETF",
+      "value_range": {
+        "min": 100000,
+        "max": 250000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2024-01-15",
+      "source": "Senate Financial Disclosure"
+    },
+    {
+      "asset_name": "Residential Property - Washington DC",
+      "asset_type": "real estate",
+      "value_range": {
+        "min": 500000,
+        "max": 1000000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2023-06-01",
+      "source": "Senate Financial Disclosure"
+    }
+  ],
+  "B000575": [
+    {
+      "asset_name": "Microsoft Corporation (MSFT)",
+      "asset_type": "stock",
+      "value_range": {
+        "min": 25000,
+        "max": 50000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2024-01-20",
+      "source": "Senate Financial Disclosure"
+    },
+    {
+      "asset_name": "Private Equity Fund - Technology Sector",
+      "asset_type": "private equity",
+      "value_range": {
+        "min": 100000,
+        "max": 500000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2023-12-01",
+      "source": "Senate Financial Disclosure"
+    }
+  ],
+  "C000127": [
+    {
+      "asset_name": "Berkshire Hathaway Inc. (BRK.A)",
+      "asset_type": "stock",
+      "value_range": {
+        "min": 75000,
+        "max": 150000
+      },
+      "transaction_type": "hold",
+      "transaction_date": "2024-02-01",
+      "source": "Senate Financial Disclosure"
+    }
+  ]
+}

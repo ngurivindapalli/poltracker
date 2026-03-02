@@ -1,0 +1,50 @@
+{
+  "GA": [
+    {
+      "date": "2026-11-03",
+      "type": "General",
+      "offices": ["Governor", "State Legislature"],
+      "source": "Ballotpedia"
+    }
+  ],
+  "MA": [
+    {
+      "date": "2026-09-01",
+      "type": "Primary",
+      "offices": ["U.S. Senate", "U.S. House"],
+      "source": "State Election Office"
+    }
+  ],
+  "CA": [
+    {
+      "date": "2026-11-03",
+      "type": "General",
+      "offices": ["U.S. Senate", "U.S. House", "Governor"],
+      "source": "California Secretary of State"
+    }
+  ],
+  "TX": [
+    {
+      "date": "2026-11-03",
+      "type": "General",
+      "offices": ["U.S. Senate", "U.S. House", "Governor"],
+      "source": "Texas Secretary of State"
+    }
+  ],
+  "NY": [
+    {
+      "date": "2026-11-03",
+      "type": "General",
+      "offices": ["U.S. Senate", "U.S. House", "Governor"],
+      "source": "New York State Board of Elections"
+    }
+  ],
+  "FL": [
+    {
+      "date": "2026-11-03",
+      "type": "General",
+      "offices": ["U.S. Senate", "U.S. House", "Governor"],
+      "source": "Florida Division of Elections"
+    }
+  ]
+}

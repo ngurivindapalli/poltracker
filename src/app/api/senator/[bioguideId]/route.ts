@@ -10,15 +10,26 @@ export async function GET(
   _req: Request,
   { params }: { params: { bioguideId: string } }
 ) {
-  // Check for API key before processing
-  if (!process.env.API_DATA_GOV_KEY) {
-    throw new Error('Missing API_DATA_GOV_KEY')
-  }
-
   try {
     const bioguideId = params.bioguideId
+
+    // Check for API key before processing
+    if (!process.env.API_DATA_GOV_KEY) {
+      return NextResponse.json(
+        { error: "Missing API_DATA_GOV_KEY" },
+        { status: 500 }
+      )
+    }
+
     const data = await fetchMember(bioguideId)
     const member = data?.member ?? data
+
+    if (!member) {
+      return NextResponse.json(
+        { error: "Not found" },
+        { status: 404 }
+      )
+    }
 
     const name = member?.directOrderName ?? member?.name ?? member?.fullName
     
@@ -58,6 +69,10 @@ export async function GET(
       }
     })
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 })
+    console.error("Senator API error:", err)
+    return NextResponse.json(
+      { error: "server_error", message: err?.message || String(err) },
+      { status: 500 }
+    )
   }
 }

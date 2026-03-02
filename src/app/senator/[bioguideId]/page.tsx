@@ -1,160 +1,226 @@
-import Image from 'next/image'
+import Link from 'next/link'
 import { getBaseUrl } from '@/lib/getBaseUrl'
-import BillSection from '@/components/BillSection'
 import NewsSection from '@/components/NewsSection'
+import SenatorImage from '@/components/SenatorImage'
+import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
+import PortfolioPanel from '@/components/senator/PortfolioPanel'
+import PortfolioChart from '@/components/senator/PortfolioChart'
+import FamilyTree from '@/components/FamilyTree'
+import LobbyingTable from '@/components/senator/LobbyingTable'
+import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
+import SenatorBillsSection from '@/components/senator/SenatorBillsSection'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 
 async function getJson(path: string) {
   try {
-    const res = await fetch(path, { cache: 'no-store' })
-    
-    // Read response as text first to check if it's HTML
-    const text = await res.text()
-    
-    // Check if response is HTML (API route returned error page)
-    if (text.trim().startsWith('<!') || text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE')) {
-      console.error(`API route returned HTML instead of JSON for ${path}. Status: ${res.status}`)
-      return null
-    }
-    
-    // Check if response is OK
+    const base = getBaseUrl()
+    const res = await fetch(base + path, {
+      cache: "no-store"
+    })
+
     if (!res.ok) {
-      // Try to parse as JSON to get error message
-      try {
-        const json = JSON.parse(text)
-        console.error(`API error ${res.status} for ${path}:`, json?.error ?? 'Request failed')
-      } catch {
-        console.error(`API error ${res.status} for ${path}: Non-JSON error response`)
-      }
+      console.error("API error", res.status, base + path)
       return null
     }
-    
-    // Safely parse JSON
-    try {
-      const json = JSON.parse(text)
-      return json
-    } catch (parseError) {
-      console.error(`Failed to parse JSON response from ${path}:`, parseError)
-      return null
-    }
-  } catch (error) {
-    console.error(`Failed to fetch ${path}:`, error)
+
+    return await res.json()
+  } catch (e) {
+    console.error("Fetch error:", path, e)
     return null
   }
 }
 
 export default async function SenatorPage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
-  const baseUrl = getBaseUrl()
 
-  // Fetch all data independently with error handling
-  const [senator, sponsored, cosponsored, news] = await Promise.all([
-    getJson(`${baseUrl}/api/senator/${bioguideId}`),
-    getJson(`${baseUrl}/api/senator/${bioguideId}/sponsored-bills`).catch(() => null),
-    getJson(`${baseUrl}/api/senator/${bioguideId}/cosponsored-bills`).catch(() => null),
-    getJson(`${baseUrl}/api/senator/${bioguideId}/news`).catch(() => null)
+  const [senator, news] = await Promise.all([
+    getJson(`/api/senator/${bioguideId}`),
+    getJson(`/api/senator/${bioguideId}/news`).catch(() => null)
   ])
 
-  // If senator profile failed to load, show full-page error (page cannot render)
   if (!senator || !senator.profile) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
-          <div className="text-lg font-semibold text-red-800">Unable to load senator data right now.</div>
-          <div className="mt-2 text-sm text-red-700">Please try again later.</div>
-        </div>
-      </div>
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Link>
+        <Card className="p-12 text-center bg-red-50 border-red-100">
+          <h2 className="text-[20px] font-bold text-red-800 mb-2">
+            Unable to load senator data right now.
+          </h2>
+          <p className="text-red-600">Please try again later.</p>
+        </Card>
+      </main>
     )
   }
 
   const profile = senator.profile
-  const sponsoredBills = sponsored?.bills ?? []
-  const cosponsoredBills = cosponsored?.bills ?? []
   const newsArticles = news?.articles ?? []
-  const sponsoredFailed = sponsored === null
-  const cosponsoredFailed = cosponsored === null
   const newsFailed = news === null
 
   return (
-    <div className="page-transition space-y-8">
-      <div className="flex flex-col gap-6 md:flex-row md:items-start">
-        <div className="relative h-[220px] w-[180px] shrink-0 overflow-hidden rounded-xl border border-border bg-background">
-          <Image src={profile.imageUrl} alt={profile.name} fill sizes="180px" className="object-cover" />
+    <main className="max-w-6xl mx-auto px-6 py-12">
+      <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Home
+      </Link>
+
+      {/* HEADER */}
+      <section className="bg-white border border-[#E2E8F0] rounded-[16px] p-8 mb-10 shadow-sm flex flex-col md:flex-row gap-8 items-start">
+        <div className="flex-shrink-0">
+            <SenatorImage
+              bioguideId={profile.bioguideId}
+              imageUrl={profile.imageUrl}
+              name={profile.name}
+              width={160}
+              height={160}
+            />
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="text-3xl font-semibold tracking-tight text-primary">{profile.name}</div>
-          <div className="mt-2 text-sm text-muted">
-            {profile.party ?? '—'} • {profile.state ?? '—'} • Bioguide: <span className="font-mono">{profile.bioguideId}</span>
-          </div>
-
-          <div className="mt-6 grid gap-3 rounded-xl border border-border bg-background p-5 text-sm">
-            <div className="text-xs font-semibold text-primary uppercase tracking-wide">Profile snapshot</div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <div className="text-xs text-muted mb-1">Party</div>
-                <div className="font-medium text-primary">{profile.party || '—'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted mb-1">State</div>
-                <div className="font-medium text-primary">{profile.state || '—'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted mb-1">Official site</div>
-                <div className="truncate text-muted">{senator.member?.officialWebsiteUrl ? <a href={senator.member.officialWebsiteUrl} target="_blank" className="text-accent hover:text-accent/80 no-underline transition-colors">{senator.member.officialWebsiteUrl}</a> : '—'}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted mb-1">Contact</div>
-                <div className="truncate text-muted">{senator.member?.addressInformation?.phoneNumber ?? senator.member?.phoneNumber ?? '—'}</div>
-              </div>
+        <div className="flex-grow">
+          <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-[32px] font-bold text-[#1E3A5F] mb-2 leading-tight">
+                    {profile.name}
+                </h1>
+                <div className="flex items-center gap-3 mb-6">
+                    <Badge variant={
+                        profile.party?.toLowerCase().includes("democrat") ? "default" : 
+                        profile.party?.toLowerCase().includes("republican") ? "danger" : "neutral"
+                    } className="text-[14px] px-3 py-1">
+                        {profile.party || '—'}
+                    </Badge>
+                    <span className="text-[16px] text-[#64748B] font-medium">
+                        {profile.state || '—'}
+                    </span>
+                    <span className="text-[#E2E8F0]">•</span>
+                    <span className="text-[16px] text-[#64748B]">
+                        U.S. Senator
+                    </span>
+                </div>
+            </div>
+            <div className="hidden md:block">
+                 <Button variant="primary">Follow Updates</Button>
             </div>
           </div>
+
+          {/* Profile Info Grid */}
+          {senator.member && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-[#F1F5F9]">
+              {senator.member.officialWebsiteUrl && (
+                <div>
+                  <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Official Website</div>
+                  <a 
+                    href={senator.member.officialWebsiteUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[15px] font-medium text-[#2563EB] hover:underline"
+                  >
+                    Visit website →
+                  </a>
+                </div>
+              )}
+              {(senator.member.addressInformation?.phoneNumber || senator.member.phoneNumber) && (
+                <div>
+                  <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Contact</div>
+                  <div className="text-[15px] text-[#111827]">
+                    {senator.member.addressInformation?.phoneNumber ?? senator.member.phoneNumber}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* BILLS SECTION (Full Width) */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+          Legislative Activity
+        </h2>
+        <SenatorBillsSection bioguideId={bioguideId} />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* LEFT COLUMN (70% - Data Heavy) */}
+        <div className="lg:col-span-2 space-y-10">
+           
+           {/* INVESTMENTS */}
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Financial Disclosures
+             </h2>
+             <div className="space-y-6">
+               <PortfolioChart bioguideId={bioguideId} />
+               <PortfolioPanel bioguideId={bioguideId} />
+             </div>
+           </section>
+
+           {/* FAMILY TREE */}
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Family Connections
+             </h2>
+             <FamilyTree senatorName={profile.name} />
+           </section>
+
+           {/* NETWORK GRAPH */}
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Influence Network
+             </h2>
+             <ConnectionsPanel bioguideId={bioguideId} />
+           </section>
+
+           {/* LOBBYING TABLE (Added to main column for better table width) */}
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Donor Influence
+             </h2>
+             <LobbyingTable bioguideId={bioguideId} />
+           </section>
+
+        </div>
+
+        {/* RIGHT COLUMN (30% - Context & News) */}
+        <div className="space-y-10">
+            
+            {/* LATEST COVERAGE */}
+            <section>
+                <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+                  Latest Coverage
+                </h2>
+                {newsFailed ? (
+                <Card className="p-6 bg-amber-50 border-amber-100 text-amber-800 text-center">
+                    Unable to load recent news.
+                </Card>
+                ) : (
+                <NewsSection
+                    bioguideId={bioguideId}
+                    initialArticles={newsArticles}
+                    initialSourceType={news?.sourceType || 'major'}
+                />
+                )}
+            </section>
+
+            {/* AFFILIATIONS */}
+            <section>
+                <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+                  Affiliations
+                </h2>
+                <AffiliationsGrid bioguideId={bioguideId} />
+            </section>
+
         </div>
       </div>
-
-      {sponsoredFailed ? (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-primary">Sponsored legislation (recent)</h2>
-            <div className="text-xs text-muted">Top 20</div>
-          </div>
-          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-            Unable to load sponsored bills.
-          </div>
-        </section>
-      ) : (
-        <BillSection title="Sponsored legislation (recent)" bills={sponsoredBills} />
-      )}
-
-      {cosponsoredFailed ? (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-primary">Cosponsored legislation (recent)</h2>
-            <div className="text-xs text-muted">Top 20</div>
-          </div>
-          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-            Unable to load cosponsored bills.
-          </div>
-        </section>
-      ) : (
-        <BillSection title="Cosponsored legislation (recent)" bills={cosponsoredBills} />
-      )}
-
-      {newsFailed ? (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-primary">Recent News</h2>
-          </div>
-          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-            Unable to load recent news.
-          </div>
-        </section>
-      ) : (
-        <NewsSection
-          bioguideId={bioguideId}
-          initialArticles={newsArticles}
-          initialSourceType={news?.sourceType || 'major'}
-        />
-      )}
-    </div>
+    </main>
   )
 }

@@ -1,9 +1,11 @@
-export function getBaseUrl(): string {
-  // On Vercel, use the VERCEL_URL environment variable
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+export function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    return ""
   }
 
-  // Fallback to localhost for local development
-  return 'http://localhost:3000'
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
+  }
+
+  return "http://localhost:" + (process.env.PORT || "3000")
 }

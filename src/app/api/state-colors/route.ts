@@ -42,13 +42,14 @@ function normalizeParty(party: string | undefined | null): 'Democrat' | 'Republi
 
 /**
  * Determine state color based on Senate majority
- * - Democrat majority → 'blue'
- * - Republican majority → 'red'
- * - Split delegation (1-1) → 'purple'
- * - No data or other → 'gray'
+ * Returns hex color codes directly:
+ * - Democrat majority → '#2563EB' (blue)
+ * - Republican majority → '#DC2626' (red)
+ * - Split delegation (1-1) → '#7C3AED' (purple)
+ * - No data or other → '#9CA3AF' (gray)
  */
-function getStateColor(senators: any[]): 'blue' | 'red' | 'purple' | 'gray' {
-  if (senators.length === 0) return 'gray'
+function getStateColor(senators: any[]): string {
+  if (senators.length === 0) return '#9CA3AF'
   
   let demCount = 0
   let repCount = 0
@@ -78,25 +79,28 @@ function getStateColor(senators: any[]): 'blue' | 'red' | 'purple' | 'gray' {
     else if (normalized === 'Republican') repCount++
   }
   
-  // Determine color based on majority
-  if (demCount > repCount) return 'blue'
-  if (repCount > demCount) return 'red'
-  if (demCount === repCount && demCount > 0) return 'purple' // Split delegation
-  return 'gray' // No valid party data
+  // Determine color based on majority - return hex colors directly
+  if (demCount > repCount) return '#2563EB' // Blue for Democrat majority
+  if (repCount > demCount) return '#DC2626' // Red for Republican majority
+  if (demCount === repCount && demCount > 0) return '#7C3AED' // Purple for split delegation
+  return '#9CA3AF' // Gray for no valid party data
 }
 
 export async function GET() {
   try {
     // Check for API key
     if (!process.env.API_DATA_GOV_KEY) {
-      return NextResponse.json(
-        { error: 'Missing API_DATA_GOV_KEY' },
-        { status: 500 }
-      )
+      console.warn('Missing API_DATA_GOV_KEY - returning empty state colors')
+      return NextResponse.json({}, { status: 200 })
     }
 
     // Fetch all current members
     const members = await fetchAllCurrentMembers()
+    
+    if (!Array.isArray(members)) {
+      console.error('fetchAllCurrentMembers did not return an array:', typeof members)
+      return NextResponse.json({}, { status: 200 })
+    }
     
     // Filter to senators only
     const senators = members.filter(isSenator)
@@ -106,7 +110,7 @@ export async function GET() {
     
     for (const senator of senators) {
       const state = senator?.state
-      if (state) {
+      if (state && typeof state === 'string') {
         if (!senatorsByState[state]) {
           senatorsByState[state] = []
         }
@@ -114,19 +118,34 @@ export async function GET() {
       }
     }
     
-    // Calculate color for each state
-    const stateColors: Record<string, 'blue' | 'red' | 'purple' | 'gray'> = {}
+    // Calculate color for each state - returns hex colors keyed by USPS state code
+    const stateColors: Record<string, string> = {}
     
     for (const [stateCode, stateSenators] of Object.entries(senatorsByState)) {
-      stateColors[stateCode] = getStateColor(stateSenators)
+      // Ensure state code is uppercase (USPS codes are uppercase)
+      if (stateCode && typeof stateCode === 'string') {
+        const normalizedStateCode = stateCode.toUpperCase()
+        stateColors[normalizedStateCode] = getStateColor(stateSenators)
+      }
     }
     
-    return NextResponse.json(stateColors)
+    // Ensure we always return a valid object
+    const response = Object.keys(stateColors).length > 0 ? stateColors : {}
+    
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
   } catch (err: any) {
     console.error('Error in state-colors route:', err)
-    return NextResponse.json(
-      { error: err?.message ?? String(err) },
-      { status: 500 }
-    )
+    // Always return valid JSON, even on error
+    return NextResponse.json({}, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
   }
 }

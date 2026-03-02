@@ -1,39 +1,10 @@
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
+import { NextResponse } from "next/server"
 
-import { NextResponse } from 'next/server'
-import { fetchCosponsoredLegislation } from '@/lib/congress'
-import { getPublicBillUrl } from '@/lib/bills'
+export async function GET() {
+  console.log("Bills API temporarily disabled")
 
-function simplify(b: any) {
-  return {
-    title: b?.title ?? b?.shortTitle ?? 'Untitled',
-    congress: b?.congress,
-    type: b?.type,
-    number: b?.number,
-    introducedDate: b?.introducedDate,
-    latestAction: b?.latestAction?.text ?? b?.latestAction,
-    url: getPublicBillUrl(b)
-  }
-}
-
-export async function GET(
-  _req: Request,
-  { params }: { params: { bioguideId: string } }
-) {
-  // Check for API key before processing
-  if (!process.env.API_DATA_GOV_KEY) {
-    throw new Error('Missing API_DATA_GOV_KEY')
-  }
-
-  try {
-    const data = await fetchCosponsoredLegislation(params.bioguideId, 20)
-    const bills = (data?.cosponsoredLegislation?.bills ?? data?.bills ?? data?.cosponsoredLegislation ?? []).map(
-      simplify
-    )
-    return NextResponse.json({ bills })
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 })
-  }
+  return NextResponse.json({
+    disabled: true,
+    bills: []
+  })
 }

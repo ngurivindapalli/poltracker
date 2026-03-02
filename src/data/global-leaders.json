@@ -1,0 +1,50 @@
+[
+  {
+    "id": "trump",
+    "name": "Donald Trump",
+    "title": "President",
+    "country": "United States",
+    "party": "Republican Party",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg"
+  },
+  {
+    "id": "starmer",
+    "name": "Keir Starmer",
+    "title": "Prime Minister",
+    "country": "United Kingdom",
+    "party": "Labour Party",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Official_portrait_of_Keir_Starmer_crop_2.jpg"
+  },
+  {
+    "id": "scholz",
+    "name": "Olaf Scholz",
+    "title": "Chancellor",
+    "country": "Germany",
+    "party": "SPD",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Olaf_Scholz_in_2023.jpg"
+  },
+  {
+    "id": "modi",
+    "name": "Narendra Modi",
+    "title": "Prime Minister",
+    "country": "India",
+    "party": "BJP",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Narendra_Modi_2023.jpg"
+  },
+  {
+    "id": "macron",
+    "name": "Emmanuel Macron",
+    "title": "President",
+    "country": "France",
+    "party": "Renaissance",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Emmanuel_Macron_2017.jpg"
+  },
+  {
+    "id": "trudeau",
+    "name": "Justin Trudeau",
+    "title": "Prime Minister",
+    "country": "Canada",
+    "party": "Liberal Party",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Justin_Trudeau_2019.jpg"
+  }
+]

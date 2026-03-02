@@ -1,0 +1,1748 @@
+[
+  {
+    "name": "Adam Schiff",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Alex Padilla",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Alfred Woden",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Amy Klobuchar",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "John Bessler"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Jim Klobuchar"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Andy Kim",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Angela Alsobrooks",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Angus King",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [
+        {
+          "name": "Angus King III"
+        }
+      ],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ashley Moody",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "James S. Moody, Jr."
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ben Ray Luj\u00c3\u00a1n",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Ben Luj\u00c3\u00a1n"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Bernie Moreno-Mej\u00c3\u00ada",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Bridget Moreno"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": [
+        {
+          "name": "Luis Alberto Moreno"
+        },
+        {
+          "name": "Roberto Moreno Mej\u00c3\u00ada"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Bernie Sanders",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Jane O'Meara Sanders"
+        }
+      ],
+      "children": [
+        {
+          "name": "Carina Driscoll"
+        }
+      ],
+      "parents": [
+        {
+          "name": "Elias Sanders"
+        },
+        {
+          "name": "Dorothy Sanders"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Larry Sanders"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Bill Cassidy",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Bill Hagerty",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Brian Schatz",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Catherine Cortez Masto",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Paul Masto"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Chris Coons",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Chris Murphy",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Cathy Holahan"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Chris Van Hollen",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Christopher Van Hollen"
+        },
+        {
+          "name": "Edith Eliza Farnsworth"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Cecilia Coale Van Hollen"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Chuck Grassley",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Chuck Schumer",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Iris Weinshall"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Cindy Hyde-Smith",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Clay Davis",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Cory Booker",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Cynthia Lummis",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Alvin Wiederspahn"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Dan Sullivan",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "David H. McCormick",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Dina Powell"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "James H. McCormick"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "David Palmer",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Sherry Palmer"
+        }
+      ],
+      "children": [
+        {
+          "name": "Keith Palmer"
+        },
+        {
+          "name": "Nicole Palmer"
+        }
+      ],
+      "parents": [],
+      "siblings": [
+        {
+          "name": "Wayne Palmer"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Deb Fischer",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Dick Durbin",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ed Markey",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Susan J. Blumenthal"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Eddie Morra",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Elissa Slotkin",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Elizabeth Warren",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Bruce Mann"
+        },
+        {
+          "name": "Jim Warren"
+        }
+      ],
+      "children": [
+        {
+          "name": "Amelia Warren Tyagi"
+        },
+        {
+          "name": "Alexander Warren"
+        }
+      ],
+      "parents": [
+        {
+          "name": "Donald Jones Herring"
+        },
+        {
+          "name": "Polly L. Herring (Reed)"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Donald Reed Herring"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Eric Schmitt",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Gary Peters",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Howard Stackhouse",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jack Reed",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jacky Rosen",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "James Lankford",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jeanne Shaheen",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jeff Merkley",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jerry Moran",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jim Banks",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jim Justice",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Cathy Justice"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "James Conley Justice Sr."
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jim Risch",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Vicki Risch"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Barrasso",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Boozman",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": [
+        {
+          "name": "Fay Boozman"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Cornyn",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Fetterman",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Gisele Barreto Fetterman"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Hickenlooper",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Helen Thorpe"
+        },
+        {
+          "name": "Robin Pringle"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "John Wright Hickenlooper"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Hoeven",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Hoynes",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John N. Kennedy",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John R. Curtis",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "John Thune",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jon Husted",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Jon Ossoff",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Joni Ernst",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Josh Hawley",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "June Finch",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Katie Britt",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Wesley Britt"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Kevin Cramer",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Kirsten Gillibrand",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Lindsey Graham",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "F.J. Graham"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Lisa Blunt Rochester",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Alex Bradley"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Theodore \"Ted\" Blunt"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Lisa Murkowski",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Verne Martell"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Frank Murkowski"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Maggie Hassan",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Thomas Hassan"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Robert Coldwell Wood"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Frank Wood"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Maria Cantwell",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Paul Cantwell"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mark Kelly",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Gabby Giffords"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": [
+        {
+          "name": "Scott Kelly"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mark Warner",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Markwayne Mullin",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Marsha Blackburn",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Martin Heinrich",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Matt Hunt",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Max Lobell",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mazie Hirono",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Michael Bennet",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Douglas J. Bennet"
+        },
+        {
+          "name": "Susanne Klejman"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "James Bennet"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mike Crapo",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mike Lee",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Rex E. Lee"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Thomas Rex Lee"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mike Rounds",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Mitch McConnell",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Sherrill Redmon"
+        },
+        {
+          "name": "Elaine Chao"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Addison Mitchell McConnell"
+        },
+        {
+          "name": "Julia McConnell"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Monica Hughes",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Nathan Petrelli",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "list of Heroes characters"
+        }
+      ],
+      "children": [
+        {
+          "name": "Claire Bennet"
+        }
+      ],
+      "parents": [
+        {
+          "name": "Arthur Petrelli"
+        },
+        {
+          "name": "Angela Petrelli"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Peter Petrelli"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Patty Murray",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Pete Ricketts",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Joe Ricketts"
+        }
+      ],
+      "siblings": [
+        {
+          "name": "Laura Ricketts"
+        },
+        {
+          "name": "Thomas S. Ricketts"
+        },
+        {
+          "name": "Todd Ricketts"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Peter Welch",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Margaret Cheney"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Rand Paul",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Kelley Paul"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Ron Paul"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Raphael Warnock",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Rich Texan",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [
+        {
+          "name": "Paris Texan"
+        }
+      ],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Richard Blumenthal",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [
+        {
+          "name": "Matt Blumenthal"
+        }
+      ],
+      "parents": [],
+      "siblings": [
+        {
+          "name": "David Blumenthal"
+        }
+      ]
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Rick Scott",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Ann Scott"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Robert Kelly",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Robert McCallister",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Robert Royce",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Roger Marshall",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Roger Wicker",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ron Johnson",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ron Wyden",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Nancy Bass Wyden"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Peter H. Wyden"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ruben Gallego",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Kate Gallego"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Sheldon Whitehouse",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Charles Sheldon Whitehouse"
+        },
+        {
+          "name": "Mary Celine Rand"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Shelley Moore Capito",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [
+        {
+          "name": "Moore Capito"
+        }
+      ],
+      "parents": [
+        {
+          "name": "Arch A. Moore"
+        },
+        {
+          "name": "Shelley Riley Moore"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Steve Daines",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Susan Collins",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [
+        {
+          "name": "Donald Collins"
+        },
+        {
+          "name": "Patricia M. Collins"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tammy Baldwin",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tammy Duckworth",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ted Budd",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Ted Cruz",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Heidi Cruz"
+        }
+      ],
+      "children": [],
+      "parents": [
+        {
+          "name": "Rafael Bienvenido Cruz"
+        },
+        {
+          "name": "Eleanor Wilson Cruz"
+        }
+      ],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Thom Tillis",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tim Kaine",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [
+        {
+          "name": "Anne Holton"
+        }
+      ],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tim Scott",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tim Sheehy",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tina Smith",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Todd Young",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tom Cotton",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Tommy Tuberville",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  },
+  {
+    "name": "Wendell Tripplehorn",
+    "image": null,
+    "wikipedia": null,
+    "family": {
+      "spouses": [],
+      "children": [],
+      "parents": [],
+      "siblings": []
+    },
+    "government_connections": false
+  }
+]

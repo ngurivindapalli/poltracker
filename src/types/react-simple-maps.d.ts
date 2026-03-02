@@ -29,6 +29,7 @@ declare module 'react-simple-maps' {
     fill?: string
     stroke?: string
     strokeWidth?: number
+    pointerEvents?: string
     style?: {
       default?: React.CSSProperties
       hover?: React.CSSProperties

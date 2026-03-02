@@ -1,197 +1,191 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import CredibilityInfo from './CredibilityInfo'
+import { useState, useEffect } from "react";
+import CredibilityInfo from "./CredibilityInfo";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 type Article = {
-  title: string
-  description: string
-  url: string
-  source: string
-  publishedAt: string
+  title: string;
+  description: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+  urlToImage?: string;
   _metadata?: {
-    sourceId: string
-    weight: number
-    isPrimary: boolean
-  }
-}
+    sourceId: string;
+    weight: number;
+    isPrimary: boolean;
+  };
+};
 
 type NewsSectionProps = {
-  bioguideId: string
-  initialArticles: Article[]
-  initialSourceType: string
-  isStatePage?: boolean
-}
+  bioguideId: string;
+  initialArticles: Article[];
+  initialSourceType: string;
+  isStatePage?: boolean;
+};
 
-type SortOption = 'credibility' | 'date' | 'none'
+type SortOption = "credibility" | "date";
 
-export default function NewsSection({ bioguideId, initialArticles, initialSourceType, isStatePage = false }: NewsSectionProps) {
-  const [coverage, setCoverage] = useState<'major' | 'all'>(initialSourceType === 'all' ? 'all' : 'major')
-  const [sortBy, setSortBy] = useState<SortOption>('credibility')
-  const [articles, setArticles] = useState<Article[]>(initialArticles)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export default function NewsSection({
+  bioguideId,
+  initialArticles,
+  initialSourceType,
+  isStatePage = false,
+}: NewsSectionProps) {
+  const [coverage, setCoverage] = useState<"major" | "all">(
+    initialSourceType === "all" ? "all" : "major"
+  );
+  const [sortBy, setSortBy] = useState<SortOption>("credibility");
+  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch news when filters change (only for senator pages, not state pages)
   useEffect(() => {
-    if (isStatePage) {
-      // On state pages, we don't refetch - just use initial articles
-      return
-    }
+    if (isStatePage) return;
 
     const fetchNews = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       try {
-        const params = new URLSearchParams()
-        params.set('coverage', coverage)
-        params.set('sort', sortBy)
+        const params = new URLSearchParams();
+        params.set("coverage", coverage);
+        params.set("sort", sortBy);
 
-        const response = await fetch(`/api/senator/${bioguideId}/news?${params.toString()}`)
-        
+        const response = await fetch(
+          `/api/senator/${bioguideId}/news?${params.toString()}`
+        );
+
         if (!response.ok) {
-          throw new Error('Failed to fetch news')
+          throw new Error("Failed to fetch news");
         }
 
-        const data = await response.json()
-        setArticles(data.articles || [])
+        const data = await response.json();
+        setArticles(data.articles || []);
       } catch (err) {
-        console.error('Error fetching news:', err)
-        setError('Unable to load news. Please try again.')
-        setArticles([])
+        console.error("Error fetching news:", err);
+        setError("Unable to load news. Please try again.");
+        setArticles([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    // Only fetch if filters changed from initial state
-    if (coverage !== (initialSourceType === 'all' ? 'all' : 'major') || sortBy !== 'credibility') {
-      fetchNews()
+    if (
+      coverage !== (initialSourceType === "all" ? "all" : "major") ||
+      sortBy !== "credibility"
+    ) {
+      fetchNews();
     }
-  }, [coverage, sortBy, bioguideId, initialSourceType, isStatePage])
+  }, [coverage, sortBy, bioguideId, initialSourceType, isStatePage]);
 
-  // Sort articles client-side based on selected option
   const sortedArticles = [...articles].sort((a, b) => {
-    if (sortBy === 'date') {
-      const dateA = new Date(a.publishedAt).getTime()
-      const dateB = new Date(b.publishedAt).getTime()
-      return dateB - dateA // Newest first
-    } else if (sortBy === 'credibility') {
-      // Sort by credibility weight (if metadata available)
-      const weightA = a._metadata?.weight ?? 0.5
-      const weightB = b._metadata?.weight ?? 0.5
-      if (weightB !== weightA) return weightB - weightA
-      // Secondary sort by date
-      const dateA = new Date(a.publishedAt).getTime()
-      const dateB = new Date(b.publishedAt).getTime()
-      return dateB - dateA
+    if (sortBy === "date") {
+      const dateA = new Date(a.publishedAt).getTime();
+      const dateB = new Date(b.publishedAt).getTime();
+      return dateB - dateA;
+    } else if (sortBy === "credibility") {
+      const weightA = a._metadata?.weight ?? 0.5;
+      const weightB = b._metadata?.weight ?? 0.5;
+      if (weightB !== weightA) return weightB - weightA;
+      const dateA = new Date(a.publishedAt).getTime();
+      const dateB = new Date(b.publishedAt).getTime();
+      return dateB - dateA;
     }
-    // 'none' - return in original order
-    return 0
-  })
+    return 0;
+  });
+
+  function formatDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(date);
+    } catch {
+      return "";
+    }
+  }
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-primary">Recent News</h2>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-muted">
-              {coverage === 'major' ? 'Major News Coverage' : 'All News Coverage'}
-            </span>
-            <CredibilityInfo />
-          </div>
-        </div>
-        
-        {!isStatePage && (
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Coverage Toggle */}
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-white p-1">
-              <button
-                onClick={() => setCoverage('major')}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors rounded ${
-                  coverage === 'major'
-                    ? 'bg-primary text-white'
-                    : 'text-muted hover:bg-background'
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+           <div className="flex bg-[#F1F5F9] p-1 rounded-lg">
+                <button
+                onClick={() => setCoverage("major")}
+                className={`px-3 py-1 text-[12px] font-medium rounded-md transition-all ${
+                    coverage === "major"
+                    ? "bg-white text-[#1E3A5F] shadow-sm"
+                    : "text-[#64748B] hover:text-[#1E3A5F]"
                 }`}
-              >
+                >
                 Major
-              </button>
-              <button
-                onClick={() => setCoverage('all')}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors rounded ${
-                  coverage === 'all'
-                    ? 'bg-primary text-white'
-                    : 'text-muted hover:bg-background'
+                </button>
+                <button
+                onClick={() => setCoverage("all")}
+                className={`px-3 py-1 text-[12px] font-medium rounded-md transition-all ${
+                    coverage === "all"
+                    ? "bg-white text-[#1E3A5F] shadow-sm"
+                    : "text-[#64748B] hover:text-[#1E3A5F]"
                 }`}
-              >
+                >
                 All
-              </button>
+                </button>
             </div>
-
-            {/* Sort Dropdown */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="rounded-lg border border-border bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition-colors"
-            >
-              <option value="credibility">Sort by Credibility</option>
-              <option value="date">Sort by Date</option>
-              <option value="none">No Sort</option>
-            </select>
-          </div>
-        )}
+            <CredibilityInfo />
+        </div>
       </div>
 
       {loading ? (
-        <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted">
-          Loading news...
-        </div>
+        <Card className="p-6 text-center text-[#64748B] italic">
+          Updating news feed...
+        </Card>
       ) : error ? (
-        <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+        <Card className="p-6 text-center bg-red-50 border-red-100 text-red-600">
           {error}
-        </div>
+        </Card>
       ) : sortedArticles.length === 0 ? (
-        <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted">
+        <Card className="p-6 text-center text-[#64748B] italic">
           No recent news found.
-        </div>
+        </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sortedArticles.map((article, index) => (
-            <a
-              key={index}
-              href={article.url}
-              target="_blank"
+            <a 
+              key={index} 
+              href={article.url} 
+              target="_blank" 
               rel="noopener noreferrer"
-              className="card-hover block rounded-xl border border-border bg-white p-5"
+              className="block group"
             >
-              <div className="font-semibold text-primary leading-snug">
-                {article.title || 'Untitled'}
-              </div>
-              {article.description && (
-                <div className="mt-3 text-sm text-muted line-clamp-2 leading-relaxed">
-                  {article.description}
+              <Card className="p-4 hover:shadow-sm transition-all border-[#E2E8F0] hover:border-[#2563EB] group-hover:translate-x-1">
+                <div className="flex justify-between items-start mb-2">
+                   <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wide">
+                      {article.source}
+                   </span>
+                   <span className="text-[11px] text-[#94A3B8]">
+                      {formatDate(article.publishedAt)}
+                   </span>
                 </div>
-              )}
-              <div className="mt-4 flex items-center gap-3 text-xs text-muted">
-                {article.source && (
-                  <span className="font-medium">{article.source}</span>
-                )}
-                {article.publishedAt && (
-                  <span>
-                    {new Date(article.publishedAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                )}
-              </div>
+                <h3 className="text-[15px] font-semibold text-[#1E3A5F] leading-snug mb-2 group-hover:text-[#2563EB] transition-colors line-clamp-3">
+                  {article.title}
+                </h3>
+                <div className="flex items-center text-[12px] text-[#2563EB] font-medium mt-2">
+                   Read Article 
+                   <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                   </svg>
+                </div>
+              </Card>
             </a>
           ))}
         </div>
       )}
-    </section>
-  )
+    </div>
+  );
 }

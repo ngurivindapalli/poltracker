@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" width="550" height="660">
+  <!-- Simplified Germany map with states -->
+  <g id="germany-states">
+    <!-- Baden-Württemberg -->
+    <path d="M 200 600 L 350 580 L 400 650 L 300 700 L 200 680 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Baden-Württemberg"/>
+    
+    <!-- Bavaria -->
+    <path d="M 350 580 L 550 560 L 600 700 L 500 750 L 400 650 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Bavaria"/>
+    
+    <!-- Berlin -->
+    <circle cx="600" cy="300" r="30" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Berlin"/>
+    
+    <!-- Brandenburg -->
+    <path d="M 500 200 L 700 180 L 750 350 L 650 400 L 550 350 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Brandenburg"/>
+    
+    <!-- Bremen -->
+    <circle cx="300" cy="250" r="25" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Bremen"/>
+    
+    <!-- Hamburg -->
+    <circle cx="400" cy="200" r="25" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Hamburg"/>
+    
+    <!-- Hesse -->
+    <path d="M 300 400 L 450 380 L 500 500 L 400 550 L 300 500 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Hesse"/>
+    
+    <!-- Lower Saxony -->
+    <path d="M 200 200 L 400 180 L 450 400 L 300 450 L 200 400 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Lower Saxony"/>
+    
+    <!-- Mecklenburg-Vorpommern -->
+    <path d="M 400 100 L 600 80 L 650 250 L 500 300 L 400 250 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Mecklenburg-Vorpommern"/>
+    
+    <!-- North Rhine-Westphalia -->
+    <path d="M 100 400 L 300 380 L 350 550 L 200 600 L 100 550 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="North Rhine-Westphalia"/>
+    
+    <!-- Rhineland-Palatinate -->
+    <path d="M 150 500 L 300 480 L 350 600 L 200 650 L 150 600 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Rhineland-Palatinate"/>
+    
+    <!-- Saarland -->
+    <path d="M 100 550 L 150 540 L 180 600 L 120 620 L 100 600 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Saarland"/>
+    
+    <!-- Saxony -->
+    <path d="M 600 400 L 750 380 L 800 550 L 650 600 L 600 550 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Saxony"/>
+    
+    <!-- Saxony-Anhalt -->
+    <path d="M 450 300 L 600 280 L 650 450 L 500 500 L 450 450 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Saxony-Anhalt"/>
+    
+    <!-- Schleswig-Holstein -->
+    <path d="M 300 50 L 500 30 L 550 200 L 400 250 L 300 200 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Schleswig-Holstein"/>
+    
+    <!-- Thuringia -->
+    <path d="M 450 400 L 600 380 L 650 550 L 500 600 L 450 550 Z" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2" class="state-region" data-state="Thuringia"/>
+  </g>
+  
+  <style>
+    .state-region {
+      cursor: pointer;
+      transition: fill 0.2s;
+    }
+    .state-region:hover {
+      fill: #2563EB;
+      opacity: 0.8;
+    }
+  </style>
+</svg>

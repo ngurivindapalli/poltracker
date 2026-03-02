@@ -1,231 +1,95 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  ComposableMap,
-  Geographies,
-  Geography
-} from 'react-simple-maps'
+import { ComposableMap, Geographies, Geography } from "react-simple-maps"
 
-// US states GeoJSON URL (using a public CDN)
-const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
+const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
 
-// State code to full name mapping
-const STATE_NAMES: Record<string, string> = {
-  AL: 'Alabama',
-  AK: 'Alaska',
-  AZ: 'Arizona',
-  AR: 'Arkansas',
-  CA: 'California',
-  CO: 'Colorado',
-  CT: 'Connecticut',
-  DE: 'Delaware',
-  FL: 'Florida',
-  GA: 'Georgia',
-  HI: 'Hawaii',
-  ID: 'Idaho',
-  IL: 'Illinois',
-  IN: 'Indiana',
-  IA: 'Iowa',
-  KS: 'Kansas',
-  KY: 'Kentucky',
-  LA: 'Louisiana',
-  ME: 'Maine',
-  MD: 'Maryland',
-  MA: 'Massachusetts',
-  MI: 'Michigan',
-  MN: 'Minnesota',
-  MS: 'Mississippi',
-  MO: 'Missouri',
-  MT: 'Montana',
-  NE: 'Nebraska',
-  NV: 'Nevada',
-  NH: 'New Hampshire',
-  NJ: 'New Jersey',
-  NM: 'New Mexico',
-  NY: 'New York',
-  NC: 'North Carolina',
-  ND: 'North Dakota',
-  OH: 'Ohio',
-  OK: 'Oklahoma',
-  OR: 'Oregon',
-  PA: 'Pennsylvania',
-  RI: 'Rhode Island',
-  SC: 'South Carolina',
-  SD: 'South Dakota',
-  TN: 'Tennessee',
-  TX: 'Texas',
-  UT: 'Utah',
-  VT: 'Vermont',
-  VA: 'Virginia',
-  WA: 'Washington',
-  WV: 'West Virginia',
-  WI: 'Wisconsin',
-  WY: 'Wyoming',
-  DC: 'District of Columbia'
+const FIPS_TO_STATE: Record<string, string> = {
+  "01":"AL","02":"AK","04":"AZ","05":"AR","06":"CA",
+  "08":"CO","09":"CT","10":"DE","11":"DC","12":"FL",
+  "13":"GA","15":"HI","16":"ID","17":"IL","18":"IN",
+  "19":"IA","20":"KS","21":"KY","22":"LA","23":"ME",
+  "24":"MD","25":"MA","26":"MI","27":"MN","28":"MS",
+  "29":"MO","30":"MT","31":"NE","32":"NV","33":"NH",
+  "34":"NJ","35":"NM","36":"NY","37":"NC","38":"ND",
+  "39":"OH","40":"OK","41":"OR","42":"PA","44":"RI",
+  "45":"SC","46":"SD","47":"TN","48":"TX","49":"UT",
+  "50":"VT","51":"VA","53":"WA","54":"WV","55":"WI",
+  "56":"WY"
 }
 
-// Color mapping for political control
-const COLOR_MAP: Record<string, string> = {
-  blue: '#2563EB',   // Democrat majority
-  red: '#DC2626',    // Republican majority
-  purple: '#7C3AED', // Split delegation
-  gray: '#9CA3AF'    // No data / fallback
+// State colors based on Senate majority (static for now)
+const STATE_COLORS: Record<string, string> = {
+  // Republican majority
+  TX: "#DC2626", FL: "#DC2626", AL: "#DC2626", AK: "#DC2626",
+  AR: "#DC2626", ID: "#DC2626", IN: "#DC2626", IA: "#DC2626",
+  KS: "#DC2626", KY: "#DC2626", LA: "#DC2626", MS: "#DC2626",
+  MO: "#DC2626", MT: "#DC2626", NE: "#DC2626", ND: "#DC2626",
+  OK: "#DC2626", SC: "#DC2626", SD: "#DC2626", TN: "#DC2626",
+  UT: "#DC2626", WV: "#DC2626", WY: "#DC2626", OH: "#DC2626",
+  // Democratic majority
+  CA: "#2563EB", NY: "#2563EB", IL: "#2563EB", MA: "#2563EB",
+  CT: "#2563EB", DE: "#2563EB", HI: "#2563EB", MD: "#2563EB",
+  MN: "#2563EB", NJ: "#2563EB", OR: "#2563EB", RI: "#2563EB",
+  VT: "#2563EB", WA: "#2563EB", CO: "#2563EB", NV: "#2563EB",
+  NM: "#2563EB", VA: "#2563EB", MI: "#2563EB", WI: "#2563EB",
+  // Split delegation (purple)
+  ME: "#7C3AED", AZ: "#7C3AED", GA: "#7C3AED", NH: "#7C3AED",
+  PA: "#7C3AED", NC: "#7C3AED"
 }
 
-// Hover color lightening/darkening
-const HOVER_COLOR_MAP: Record<string, string> = {
-  blue: '#3B82F6',   // Lighter blue
-  red: '#EF4444',    // Lighter red
-  purple: '#8B5CF6', // Lighter purple
-  gray: '#D1D5DB'    // Lighter gray
+// Resolve state color (no async, no hooks)
+const resolveStateColor = (stateCode?: string) => {
+  if (!stateCode) return "#E5E7EB"
+  return STATE_COLORS[stateCode] ?? "#E5E7EB"
 }
-
-type StateColorMap = Record<string, 'blue' | 'red' | 'purple' | 'gray'>
 
 export default function USStateMap() {
-  const router = useRouter()
-  const [hoveredState, setHoveredState] = useState<string | null>(null)
-  const [stateColors, setStateColors] = useState<StateColorMap>({})
-  const [loading, setLoading] = useState(true)
-
-  // Fetch state colors on mount
-  useEffect(() => {
-    const fetchStateColors = async () => {
-      try {
-        const res = await fetch('/api/state-colors')
-        if (res.ok) {
-          const colors = await res.json()
-          setStateColors(colors)
-        }
-      } catch (err) {
-        console.error('Error fetching state colors:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    
-    fetchStateColors()
-  }, [])
-
-  const handleStateClick = (stateCode: string) => {
-    if (stateCode && STATE_NAMES[stateCode]) {
-      router.push(`/state/${stateCode}`)
-    }
-  }
-
-  /**
-   * Get the base fill color for a state based on political control
-   */
-  const getStateFill = (stateCode: string, isHovered: boolean): string => {
-    const colorKey = stateColors[stateCode] || 'gray'
-    return isHovered ? (HOVER_COLOR_MAP[colorKey] || COLOR_MAP[colorKey]) : COLOR_MAP[colorKey]
-  }
-
   return (
-    <div className="w-full rounded-xl border border-border bg-white p-6">
-      <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-primary">Explore by State</h2>
-        <p className="mt-1 text-sm text-muted">
-          Click a state to view news and legislation from its representatives
-        </p>
-      </div>
-      
-      {loading && (
-        <div className="w-full rounded-lg bg-background p-8 text-center text-sm text-muted" style={{ minHeight: '400px' }}>
-          Loading state data...
-        </div>
-      )}
-      
-      {!loading && (
-        <div className="w-full overflow-hidden rounded-lg bg-background" style={{ minHeight: '400px' }}>
-          <ComposableMap
-            projection="geoAlbersUsa"
-            className="w-full"
-            style={{ width: '100%', height: 'auto', pointerEvents: 'auto' }}
-          >
-          <Geographies geography={geoUrl}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                // us-atlas uses 'STUSPS' property for state codes (e.g., "CA", "NY")
-                // Fallback to 'name' if STUSPS is not available
-                const stateCode = (geo.properties?.STUSPS || geo.properties?.name || geo.id || '').toUpperCase()
-                const isHovered = hoveredState === stateCode
-                const fillColor = getStateFill(stateCode, isHovered)
-                
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={fillColor}
-                    stroke="#FFFFFF"
-                    strokeWidth={0.5}
-                    style={{
-                      default: {
-                        outline: 'none',
-                        cursor: 'pointer',
-                        transition: 'fill 0.2s ease',
-                        pointerEvents: 'auto'
-                      },
-                      hover: {
-                        outline: 'none',
-                        cursor: 'pointer',
-                        transition: 'fill 0.2s ease',
-                        pointerEvents: 'auto'
-                      },
-                      pressed: {
-                        outline: 'none',
-                        opacity: 0.8,
-                        pointerEvents: 'auto'
-                      }
-                    }}
-                    onMouseEnter={() => {
-                      if (stateCode) {
-                        setHoveredState(stateCode)
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredState(null)
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (stateCode && STATE_NAMES[stateCode]) {
-                        handleStateClick(stateCode)
-                      }
-                    }}
-                  />
-                )
-              })
-            }
-          </Geographies>
-        </ComposableMap>
-        </div>
-      )}
-      
-      {hoveredState && STATE_NAMES[hoveredState] && (
-        <div className="mt-4 text-center text-sm text-muted">
-          {STATE_NAMES[hoveredState]} — Click to explore
-        </div>
-      )}
-      
-      {!loading && (
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-muted">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded" style={{ backgroundColor: COLOR_MAP.blue }} />
-            <span>Democrat Majority</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded" style={{ backgroundColor: COLOR_MAP.red }} />
-            <span>Republican Majority</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded" style={{ backgroundColor: COLOR_MAP.purple }} />
-            <span>Split Delegation</span>
-          </div>
-        </div>
-      )}
+    <div style={{ width: "100%", height: "500px", backgroundColor: "#F9FAFB", borderRadius: "8px", overflow: "hidden" }}>
+      <ComposableMap 
+        projection="geoAlbersUsa"
+        style={{ width: "100%", height: "100%" }}
+      >
+        <Geographies geography={geoUrl}>
+          {({ geographies }) =>
+            geographies.map((geo) => {
+              const fipsCode = geo.id ? String(geo.id).padStart(2, '0') : ''
+              const stateCode = fipsCode ? FIPS_TO_STATE[fipsCode] : undefined
+
+              const fillColor = resolveStateColor(stateCode)
+
+              return (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill={fillColor}
+                  stroke="#FFFFFF"
+                  strokeWidth={0.5}
+                  onClick={() => {
+                    if (!stateCode) return
+                    window.open(`/state/${stateCode}`, "_blank")
+                  }}
+                  style={{
+                    default: {
+                      outline: "none",
+                      cursor: "pointer",
+                      transition: "fill 0.2s ease"
+                    },
+                    hover: {
+                      filter: "brightness(0.9)",
+                      cursor: "pointer"
+                    },
+                    pressed: {
+                      outline: "none"
+                    }
+                  }}
+                />
+              )
+            })
+          }
+        </Geographies>
+      </ComposableMap>
     </div>
   )
 }

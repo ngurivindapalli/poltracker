@@ -1,164 +1,83 @@
-'use client'
+import { LandingHero } from "@/components/home/LandingHero";
+import CspanSchedule from "@/components/home/CspanSchedule";
+import USStateMap from "@/components/USStateMap";
+import SenatorsList from "@/components/SenatorsList";
+import LeadersList from "@/components/home/LeadersList";
+import { Section } from "@/components/ui/Section";
+import { getServerUrl } from "@/lib/serverUrl";
+import leadersData from "@/data/global-leaders.json";
 
-import { useEffect, useMemo, useState, useRef } from 'react'
-import SenatorCard from '@/components/SenatorCard'
-import SearchBar from '@/components/SearchBar'
-import USStateMap from '@/components/USStateMap'
-import type { SenatorLite } from '@/lib/types'
+// Fetch Senators
+async function getSenators() {
+  try {
+    const res = await fetch(`${getServerUrl()}/api/senators`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.senators || [];
+  } catch (e) {
+    console.error("Failed to fetch senators", e);
+    return [];
+  }
+}
 
-export default function HomePage() {
-  const [senators, setSenators] = useState<SenatorLite[]>([])
-  const [query, setQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
+// Transform JSON data to LeadersList format
+const FEATURED_LEADERS = leadersData.map(leader => ({
+  id: leader.id,
+  name: leader.name,
+  title: leader.title,
+  country: leader.country,
+  imageUrl: leader.image,
+  link: `/leader/${leader.id}`,
+}));
 
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch('/api/senators')
-        
-        if (!res.ok) {
-          let errorMessage = 'Unable to load senators at the moment.'
-          try {
-            const errorJson = await res.json()
-            if (errorJson?.error) {
-              errorMessage = errorJson.error
-            }
-          } catch {
-            // If JSON parsing fails, use default message
-          }
-          console.error('Failed to fetch senators:', res.status, errorMessage)
-          if (alive) setError(errorMessage)
-          return
-        }
-
-        const json = await res.json()
-        if (alive) {
-          setSenators(json.senators ?? [])
-          setError(null)
-        }
-      } catch (e: any) {
-        console.error('Error fetching senators:', e)
-        if (alive) setError('Unable to load senators at the moment.')
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
-    return () => {
-      alive = false
-    }
-  }, [])
-
-  // Scroll animation observer
-  useEffect(() => {
-    if (loading || !gridRef.current) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible')
-          }
-        })
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      }
-    )
-
-    const cards = gridRef.current.querySelectorAll('.senator-card')
-    cards.forEach((card) => {
-      observer.observe(card)
-    })
-
-    return () => {
-      cards.forEach((card) => {
-        observer.unobserve(card)
-      })
-    }
-  }, [loading, senators, query])
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return senators
-    return senators.filter((s) => {
-      return (
-        s.name.toLowerCase().includes(q) ||
-        (s.state ?? '').toLowerCase().includes(q) ||
-        (s.party ?? '').toLowerCase().includes(q)
-      )
-    })
-  }, [query, senators])
+export default async function HomePage() {
+  const senators = await getSenators();
 
   return (
-    <div className="page-transition space-y-12">
-      {/* Hero Section */}
-      <section className="space-y-6 py-12 text-center">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-semibold tracking-tight text-primary sm:text-5xl md:text-6xl">
-            Everything you need to understand U.S. legislation — in one place.
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted leading-relaxed">
-            Track lawmakers, explore bills, and understand policy through verified data and AI-powered summaries.
-          </p>
-        </div>
-      </section>
+    <div className="pb-24">
+      <LandingHero />
 
-      {/* Interactive US Map */}
-      <USStateMap />
+      <div className="max-w-[1300px] mx-auto px-6">
+        {/* Map Section */}
+        <Section 
+          title="Explore By State" 
+          subtitle="Click on any state to view local representatives, news, and legislative updates."
+        >
+          <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-1 overflow-hidden shadow-sm">
+             <USStateMap />
+          </div>
+        </Section>
 
-      {/* Main Content */}
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-primary">U.S. Senators</h2>
-            <p className="mt-2 text-sm text-muted">
-              Search senators, open a profile, and see recent sponsored/cosponsored legislation via official U.S. government APIs.
-        </p>
-      </div>
+        {/* Global Leaders */}
+        <Section
+          title="Global Leadership"
+          subtitle="Track key international political figures."
+        >
+          <LeadersList leaders={FEATURED_LEADERS} />
+        </Section>
 
-      <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-        <SearchBar placeholder="Search by name, state, or party…" value={query} onChange={setQuery} />
-            <div className="text-sm text-muted md:text-right">
-          {loading ? 'Loading…' : `${filtered.length} shown`}
-            </div>
-        </div>
-      </div>
+        {/* Senators Section */}
+        <Section
+          title="U.S. Senate"
+          subtitle="Direct access to financial disclosures, voting records, and donor networks."
+        >
+          <SenatorsList senators={senators} limit={8} />
+          
+          <div className="mt-8 text-center">
+            <a 
+              href="/senators" 
+              className="inline-flex items-center justify-center px-6 py-3 border border-[#E2E8F0] rounded-[8px] text-[14px] font-semibold text-[#1E3A5F] bg-white hover:bg-[#F8FAFC] transition-colors"
+            >
+              View All Senators
+            </a>
+          </div>
+        </Section>
 
-      {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      ) : null}
-
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="h-[142px] animate-pulse rounded-xl border border-border bg-white" />
-          ))}
-        </div>
-      ) : (
-          <div ref={gridRef} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((s, index) => (
-              <div
-                key={s.bioguideId}
-                className={`senator-card fade-in-up ${index < 18 ? `stagger-${(index % 6) + 1}` : ''}`}
-              >
-                <SenatorCard senator={s} />
-              </div>
-          ))}
-        </div>
-      )}
-
-        <div className="rounded-xl border border-border bg-white p-4 text-xs text-muted">
-        Tip: try searching by a state like <b>NY</b>, or a party like <b>Democrat</b>.
-        </div>
+        {/* C-SPAN Schedule */}
+        <CspanSchedule />
       </div>
     </div>
-  )
+  );
 }

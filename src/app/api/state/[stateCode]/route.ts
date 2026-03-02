@@ -194,6 +194,9 @@ export async function GET(
       aggregateStateBills(members)
     ])
 
+    // Log results for debugging
+    console.log(`State ${stateCode}: ${news.length} news articles, ${bills.sponsored.length} sponsored bills, ${bills.cosponsored.length} cosponsored bills`)
+
     return NextResponse.json({
       stateCode,
       stateName: STATE_NAMES[stateCode],
