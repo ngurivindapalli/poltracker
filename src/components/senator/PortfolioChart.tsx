@@ -7,7 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
 } from "recharts";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
@@ -23,19 +23,42 @@ export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
   useEffect(() => {
     fetch(`/api/member/${bioguideId}/portfolio-history`)
       .then((r) => r.json())
-      .then((data) => {
-        setData(data);
+      .then((rawData) => {
+        // Clean and validate the data
+        const clean = Array.isArray(rawData)
+          ? rawData
+              .map((d: any) => ({
+                year: Number(d?.year),
+                value: Number(d?.value),
+              }))
+              .filter((d) => Number.isFinite(d.year) && Number.isFinite(d.value))
+              .sort((a, b) => a.year - b.year)
+          : [];
+
+        // Debug in dev
+        if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+          console.log("[PortfolioChart] raw:", rawData);
+          console.log("[PortfolioChart] clean:", clean);
+        }
+
+        setData(clean);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [bioguideId]);
 
   if (loading) {
-     return null; // Don't show empty loading state for chart if panel shows loading
+    return null;
   }
 
-  if (data.length === 0) {
-    return null;
+  if (data.length < 2) {
+    return (
+      <Card className="mt-8">
+        <div className="text-gray-400">
+          Not enough portfolio history to display a chart.
+        </div>
+      </Card>
+    );
   }
 
   return (
@@ -48,41 +71,41 @@ export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
           Estimated total portfolio value by year
         </p>
       </div>
-      
-      <div className="w-full h-[300px]">
+
+      <div className="w-full h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-            <XAxis 
-              dataKey="year" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#64748B', fontSize: 12 }} 
+            <XAxis
+              dataKey="year"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#64748B", fontSize: 12 }}
               dy={10}
             />
-            <YAxis 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#64748B', fontSize: 12 }} 
-              tickFormatter={(value) => `$${value/1000}k`}
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#64748B", fontSize: 12 }}
+              tickFormatter={(v) => `$${Math.round(v / 1000)}k`}
             />
             <Tooltip
-              contentStyle={{ 
-                backgroundColor: '#fff', 
-                border: '1px solid #E2E8F0', 
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              contentStyle={{
+                backgroundColor: "#fff",
+                border: "1px solid #E2E8F0",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(value: any) => [`$${value.toLocaleString()}`, "Total Value"]}
-              labelStyle={{ color: '#64748B', marginBottom: '4px' }}
+              formatter={(v: any) => [`$${Number(v).toLocaleString()}`, "Total Value"]}
+              labelStyle={{ color: "#64748B", marginBottom: "4px" }}
             />
             <Line
               type="monotone"
-              dataKey="total"
+              dataKey="value"
               stroke="#2563eb"
               strokeWidth={3}
-              dot={{ r: 4, fill: '#2563eb', strokeWidth: 2, stroke: '#fff' }}
-              activeDot={{ r: 6, fill: '#2563eb' }}
+              dot={{ r: 4, fill: "#2563eb", strokeWidth: 2, stroke: "#fff" }}
+              activeDot={{ r: 6, fill: "#2563eb" }}
             />
           </LineChart>
         </ResponsiveContainer>

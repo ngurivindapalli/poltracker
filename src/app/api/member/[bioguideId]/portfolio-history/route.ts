@@ -1,25 +1,26 @@
-import { NextResponse } from "next/server"
-import { timeline } from "@/lib/investments/timeline"
-import { loadInvestments } from "@/lib/investments/loadInvestments"
-import { getSenatorName } from "@/lib/senators"
+import { NextResponse } from "next/server";
+import dataset from "@/data/portfolio-history.json";
+
+type Point = { year: number; value: number };
 
 export async function GET(
   req: Request,
   { params }: { params: { bioguideId: string } }
 ) {
-  try {
-    const name = await getSenatorName(params.bioguideId)
+  const id = params.bioguideId;
 
-    const inv = loadInvestments()
-      .filter(i =>
-        i.senator
-          .toLowerCase()
-          .includes(name.toLowerCase())
-      )
+  // dataset is an object keyed by bioguideId -> Point[]
+  const raw = (dataset as Record<string, any>)[id];
 
-    return NextResponse.json(timeline(inv))
-  } catch (e) {
-    console.log("Portfolio history API error:", e)
-    return NextResponse.json([])
-  }
+  const arr: Point[] = Array.isArray(raw)
+    ? raw
+        .map((p: any) => ({
+          year: Number(p?.year),
+          value: Number(p?.value),
+        }))
+        .filter((p) => Number.isFinite(p.year) && Number.isFinite(p.value))
+        .sort((a, b) => a.year - b.year)
+    : [];
+
+  return NextResponse.json(arr);
 }

@@ -1,53 +1,127 @@
 import fs from "fs";
-import path from "path";
-import fetch from "node-fetch";
+import dotenv from "dotenv";
 
-const OUTPUT_PATH = path.join(process.cwd(), "data", "portfolio.csv");
+// Load environment variables from .env.local
+dotenv.config({ path: ".env.local" });
 
-async function generate() {
-  console.log("Fetching senators...");
+const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
-  const res = await fetch("http://localhost:3000/api/senators");
-  const data = await res.json();
-  const senators = data.senators || [];
-
-  if (!Array.isArray(senators)) {
-    throw new Error("Failed to fetch senators list");
-  }
-
-  console.log(`Generating portfolio data for ${senators.length} senators`);
-
-  const years = [2021, 2022, 2023, 2024];
-
-  let csv =
-    "bioguideId,senator,state,asset_category,estimated_min,estimated_max,report_year\n";
-
-  senators.forEach((s: any) => {
-    const categories = [
-      "Stocks",
-      "Mutual Funds",
-      "Bonds",
-      "Real Estate",
-      "Private Equity",
-    ];
-
-    years.forEach((year, i) => {
-      const base = 500000 + Math.floor(Math.random() * 2000000);
-
-      categories.forEach((cat) => {
-        const min = Math.floor(base * (0.1 + Math.random() * 0.2));
-        const max = min + Math.floor(Math.random() * 200000);
-
-        csv += `${s.bioguideId},${s.name},${s.state},${cat},${min},${max},${year}\n`;
-      });
-    });
-  });
-
-  fs.mkdirSync(path.join(process.cwd(), "data"), { recursive: true });
-  fs.writeFileSync(OUTPUT_PATH, csv);
-
-  console.log("Portfolio dataset generated at:");
-  console.log(OUTPUT_PATH);
+if (!OPENAI_KEY) {
+  console.error("ERROR: OPENAI_API_KEY not found in .env.local");
+  process.exit(1);
 }
 
-generate();
+interface Senator {
+  bioguideId: string;
+  name: string;
+  startYear?: number;
+}
+
+interface PortfolioPoint {
+  year: number;
+  value: number;
+}
+
+async function fetchSenators(): Promise<{ senators: Senator[] }> {
+  const res = await fetch("http://localhost:3000/api/senators");
+  return await res.json();
+}
+
+async function generateHistory(senator: Senator): Promise<PortfolioPoint[]> {
+  const prompt = `
+Generate estimated yearly investment portfolio values
+for US Senator ${senator.name}.
+
+Use publicly available information such as:
+
+- financial disclosures
+- stock trades
+- net worth estimates
+
+Return JSON:
+
+[
+ { "year": YEAR, "value": NUMBER }
+]
+
+Requirements:
+
+- Start at year entered office: ${senator.startYear || 2010}
+- End 2024
+- Realistic growth
+- At least 5 points
+- Numbers in USD
+
+Only JSON, no explanation.
+`;
+
+  const res = await fetch(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.2
+      })
+    }
+  );
+
+  const json = await res.json();
+  
+  // Debug: log the response if there's an error
+  if (!json.choices || !json.choices[0]) {
+    console.log("API Error:", JSON.stringify(json, null, 2));
+    throw new Error("Invalid API response");
+  }
+  
+  // Extract JSON from response
+  let content = json.choices[0].message.content;
+  
+  // Clean up markdown code blocks if present
+  if (content.includes("```")) {
+    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "");
+  }
+  
+  return JSON.parse(content.trim());
+}
+
+async function main() {
+  console.log("Fetching senators...");
+  
+  const senatorsData = await fetchSenators();
+  const senators = senatorsData.senators;
+
+  console.log(`Found ${senators.length} senators`);
+
+  const dataset: Record<string, PortfolioPoint[]> = {};
+
+  for (const s of senators) {
+    console.log("Generating:", s.name);
+
+    try {
+      dataset[s.bioguideId] = await generateHistory(s);
+      
+      // Rate limiting - wait 500ms between requests
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+    } catch (e) {
+      console.log("Failed:", s.name, e);
+    }
+  }
+
+  fs.writeFileSync(
+    "data/portfolio-history.json",
+    JSON.stringify(dataset, null, 2)
+  );
+
+  console.log("DONE - Generated data for", Object.keys(dataset).length, "senators");
+}
+
+main();
