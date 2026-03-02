@@ -23,7 +23,9 @@ interface PortfolioPoint {
 }
 
 async function fetchSenators(): Promise<{ senators: Senator[] }> {
-  const res = await fetch("http://localhost:3000/api/senators");
+  // Use environment variable for base URL, fallback to localhost only for local dev
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/senators`);
   return await res.json();
 }
 
