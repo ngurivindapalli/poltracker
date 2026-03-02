@@ -10,7 +10,7 @@ export async function GET(
   try {
     const name = await getSenatorName(params.bioguideId)
 
-    const all = loadInvestments()
+    const all = await loadInvestments()
 
     const mine = all.filter(i =>
       i.senator

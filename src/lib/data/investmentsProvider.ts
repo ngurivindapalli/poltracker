@@ -4,12 +4,11 @@
  * - Senate EFD parser
  * - Quiver Quant API
  * 
- * Currently uses mock data from data/mockInvestments.json
+ * Currently uses mock data from public/data/mockInvestments.json
  */
 
-import fs from 'fs'
-import path from 'path'
 import { Investment } from '../types/senatorExtended'
+import { getBaseUrl } from '../getBaseUrl'
 
 export async function getSenatorInvestments(bioguideId: string): Promise<Investment[]> {
   // Future: Check for QUIVER_API_KEY and fetch live data
@@ -26,14 +25,23 @@ export async function getSenatorInvestments(bioguideId: string): Promise<Investm
   return getMockInvestments(bioguideId)
 }
 
-function getMockInvestments(bioguideId: string): Investment[] {
+async function getMockInvestments(bioguideId: string): Promise<Investment[]> {
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'mockInvestments.json')
-    const fileContent = fs.readFileSync(dataPath, 'utf-8')
-    const mockData = JSON.parse(fileContent)
+    const baseUrl = getBaseUrl()
+    const res = await fetch(`${baseUrl}/data/mockInvestments.json`, {
+      cache: 'no-store'
+    })
+    
+    if (!res.ok) {
+      console.error('Failed loading mock investments dataset')
+      return []
+    }
+    
+    const mockData = await res.json()
+    console.log('Loaded Mock Investments')
     return mockData[bioguideId] || []
   } catch (error) {
-    console.error('Error reading mock investments:', error)
+    console.error('Error fetching mock investments:', error)
     return []
   }
 }

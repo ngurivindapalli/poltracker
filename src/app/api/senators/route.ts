@@ -42,8 +42,10 @@ export async function GET() {
       .filter((s) => s.bioguideId && s.name)
       .sort((a, b) => a.name.localeCompare(b.name))
 
+    console.log('Loaded Senators:', senators.length)
     return NextResponse.json({ senators })
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 })
+    console.error('Failed loading senators dataset:', err?.message ?? String(err))
+    return NextResponse.json({ senators: [] })
   }
 }

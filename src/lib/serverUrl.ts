@@ -4,11 +4,16 @@ export function getServerUrl() {
     return ""
   }
 
+  // On Vercel, use the deployment URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+
   // On server, use environment variable if available
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL
   }
 
-  // Fallback: empty string for relative paths (works on both local and Vercel)
-  return ""
+  // Local development fallback
+  return "http://localhost:3000"
 }
