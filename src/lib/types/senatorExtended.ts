@@ -3,6 +3,8 @@
  * Adds intelligence layers: investments, donors, family, affiliations, relationship graph
  */
 
+import { GraphNode as BaseGraphNode, GraphEdge as BaseGraphEdge } from "@/types/graph";
+
 export interface Investment {
   asset_name: string
   asset_type: 'stock' | 'ETF' | 'private equity' | 'crypto' | 'real estate' | 'bond' | 'other'
@@ -47,23 +49,19 @@ export interface Affiliation {
   source: string
 }
 
-export interface GraphNode {
-  id: string
-  label: string
+export interface SenatorGraphNode extends BaseGraphNode {
   type: 'senator' | 'family' | 'family-prominent' | 'colleague' | 'person'
   metadata?: Record<string, any>
 }
 
-export interface GraphEdge {
-  source: string
-  target: string
+export interface SenatorGraphEdge extends BaseGraphEdge {
   label: 'spouse_of' | 'parent_of' | 'child_of' | 'colleague_of' | 'co_sponsored_with'
   metadata?: Record<string, any>
 }
 
 export interface RelationshipGraph {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
+  nodes: SenatorGraphNode[]
+  edges: SenatorGraphEdge[]
 }
 
 export interface SenatorExtended {

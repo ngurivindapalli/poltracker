@@ -17,17 +17,19 @@ export default function GermanyMap() {
     <div style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "2.5rem" }}>
       <ComposableMap
         projection="geoMercator"
-        projectionConfig={{
-          center: [10.5, 51.1],
-          scale: 2600
-        }}
+        {...{
+          projectionConfig: {
+            center: [10.5, 51.1],
+            scale: 2600
+          }
+        } as any}
         width={800}
         height={600}
         style={{ width: "100%", height: "auto" }}
       >
         <Geographies geography={geoUrl}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
+          {({ geographies }: { geographies: any[] }) =>
+            geographies.map((geo: any) => {
               const name =
                 geo.properties.name ||
                 geo.properties.NAME_1 ||

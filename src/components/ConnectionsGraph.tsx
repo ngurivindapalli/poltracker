@@ -2,6 +2,7 @@
 
 import { ReactFlow, Node, Edge, Background, Controls } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { GraphNode, GraphEdge } from "@/types/graph"
 
 function nodeColor(type: string): string {
   if (type === "senator") return "#2563eb" // Blue
@@ -46,22 +47,13 @@ const NodeLabel = ({ data }: { data: any }) => {
   )
 }
 
-interface GraphNode {
-  id: string
-  label?: string
-  type?: string
+interface ExtendedGraphNode extends GraphNode {
   data?: any
-  position?: any
-}
-
-interface GraphEdge {
-  source: string
-  target: string
-  label?: string
+  position?: { x: number; y: number }
 }
 
 interface ConnectionsGraphProps {
-  nodes: GraphNode[]
+  nodes: ExtendedGraphNode[]
   edges: GraphEdge[]
 }
 
@@ -122,18 +114,20 @@ export default function ConnectionsGraph({ nodes, edges }: ConnectionsGraphProps
     }
   })
 
-  // Convert edges to ReactFlow format
-  const flowEdges: Edge[] = edges.map((e, index) => ({
-    id: String(e.id || index) + "_" + index,
-    source: String(e.source || e.from),
-    target: String(e.target || e.to),
-    label: e.label || 'Connection',
-    type: e.type || "smoothstep",
-    markerEnd: e.markerEnd || "url(#arrowclosed)",
-    style: { stroke: '#6B7280', strokeWidth: 2 },
-    labelStyle: { fill: '#374151', fontSize: '11px', fontWeight: 500, backgroundColor: 'white', padding: '2px 6px', borderRadius: '4px' },
-    labelBgStyle: { fill: 'white', fillOpacity: 0.8 },
-  }))
+  // Convert edges to ReactFlow format with safety checks
+  const flowEdges: Edge[] = edges
+    .filter(e => e.source || e.from)
+    .filter(e => e.target || e.to)
+    .map((e, index) => ({
+      id: `edge_${index}`,
+      source: String(e.source || e.from),
+      target: String(e.target || e.to),
+      label: e.label || e.relationship || "Connection",
+      type: "smoothstep",
+      style: { stroke: '#6B7280', strokeWidth: 2 },
+      labelStyle: { fill: '#374151', fontSize: '11px', fontWeight: 500, backgroundColor: 'white', padding: '2px 6px', borderRadius: '4px' },
+      labelBgStyle: { fill: 'white', fillOpacity: 0.8 },
+    }))
 
   const nodeTypes = {
     default: NodeLabel

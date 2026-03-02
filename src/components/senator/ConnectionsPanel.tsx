@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import InfluenceMap from "@/components/InfluenceMap";
 import { Card } from "@/components/ui/Card";
+import { GraphNode, GraphEdge } from "@/types/graph";
 
 interface ConnectionsPanelProps {
   bioguideId: string;
 }
 
-interface GraphNode {
-  id: string;
-  label?: string;
-  type?: string;
+interface ExtendedGraphNode extends GraphNode {
   data?: {
     label?: string;
     type?: string;
@@ -19,16 +17,8 @@ interface GraphNode {
   };
 }
 
-interface GraphEdge {
-  source?: string;
-  target?: string;
-  from?: string;
-  to?: string;
-  label?: string;
-}
-
 interface GraphData {
-  nodes: GraphNode[];
+  nodes: ExtendedGraphNode[];
   edges: GraphEdge[];
 }
 

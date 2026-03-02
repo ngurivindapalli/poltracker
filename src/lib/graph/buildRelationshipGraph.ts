@@ -4,8 +4,8 @@
  */
 
 import {
-  GraphNode,
-  GraphEdge,
+  SenatorGraphNode,
+  SenatorGraphEdge,
   RelationshipGraph
 } from '../types/senatorExtended'
 import { FamilyResearchMember, isProminent } from '../data/familyResearchProvider'
@@ -26,8 +26,8 @@ interface GraphInput {
 }
 
 export function buildRelationshipGraph(input: GraphInput): RelationshipGraph {
-  const nodes: GraphNode[] = []
-  const edges: GraphEdge[] = []
+  const nodes: SenatorGraphNode[] = []
+  const edges: SenatorGraphEdge[] = []
 
   // Add senator as center node
   const senatorNodeId = `senator-${input.senatorId}`
@@ -53,7 +53,7 @@ export function buildRelationshipGraph(input: GraphInput): RelationshipGraph {
     })
 
     // Add edge based on relation
-    let edgeLabel: GraphEdge['label'] = 'spouse_of'
+    let edgeLabel: SenatorGraphEdge['label'] = 'spouse_of'
     if (member.relation === 'child') edgeLabel = 'parent_of'
     else if (member.relation === 'parent') edgeLabel = 'parent_of'
     else if (member.relation === 'sibling') edgeLabel = 'spouse_of' // Would need sibling_of type

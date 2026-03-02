@@ -51,17 +51,19 @@ export default function IndiaMap() {
       <div className="w-full" style={{ height: "420px" }}>
         <ComposableMap 
           projection="geoMercator"
-          projectionConfig={{
-            center: [78, 22],
-            scale: 1000
-          }}
+          {...{
+            projectionConfig: {
+              center: [78, 22],
+              scale: 1000
+            }
+          } as any}
           width={800}
           height={420}
           style={{ width: "100%", height: "100%" }}
         >
           <Geographies geography={GEO_URL}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
+            {({ geographies }: { geographies: any[] }) =>
+              geographies.map((geo: any) => {
                 const name =
                   geo.properties?.st_nm ||
                   geo.properties?.name ||
