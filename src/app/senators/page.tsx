@@ -4,13 +4,20 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
 import Link from "next/link";
 
+// Force dynamic rendering so senators are fetched at request time
+export const dynamic = 'force-dynamic'
+
 async function getSenators() {
   try {
     const res = await fetch(`${getServerUrl()}/api/senators`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error("Failed to fetch senators - status:", res.status);
+      return [];
+    }
     const data = await res.json();
+    console.log("Loaded Senators:", data.senators?.length || 0);
     return data.senators || [];
   } catch (e) {
     console.error("Failed to fetch senators", e);

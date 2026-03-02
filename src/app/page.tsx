@@ -7,14 +7,21 @@ import { Section } from "@/components/ui/Section";
 import { getServerUrl } from "@/lib/serverUrl";
 import leadersData from "@/data/global-leaders.json";
 
+// Force dynamic rendering so senators are fetched at request time
+export const dynamic = 'force-dynamic'
+
 // Fetch Senators
 async function getSenators() {
   try {
     const res = await fetch(`${getServerUrl()}/api/senators`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error("Failed to fetch senators - status:", res.status);
+      return [];
+    }
     const data = await res.json();
+    console.log("Home page - Loaded Senators:", data.senators?.length || 0);
     return data.senators || [];
   } catch (e) {
     console.error("Failed to fetch senators", e);
