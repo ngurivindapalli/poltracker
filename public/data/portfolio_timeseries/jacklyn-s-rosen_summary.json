@@ -1,0 +1,21 @@
+{
+  "senator": "Jacklyn S Rosen",
+  "slug": "jacklyn-s-rosen",
+  "totalTrades": 8,
+  "uniqueTickers": 1,
+  "startDate": "2022-04-01",
+  "endDate": "2023-01-03",
+  "topTickers": [
+    {
+      "ticker": "AT",
+      "count": 3
+    }
+  ],
+  "assetTypes": {
+    "Stock": 8
+  },
+  "tradesByYear": {
+    "2022": 4,
+    "2023": 4
+  }
+}

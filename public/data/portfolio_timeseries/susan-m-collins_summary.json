@@ -1,0 +1,36 @@
+{
+  "senator": "Susan M Collins",
+  "slug": "susan-m-collins",
+  "totalTrades": 12,
+  "uniqueTickers": 4,
+  "startDate": "2022-04-21",
+  "endDate": "2026-01-06",
+  "topTickers": [
+    {
+      "ticker": "ME",
+      "count": 3
+    },
+    {
+      "ticker": "AKAM",
+      "count": 1
+    },
+    {
+      "ticker": "FIS",
+      "count": 1
+    },
+    {
+      "ticker": "GL",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Municipal Security": 5,
+    "Corporate Bond": 5,
+    "Stock": 2
+  },
+  "tradesByYear": {
+    "2022": 5,
+    "2024": 6,
+    "2026": 1
+  }
+}

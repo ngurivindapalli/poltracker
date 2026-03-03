@@ -1,0 +1,25 @@
+{
+  "senator": "Mark R Warner",
+  "slug": "mark-r-warner",
+  "totalTrades": 63,
+  "uniqueTickers": 1,
+  "startDate": "2022-07-06",
+  "endDate": "2025-12-24",
+  "topTickers": [
+    {
+      "ticker": "ROAD",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Other": 4,
+    "Stock": 1,
+    "Municipal Security": 58
+  },
+  "tradesByYear": {
+    "2022": 1,
+    "2023": 49,
+    "2024": 11,
+    "2025": 2
+  }
+}

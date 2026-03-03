@@ -1,0 +1,54 @@
+[
+  {
+    "senator": "Debra S Fischer",
+    "office": "Fischer, Deb (Senator)",
+    "reportTitle": "Periodic Transaction Report for 07/20/2022",
+    "reportDate": "2022-07-20",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/dd07f9c3-7244-4a84-8b97-55c68f381c31/",
+    "transactionDate": "2022-06-23",
+    "owner": "Joint",
+    "ticker": "LMT",
+    "asset": "Lockheed Martin Corporation Common Stock",
+    "assetType": "Stock",
+    "rawOwner": "LMT"
+  },
+  {
+    "senator": "Debra S Fischer",
+    "office": "Fischer, Deb (Senator)",
+    "reportTitle": "Periodic Transaction Report for 07/20/2022",
+    "reportDate": "2022-07-20",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/dd07f9c3-7244-4a84-8b97-55c68f381c31/",
+    "transactionDate": "2022-06-23",
+    "owner": "Joint",
+    "ticker": "KO",
+    "asset": "Coca-Cola Company (The) Common Stock",
+    "assetType": "Stock",
+    "rawOwner": "KO"
+  },
+  {
+    "senator": "Debra S Fischer",
+    "office": "Fischer, Deb (Senator)",
+    "reportTitle": "Periodic Transaction Report for 07/20/2022",
+    "reportDate": "2022-07-20",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/dd07f9c3-7244-4a84-8b97-55c68f381c31/",
+    "transactionDate": "2022-06-23",
+    "owner": "Joint",
+    "ticker": "CSCO",
+    "asset": "Cisco Systems, Inc. - Common Stock",
+    "assetType": "Stock",
+    "rawOwner": "CSCO"
+  },
+  {
+    "senator": "Debra S Fischer",
+    "office": "Fischer, Deb (Senator)",
+    "reportTitle": "Periodic Transaction Report for 07/20/2022",
+    "reportDate": "2022-07-20",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/dd07f9c3-7244-4a84-8b97-55c68f381c31/",
+    "transactionDate": "2022-06-23",
+    "owner": "Joint",
+    "ticker": "CAT",
+    "asset": "Caterpillar, Inc. Common Stock",
+    "assetType": "Stock",
+    "rawOwner": "CAT"
+  }
+]

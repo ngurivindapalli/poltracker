@@ -1,0 +1,57 @@
+{
+  "senator": "John P Ricketts",
+  "slug": "john-p-ricketts",
+  "totalTrades": 30,
+  "uniqueTickers": 25,
+  "startDate": "2023-01-18",
+  "endDate": "2023-09-21",
+  "topTickers": [
+    {
+      "ticker": "YUM",
+      "count": 1
+    },
+    {
+      "ticker": "WAL",
+      "count": 1
+    },
+    {
+      "ticker": "VZ",
+      "count": 1
+    },
+    {
+      "ticker": "UNP",
+      "count": 1
+    },
+    {
+      "ticker": "UNH",
+      "count": 1
+    },
+    {
+      "ticker": "PNC",
+      "count": 1
+    },
+    {
+      "ticker": "PM",
+      "count": 1
+    },
+    {
+      "ticker": "PLD",
+      "count": 1
+    },
+    {
+      "ticker": "PG",
+      "count": 1
+    },
+    {
+      "ticker": "NTR",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Municipal Security": 5,
+    "Stock": 25
+  },
+  "tradesByYear": {
+    "2023": 30
+  }
+}

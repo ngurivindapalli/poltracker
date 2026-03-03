@@ -1,0 +1,59 @@
+{
+  "senator": "John Fetterman",
+  "slug": "john-fetterman",
+  "totalTrades": 65,
+  "uniqueTickers": 11,
+  "startDate": "2023-01-24",
+  "endDate": "2025-12-22",
+  "topTickers": [
+    {
+      "ticker": "MRO",
+      "count": 1
+    },
+    {
+      "ticker": "V",
+      "count": 1
+    },
+    {
+      "ticker": "IKON",
+      "count": 1
+    },
+    {
+      "ticker": "SEMPRA",
+      "count": 1
+    },
+    {
+      "ticker": "BANK",
+      "count": 1
+    },
+    {
+      "ticker": "ENSTAR",
+      "count": 1
+    },
+    {
+      "ticker": "ARES",
+      "count": 1
+    },
+    {
+      "ticker": "HASBRO",
+      "count": 1
+    },
+    {
+      "ticker": "GOOG",
+      "count": 1
+    },
+    {
+      "ticker": "BAKER",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 3,
+    "Corporate Bond": 62
+  },
+  "tradesByYear": {
+    "2023": 31,
+    "2024": 13,
+    "2025": 21
+  }
+}

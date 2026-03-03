@@ -1,0 +1,242 @@
+[
+  {
+    "senator": "A. Mitchell McConnell, Jr.",
+    "slug": "a-mitchell-mcconnell-jr",
+    "totalTrades": 19,
+    "uniqueTickers": 3
+  },
+  {
+    "senator": "Adam B Schiff",
+    "slug": "adam-b-schiff",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Angus S King, Jr.",
+    "slug": "angus-s-king-jr",
+    "totalTrades": 31,
+    "uniqueTickers": 27
+  },
+  {
+    "senator": "Ashley Moody",
+    "slug": "ashley-moody",
+    "totalTrades": 57,
+    "uniqueTickers": 26
+  },
+  {
+    "senator": "Bernie Moreno",
+    "slug": "bernie-moreno",
+    "totalTrades": 6,
+    "uniqueTickers": 3
+  },
+  {
+    "senator": "Christopher A Coons",
+    "slug": "christopher-a-coons",
+    "totalTrades": 3,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Cynthia M Lummis",
+    "slug": "cynthia-m-lummis",
+    "totalTrades": 3,
+    "uniqueTickers": 0
+  },
+  {
+    "senator": "Daniel S Sullivan",
+    "slug": "daniel-s-sullivan",
+    "totalTrades": 143,
+    "uniqueTickers": 49
+  },
+  {
+    "senator": "David H McCormick",
+    "slug": "david-h-mccormick",
+    "totalTrades": 226,
+    "uniqueTickers": 34
+  },
+  {
+    "senator": "Debra S Fischer",
+    "slug": "debra-s-fischer",
+    "totalTrades": 4,
+    "uniqueTickers": 4
+  },
+  {
+    "senator": "Gary C Peters",
+    "slug": "gary-c-peters",
+    "totalTrades": 18,
+    "uniqueTickers": 16
+  },
+  {
+    "senator": "Jacklyn S Rosen",
+    "slug": "jacklyn-s-rosen",
+    "totalTrades": 8,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "James Banks",
+    "slug": "james-banks",
+    "totalTrades": 3,
+    "uniqueTickers": 2
+  },
+  {
+    "senator": "James Conley Justice, II",
+    "slug": "james-conley-justice-ii",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Jerry Moran,",
+    "slug": "jerry-moran",
+    "totalTrades": 57,
+    "uniqueTickers": 24
+  },
+  {
+    "senator": "John Boozman",
+    "slug": "john-boozman",
+    "totalTrades": 192,
+    "uniqueTickers": 88
+  },
+  {
+    "senator": "John Fetterman",
+    "slug": "john-fetterman",
+    "totalTrades": 65,
+    "uniqueTickers": 11
+  },
+  {
+    "senator": "John P Ricketts",
+    "slug": "john-p-ricketts",
+    "totalTrades": 30,
+    "uniqueTickers": 25
+  },
+  {
+    "senator": "John R Curtis",
+    "slug": "john-r-curtis",
+    "totalTrades": 3,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "John R Thune",
+    "slug": "john-r-thune",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "John W Hickenlooper",
+    "slug": "john-w-hickenlooper",
+    "totalTrades": 61,
+    "uniqueTickers": 19
+  },
+  {
+    "senator": "Jon A Husted",
+    "slug": "jon-a-husted",
+    "totalTrades": 1,
+    "uniqueTickers": 0
+  },
+  {
+    "senator": "Katie Britt",
+    "slug": "katie-britt",
+    "totalTrades": 24,
+    "uniqueTickers": 12
+  },
+  {
+    "senator": "Ladda Tammy Duckworth",
+    "slug": "ladda-tammy-duckworth",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Lindsey Graham",
+    "slug": "lindsey-graham",
+    "totalTrades": 12,
+    "uniqueTickers": 8
+  },
+  {
+    "senator": "Maria Cantwell",
+    "slug": "maria-cantwell",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Mark R Warner",
+    "slug": "mark-r-warner",
+    "totalTrades": 63,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Markwayne Mullin",
+    "slug": "markwayne-mullin",
+    "totalTrades": 539,
+    "uniqueTickers": 134
+  },
+  {
+    "senator": "Michael F Bennet",
+    "slug": "michael-f-bennet",
+    "totalTrades": 2,
+    "uniqueTickers": 0
+  },
+  {
+    "senator": "Rafael E Cruz",
+    "slug": "rafael-e-cruz",
+    "totalTrades": 2,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Rick Scott",
+    "slug": "rick-scott",
+    "totalTrades": 220,
+    "uniqueTickers": 2
+  },
+  {
+    "senator": "Roger W Marshall",
+    "slug": "roger-w-marshall",
+    "totalTrades": 1,
+    "uniqueTickers": 0
+  },
+  {
+    "senator": "Ron L Wyden",
+    "slug": "ron-l-wyden",
+    "totalTrades": 34,
+    "uniqueTickers": 18
+  },
+  {
+    "senator": "Sheldon Whitehouse",
+    "slug": "sheldon-whitehouse",
+    "totalTrades": 108,
+    "uniqueTickers": 52
+  },
+  {
+    "senator": "Shelley M Capito",
+    "slug": "shelley-m-capito",
+    "totalTrades": 128,
+    "uniqueTickers": 61
+  },
+  {
+    "senator": "Susan M Collins",
+    "slug": "susan-m-collins",
+    "totalTrades": 12,
+    "uniqueTickers": 4
+  },
+  {
+    "senator": "Thomas H Tuberville",
+    "slug": "thomas-h-tuberville",
+    "totalTrades": 1073,
+    "uniqueTickers": 257
+  },
+  {
+    "senator": "Thomas R Tillis",
+    "slug": "thomas-r-tillis",
+    "totalTrades": 1,
+    "uniqueTickers": 1
+  },
+  {
+    "senator": "Tina Smith",
+    "slug": "tina-smith",
+    "totalTrades": 16,
+    "uniqueTickers": 11
+  },
+  {
+    "senator": "William F Hagerty, IV",
+    "slug": "william-f-hagerty-iv",
+    "totalTrades": 23,
+    "uniqueTickers": 5
+  }
+]

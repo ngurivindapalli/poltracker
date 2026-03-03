@@ -1,0 +1,62 @@
+{
+  "senator": "Sheldon Whitehouse",
+  "slug": "sheldon-whitehouse",
+  "totalTrades": 108,
+  "uniqueTickers": 52,
+  "startDate": "2022-04-11",
+  "endDate": "2026-01-09",
+  "topTickers": [
+    {
+      "ticker": "SBUX",
+      "count": 7
+    },
+    {
+      "ticker": "NVDA",
+      "count": 7
+    },
+    {
+      "ticker": "VZ",
+      "count": 4
+    },
+    {
+      "ticker": "TSLA",
+      "count": 4
+    },
+    {
+      "ticker": "C",
+      "count": 3
+    },
+    {
+      "ticker": "KVUE",
+      "count": 3
+    },
+    {
+      "ticker": "LLY",
+      "count": 3
+    },
+    {
+      "ticker": "VLTO",
+      "count": 3
+    },
+    {
+      "ticker": "KO",
+      "count": 3
+    },
+    {
+      "ticker": "HON",
+      "count": 3
+    }
+  ],
+  "assetTypes": {
+    "Stock": 105,
+    "Corporate Bond": 1,
+    "Municipal Security": 2
+  },
+  "tradesByYear": {
+    "2022": 4,
+    "2023": 31,
+    "2024": 40,
+    "2025": 27,
+    "2026": 6
+  }
+}

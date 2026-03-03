@@ -1,21 +1,20 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET() {
   try {
-    const baseUrl = getBaseUrl()
-    const res = await fetch(`${baseUrl}/data/familyTrees.json`, {
-      cache: 'no-store'
-    })
+    const filePath = path.join(process.cwd(), 'public', 'data', 'familyTrees.json')
     
-    if (!res.ok) {
-      console.error('Failed loading family trees dataset')
+    if (!fs.existsSync(filePath)) {
+      console.log('familyTrees.json not found')
       return NextResponse.json([])
     }
     
-    const data = await res.json()
+    const raw = fs.readFileSync(filePath, 'utf8')
+    const data = JSON.parse(raw)
     console.log('Loaded Family Trees:', Array.isArray(data) ? data.length : 0)
     return NextResponse.json(data)
   } catch (err: any) {

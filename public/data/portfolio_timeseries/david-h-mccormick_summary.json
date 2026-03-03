@@ -1,0 +1,60 @@
+{
+  "senator": "David H McCormick",
+  "slug": "david-h-mccormick",
+  "totalTrades": 226,
+  "uniqueTickers": 34,
+  "startDate": "2024-02-18",
+  "endDate": "2026-01-30",
+  "topTickers": [
+    {
+      "ticker": "BITB",
+      "count": 24
+    },
+    {
+      "ticker": "UNIV",
+      "count": 6
+    },
+    {
+      "ticker": "UPPER",
+      "count": 5
+    },
+    {
+      "ticker": "PA",
+      "count": 4
+    },
+    {
+      "ticker": "EAST",
+      "count": 3
+    },
+    {
+      "ticker": "LOWER",
+      "count": 2
+    },
+    {
+      "ticker": "EAGLE",
+      "count": 2
+    },
+    {
+      "ticker": "GS",
+      "count": 2
+    },
+    {
+      "ticker": "SENECA",
+      "count": 2
+    },
+    {
+      "ticker": "KING",
+      "count": 2
+    }
+  ],
+  "assetTypes": {
+    "Municipal Security": 186,
+    "Corporate Bond": 12,
+    "Stock": 28
+  },
+  "tradesByYear": {
+    "2024": 1,
+    "2025": 212,
+    "2026": 13
+  }
+}

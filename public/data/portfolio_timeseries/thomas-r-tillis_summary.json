@@ -1,0 +1,20 @@
+{
+  "senator": "Thomas R Tillis",
+  "slug": "thomas-r-tillis",
+  "totalTrades": 1,
+  "uniqueTickers": 1,
+  "startDate": "2022-08-30",
+  "endDate": "2022-08-30",
+  "topTickers": [
+    {
+      "ticker": "KD",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 1
+  },
+  "tradesByYear": {
+    "2022": 1
+  }
+}

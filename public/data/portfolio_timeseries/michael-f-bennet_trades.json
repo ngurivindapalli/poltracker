@@ -1,0 +1,28 @@
+[
+  {
+    "senator": "Michael F Bennet",
+    "office": "Bennet, Michael (Senator)",
+    "reportTitle": "Periodic Transaction Report for 10/18/2022",
+    "reportDate": "2022-10-18",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/3d1b3c85-7b41-4183-89d6-aec3600db2a1/",
+    "transactionDate": "2022-10-04",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "More Company: More (Ebene, Muritius (India)) Description: Grocery Chain",
+    "assetType": "Other",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Michael F Bennet",
+    "office": "Bennet, Michael (Senator)",
+    "reportTitle": "Periodic Transaction Report for 05/16/2023",
+    "reportDate": "2023-05-16",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/f590a331-1f74-4d08-b79f-88930593f314/",
+    "transactionDate": "2023-04-26",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "More Company: More (Ebene, Muritius (India)) Description: Grocery Chain",
+    "assetType": "Other",
+    "rawOwner": "--"
+  }
+]

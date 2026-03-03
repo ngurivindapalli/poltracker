@@ -1,0 +1,41 @@
+[
+  {
+    "senator": "James Banks",
+    "office": "Banks, James E. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 03/10/2025",
+    "reportDate": "2025-03-10",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/f90fce4f-35b7-4e45-b540-a8f2e2372a63/",
+    "transactionDate": "2025-02-18",
+    "owner": "Joint",
+    "ticker": "YUM",
+    "asset": "Yum! Brands Company: Yum (Louisville, KY) Description: Food",
+    "assetType": "Other",
+    "rawOwner": "YUM"
+  },
+  {
+    "senator": "James Banks",
+    "office": "Banks, James E. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 06/26/2025",
+    "reportDate": "2025-06-26",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/9d380e2e-86d9-4378-a156-353054bb5833/",
+    "transactionDate": "2025-06-16",
+    "owner": "Joint",
+    "ticker": "RBLX",
+    "asset": null,
+    "assetType": "Stock",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "James Banks",
+    "office": "Banks, James E. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 08/10/2025",
+    "reportDate": "2025-08-10",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/743c6542-9aec-48ae-8fa6-62645757bc8f/",
+    "transactionDate": "2025-08-04",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "starbuck",
+    "assetType": "Stock",
+    "rawOwner": "--"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "senator": "Ladda Tammy Duckworth",
+  "slug": "ladda-tammy-duckworth",
+  "totalTrades": 1,
+  "uniqueTickers": 1,
+  "startDate": "2023-04-11",
+  "endDate": "2023-04-11",
+  "topTickers": [
+    {
+      "ticker": "ITW",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 1
+  },
+  "tradesByYear": {
+    "2023": 1
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "senator": "Katie Britt",
+  "slug": "katie-britt",
+  "totalTrades": 24,
+  "uniqueTickers": 12,
+  "startDate": "2023-08-25",
+  "endDate": "2025-11-07",
+  "topTickers": [
+    {
+      "ticker": "AAPL",
+      "count": 3
+    },
+    {
+      "ticker": "AMZN",
+      "count": 3
+    },
+    {
+      "ticker": "NVDA",
+      "count": 3
+    },
+    {
+      "ticker": "XOM",
+      "count": 2
+    },
+    {
+      "ticker": "GOOG",
+      "count": 2
+    },
+    {
+      "ticker": "V",
+      "count": 2
+    },
+    {
+      "ticker": "UNH",
+      "count": 2
+    },
+    {
+      "ticker": "JPM",
+      "count": 1
+    },
+    {
+      "ticker": "EOG",
+      "count": 1
+    },
+    {
+      "ticker": "WMT",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Other": 2,
+    "Stock": 22
+  },
+  "tradesByYear": {
+    "2023": 2,
+    "2025": 22
+  }
+}

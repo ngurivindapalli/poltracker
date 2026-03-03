@@ -1,0 +1,58 @@
+{
+  "senator": "Daniel S Sullivan",
+  "slug": "daniel-s-sullivan",
+  "totalTrades": 143,
+  "uniqueTickers": 49,
+  "startDate": "2022-03-04",
+  "endDate": "2024-01-24",
+  "topTickers": [
+    {
+      "ticker": "GOOG",
+      "count": 8
+    },
+    {
+      "ticker": "MSFT",
+      "count": 7
+    },
+    {
+      "ticker": "AMZN",
+      "count": 6
+    },
+    {
+      "ticker": "RPM",
+      "count": 5
+    },
+    {
+      "ticker": "META",
+      "count": 5
+    },
+    {
+      "ticker": "AAPL",
+      "count": 5
+    },
+    {
+      "ticker": "ADBE",
+      "count": 5
+    },
+    {
+      "ticker": "ZTS",
+      "count": 5
+    },
+    {
+      "ticker": "TJX",
+      "count": 4
+    },
+    {
+      "ticker": "TMO",
+      "count": 4
+    }
+  ],
+  "assetTypes": {
+    "Stock": 143
+  },
+  "tradesByYear": {
+    "2022": 62,
+    "2023": 80,
+    "2024": 1
+  }
+}

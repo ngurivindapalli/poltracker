@@ -1,0 +1,32 @@
+{
+  "senator": "A. Mitchell McConnell, Jr.",
+  "slug": "a-mitchell-mcconnell-jr",
+  "totalTrades": 19,
+  "uniqueTickers": 3,
+  "startDate": "2022-06-03",
+  "endDate": "2025-12-24",
+  "topTickers": [
+    {
+      "ticker": "WFC",
+      "count": 15
+    },
+    {
+      "ticker": "LAZR",
+      "count": 2
+    },
+    {
+      "ticker": "KR",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 18,
+    "Other": 1
+  },
+  "tradesByYear": {
+    "2022": 4,
+    "2023": 5,
+    "2024": 4,
+    "2025": 6
+  }
+}

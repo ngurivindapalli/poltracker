@@ -1,0 +1,15 @@
+{
+  "senator": "Cynthia M Lummis",
+  "slug": "cynthia-m-lummis",
+  "totalTrades": 3,
+  "uniqueTickers": 0,
+  "startDate": "2025-03-01",
+  "endDate": "2025-03-01",
+  "topTickers": [],
+  "assetTypes": {
+    "Non-Public Stock": 3
+  },
+  "tradesByYear": {
+    "2025": 3
+  }
+}

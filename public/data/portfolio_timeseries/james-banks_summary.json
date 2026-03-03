@@ -1,0 +1,25 @@
+{
+  "senator": "James Banks",
+  "slug": "james-banks",
+  "totalTrades": 3,
+  "uniqueTickers": 2,
+  "startDate": "2025-02-18",
+  "endDate": "2025-08-04",
+  "topTickers": [
+    {
+      "ticker": "YUM",
+      "count": 1
+    },
+    {
+      "ticker": "RBLX",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Other": 1,
+    "Stock": 2
+  },
+  "tradesByYear": {
+    "2025": 3
+  }
+}

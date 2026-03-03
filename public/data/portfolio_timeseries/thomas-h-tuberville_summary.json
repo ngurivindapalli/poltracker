@@ -1,0 +1,64 @@
+{
+  "senator": "Thomas H Tuberville",
+  "slug": "thomas-h-tuberville",
+  "totalTrades": 1073,
+  "uniqueTickers": 257,
+  "startDate": "2022-03-04",
+  "endDate": "2025-12-17",
+  "topTickers": [
+    {
+      "ticker": "CLF",
+      "count": 82
+    },
+    {
+      "ticker": "X",
+      "count": 38
+    },
+    {
+      "ticker": "PYPL",
+      "count": 36
+    },
+    {
+      "ticker": "CALL",
+      "count": 33
+    },
+    {
+      "ticker": "QCOM",
+      "count": 22
+    },
+    {
+      "ticker": "TXN",
+      "count": 22
+    },
+    {
+      "ticker": "MSFT",
+      "count": 21
+    },
+    {
+      "ticker": "GOLD",
+      "count": 19
+    },
+    {
+      "ticker": "INTC",
+      "count": 15
+    },
+    {
+      "ticker": "CLX",
+      "count": 15
+    }
+  ],
+  "assetTypes": {
+    "Commodities/Futures Contract": 117,
+    "Stock": 689,
+    "Stock Option": 263,
+    "Corporate Bond": 1,
+    "Other": 2,
+    "Municipal Security": 1
+  },
+  "tradesByYear": {
+    "2022": 290,
+    "2023": 479,
+    "2024": 270,
+    "2025": 34
+  }
+}

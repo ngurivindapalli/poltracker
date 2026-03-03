@@ -1,0 +1,41 @@
+[
+  {
+    "senator": "John R Curtis",
+    "office": "Curtis, John R. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 08/13/2025",
+    "reportDate": "2025-08-13",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/000e724b-fb9a-4922-9011-ca8925a047f3/",
+    "transactionDate": "2024-05-13",
+    "owner": "Joint",
+    "ticker": null,
+    "asset": "OSHKOSH WIS AREASCH DIST GO PROM NTS 2022 Rate/Coupon: 2.625% Matures: 03/01/2027",
+    "assetType": "Municipal Security",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "John R Curtis",
+    "office": "Curtis, John R. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 08/13/2025",
+    "reportDate": "2025-08-13",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/000e724b-fb9a-4922-9011-ca8925a047f3/",
+    "transactionDate": "2024-09-03",
+    "owner": "Joint",
+    "ticker": "PRINCE",
+    "asset": "PRINCE GEORGES CNTY MD GO CONS PUB IMPT BDS 2014A Rate/Coupon: 4.0% Matures: 09/01/2032",
+    "assetType": "Municipal Security",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "John R Curtis",
+    "office": "Curtis, John R. (Senator)",
+    "reportTitle": "Periodic Transaction Report for 08/13/2025",
+    "reportDate": "2025-08-13",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/000e724b-fb9a-4922-9011-ca8925a047f3/",
+    "transactionDate": "2024-12-11",
+    "owner": "Joint",
+    "ticker": null,
+    "asset": "ANDREWS TX INDPT SCH DIST BLDG PSF GTD B/E CPN Rate/Coupon: 5.0% Matures: 02/15/2025",
+    "assetType": "Municipal Security",
+    "rawOwner": "--"
+  }
+]

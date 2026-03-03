@@ -1,0 +1,32 @@
+{
+  "senator": "Debra S Fischer",
+  "slug": "debra-s-fischer",
+  "totalTrades": 4,
+  "uniqueTickers": 4,
+  "startDate": "2022-06-23",
+  "endDate": "2022-06-23",
+  "topTickers": [
+    {
+      "ticker": "LMT",
+      "count": 1
+    },
+    {
+      "ticker": "KO",
+      "count": 1
+    },
+    {
+      "ticker": "CSCO",
+      "count": 1
+    },
+    {
+      "ticker": "CAT",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 4
+  },
+  "tradesByYear": {
+    "2022": 4
+  }
+}

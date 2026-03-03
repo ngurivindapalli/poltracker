@@ -2,7 +2,8 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET(
   req: Request,
@@ -13,22 +14,20 @@ export async function GET(
     const url = new URL(req.url)
     const country = url.searchParams.get('country') || 'US'
 
-    // Fetch investments data from public directory
-    const baseUrl = getBaseUrl()
+    // Read investments data from public directory
     let investmentsData: any = {}
 
     try {
-      const res = await fetch(`${baseUrl}/data/investments.json`, {
-        cache: 'no-store'
-      })
-      if (res.ok) {
-        investmentsData = await res.json()
+      const filePath = path.join(process.cwd(), 'public', 'data', 'investments.json')
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf8')
+        investmentsData = JSON.parse(raw)
         console.log('Loaded Investments data')
       } else {
-        console.error('Failed loading investments dataset')
+        console.log('investments.json not found')
       }
-    } catch (fetchError) {
-      console.error('Error fetching investments file:', fetchError)
+    } catch (readError) {
+      console.error('Error reading investments file:', readError)
     }
 
     const countryData = investmentsData[country] || {}

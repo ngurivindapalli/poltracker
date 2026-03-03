@@ -1,0 +1,56 @@
+{
+  "senator": "Ashley Moody",
+  "slug": "ashley-moody",
+  "totalTrades": 57,
+  "uniqueTickers": 26,
+  "startDate": "2025-01-21",
+  "endDate": "2025-04-04",
+  "topTickers": [
+    {
+      "ticker": "SMCI",
+      "count": 11
+    },
+    {
+      "ticker": "AMAT",
+      "count": 7
+    },
+    {
+      "ticker": "NVDA",
+      "count": 5
+    },
+    {
+      "ticker": "HWM",
+      "count": 4
+    },
+    {
+      "ticker": "NCLH",
+      "count": 3
+    },
+    {
+      "ticker": "OKTA",
+      "count": 2
+    },
+    {
+      "ticker": "AMD",
+      "count": 2
+    },
+    {
+      "ticker": "CCL",
+      "count": 2
+    },
+    {
+      "ticker": "MU",
+      "count": 2
+    },
+    {
+      "ticker": "ASML",
+      "count": 2
+    }
+  ],
+  "assetTypes": {
+    "Stock": 57
+  },
+  "tradesByYear": {
+    "2025": 57
+  }
+}

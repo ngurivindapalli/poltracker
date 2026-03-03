@@ -1,0 +1,43 @@
+{
+  "senator": "William F Hagerty, IV",
+  "slug": "william-f-hagerty-iv",
+  "totalTrades": 23,
+  "uniqueTickers": 5,
+  "startDate": "2022-03-09",
+  "endDate": "2026-01-23",
+  "topTickers": [
+    {
+      "ticker": "HC",
+      "count": 4
+    },
+    {
+      "ticker": "TACO",
+      "count": 2
+    },
+    {
+      "ticker": "LMND",
+      "count": 1
+    },
+    {
+      "ticker": "NSHD",
+      "count": 1
+    },
+    {
+      "ticker": "EQC",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 7,
+    "Other": 11,
+    "Corporate Bond": 1,
+    "Non-Public Stock": 4
+  },
+  "tradesByYear": {
+    "2022": 11,
+    "2023": 3,
+    "2024": 7,
+    "2025": 1,
+    "2026": 1
+  }
+}

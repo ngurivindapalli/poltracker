@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -14,48 +14,94 @@ import { Card } from "@/components/ui/Card";
 
 interface PortfolioChartProps {
   bioguideId: string;
+  senatorName?: string;
 }
 
-export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
-  const [data, setData] = useState<any[]>([]);
+interface Trade {
+  transactionDate?: string;
+}
+
+interface YearlyTotals {
+  [year: string]: number;
+}
+
+export default function PortfolioChart({ bioguideId, senatorName }: PortfolioChartProps) {
+  const [data, setData] = useState<{ year: string; value: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/member/${bioguideId}/portfolio-history`)
-      .then((r) => r.json())
-      .then((rawData) => {
-        // Clean and validate the data
-        const clean = Array.isArray(rawData)
-          ? rawData
+    const fetchData = async () => {
+      try {
+        let trades: Trade[] = [];
+
+        if (senatorName) {
+          // Use local STOCK Act data
+          const res = await fetch(`/api/investments/${encodeURIComponent(senatorName)}`);
+          const rawData = await res.json();
+          // API returns { trades, count }
+          trades = Array.isArray(rawData.trades) ? rawData.trades : [];
+        } else {
+          // Fallback to old portfolio-history API
+          const res = await fetch(`/api/member/${bioguideId}/portfolio-history`);
+          const rawData = await res.json();
+          
+          // If old API returns year/value format, use it directly
+          if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.year !== undefined) {
+            const clean = rawData
               .map((d: any) => ({
-                year: Number(d?.year),
+                year: String(d?.year),
                 value: Number(d?.value),
               }))
-              .filter((d) => Number.isFinite(d.year) && Number.isFinite(d.value))
-              .sort((a, b) => a.year - b.year)
-          : [];
+              .filter((d) => d.year && Number.isFinite(d.value))
+              .sort((a, b) => a.year.localeCompare(b.year));
+            setData(clean);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Transform trades to yearly totals
+        const yearlyTotals: YearlyTotals = {};
+
+        trades.forEach((t: Trade) => {
+          const year = t.transactionDate?.slice(0, 4);
+          if (!year) return;
+          if (!yearlyTotals[year]) yearlyTotals[year] = 0;
+          yearlyTotals[year] += 1;
+        });
+
+        // Convert to chart data format
+        const chartData = Object.entries(yearlyTotals)
+          .map(([year, value]) => ({ year, value }))
+          .sort((a, b) => a.year.localeCompare(b.year));
 
         // Debug in dev
         if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
-          console.log("[PortfolioChart] raw:", rawData);
-          console.log("[PortfolioChart] clean:", clean);
+          console.log("[PortfolioChart] trades:", trades.length);
+          console.log("[PortfolioChart] chartData:", chartData);
         }
 
-        setData(clean);
+        setData(chartData);
+      } catch (err) {
+        console.error("Error fetching chart data:", err);
+        setData([]);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [bioguideId]);
+      }
+    };
+
+    fetchData();
+  }, [bioguideId, senatorName]);
 
   if (loading) {
     return null;
   }
 
-  if (data.length < 2) {
+  if (data.length < 1) {
     return (
       <Card className="mt-8">
         <div className="text-gray-400">
-          Not enough portfolio history to display a chart.
+          Not enough trading history to display a chart.
         </div>
       </Card>
     );
@@ -65,16 +111,16 @@ export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
     <Card className="mt-8">
       <div className="mb-6">
         <h2 className="text-[24px] font-semibold text-[#1E3A5F]">
-          Investment Value Over Time
+          Trading Activity Over Time
         </h2>
         <p className="text-[14px] text-[#64748B]">
-          Estimated total portfolio value by year
+          Number of trades per year
         </p>
       </div>
 
       <div className="w-full h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
             <XAxis
               dataKey="year"
@@ -87,7 +133,7 @@ export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#64748B", fontSize: 12 }}
-              tickFormatter={(v) => `$${Math.round(v / 1000)}k`}
+              allowDecimals={false}
             />
             <Tooltip
               contentStyle={{
@@ -96,18 +142,15 @@ export default function PortfolioChart({ bioguideId }: PortfolioChartProps) {
                 borderRadius: "8px",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(v: any) => [`$${Number(v).toLocaleString()}`, "Total Value"]}
+              formatter={(v: any) => [`${Number(v)} trades`, "Activity"]}
               labelStyle={{ color: "#64748B", marginBottom: "4px" }}
             />
-            <Line
-              type="monotone"
+            <Bar
               dataKey="value"
-              stroke="#2563eb"
-              strokeWidth={3}
-              dot={{ r: 4, fill: "#2563eb", strokeWidth: 2, stroke: "#fff" }}
-              activeDot={{ r: 6, fill: "#2563eb" }}
+              fill="#2563eb"
+              radius={[4, 4, 0, 0]}
             />
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </Card>

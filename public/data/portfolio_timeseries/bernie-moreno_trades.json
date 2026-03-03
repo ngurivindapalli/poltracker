@@ -1,0 +1,80 @@
+[
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 04/30/2025",
+    "reportDate": "2025-04-30",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/2bc0e244-3dad-4723-a878-c62957b5d63a/",
+    "transactionDate": "2025-03-17",
+    "owner": "Self",
+    "ticker": "BEEP",
+    "asset": "Mobile Infrastructure Corp",
+    "assetType": "Stock",
+    "rawOwner": "BEEP"
+  },
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 04/24/2025",
+    "reportDate": "2025-04-24",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/4481aa87-75c5-4c72-a204-431b74c56c4e/",
+    "transactionDate": "2025-04-02",
+    "owner": "Self",
+    "ticker": "JP",
+    "asset": "JP Morgan Chase Financial Company LLC Trigger Autocallable Contingent Yield Notes Company: JP Morgan Chase Financial Company LLC (New York, NY) Description: Structured Note",
+    "assetType": "Other",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 11/03/2025",
+    "reportDate": "2025-11-03",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/42ed7699-61fc-4a73-813d-4ae47af91e61/",
+    "transactionDate": "2025-10-22",
+    "owner": "Self",
+    "ticker": "GS",
+    "asset": "GS Finance Corp. Trigger Autocallable Contingent Yield Note Company: GS Finance Corp. (New York, NY) Description: Equity Index-Linked Note",
+    "assetType": "Other",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 11/03/2025",
+    "reportDate": "2025-11-03",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/42ed7699-61fc-4a73-813d-4ae47af91e61/",
+    "transactionDate": "2025-10-31",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "Bitcoin Exchange/Platform : eToro",
+    "assetType": "Cryptocurrency",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 01/09/2026",
+    "reportDate": "2026-01-09",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/de8efd52-6618-4e4f-bd3d-d3e32cccaa0c/",
+    "transactionDate": "2025-12-17",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "Canadian Imperial Bank of Commerce Trigger Autocallable Contingent Yield Notes Company: Canadian Imperial Bank of Commerce (Toronto, Ontario) Description: Equity Index-Linked Note",
+    "assetType": "Other",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Bernie Moreno",
+    "office": "Moreno, Bernardo (Senator)",
+    "reportTitle": "Periodic Transaction Report for 01/09/2026",
+    "reportDate": "2026-01-09",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/de8efd52-6618-4e4f-bd3d-d3e32cccaa0c/",
+    "transactionDate": "2025-12-19",
+    "owner": "Self",
+    "ticker": null,
+    "asset": "BofA Finance LLC Trigger Autocallable Contingent Yield Notes Company: Bank of America Corporation (Charlotte, NC) Description: Equity Index-Linked Note",
+    "assetType": "Other",
+    "rawOwner": "--"
+  }
+]

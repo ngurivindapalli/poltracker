@@ -1,0 +1,61 @@
+{
+  "senator": "Tina Smith",
+  "slug": "tina-smith",
+  "totalTrades": 16,
+  "uniqueTickers": 11,
+  "startDate": "2022-04-04",
+  "endDate": "2026-01-27",
+  "topTickers": [
+    {
+      "ticker": "AORT",
+      "count": 3
+    },
+    {
+      "ticker": "CSII",
+      "count": 2
+    },
+    {
+      "ticker": "TCMD",
+      "count": 2
+    },
+    {
+      "ticker": "MDT",
+      "count": 1
+    },
+    {
+      "ticker": "PODD",
+      "count": 1
+    },
+    {
+      "ticker": "NEE",
+      "count": 1
+    },
+    {
+      "ticker": "PEP",
+      "count": 1
+    },
+    {
+      "ticker": "GIS",
+      "count": 1
+    },
+    {
+      "ticker": "HBAN",
+      "count": 1
+    },
+    {
+      "ticker": "BRK.B",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Other": 1,
+    "Stock": 15
+  },
+  "tradesByYear": {
+    "2022": 2,
+    "2023": 6,
+    "2024": 3,
+    "2025": 3,
+    "2026": 2
+  }
+}

@@ -1,29 +1,21 @@
-import { getBaseUrl } from '../getBaseUrl'
+import fs from 'fs'
+import path from 'path'
 
 export async function loadInvestments() {
   try {
-    const baseUrl = getBaseUrl()
-    const res = await fetch(`${baseUrl}/data/trades.csv`, {
-      cache: 'no-store'
-    })
+    const filePath = path.join(process.cwd(), 'public', 'data', 'trades.csv')
     
-    if (!res.ok) {
+    if (!fs.existsSync(filePath)) {
       console.log("Investment data file not available")
       return []
     }
     
-    const csv = await res.text()
-
-    // Check if file contains error
-    if (csv.includes("404") || csv.includes("Not Found")) {
-      console.log("Investment data file not available")
-      return []
-    }
+    const csv = fs.readFileSync(filePath, 'utf8')
 
     const rows = csv.split("\n").slice(1)
 
     const investments = rows
-      .filter(r => r.trim() && !r.includes("404"))
+      .filter(r => r.trim())
       .map(r => {
         // Handle CSV with quoted fields - more robust parsing
         const parts: string[] = []

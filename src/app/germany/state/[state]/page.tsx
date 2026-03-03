@@ -1,8 +1,57 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
+import Link from "next/link"
 import BackButton from "@/components/BackButton"
+import { Card } from "@/components/ui/Card"
+import { Badge } from "@/components/ui/Badge"
+
+// Generate initials from name for fallback
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+// Party color mapping
+function getPartyColor(party: string): string {
+  const colors: Record<string, string> = {
+    "SPD": "#E3000F",
+    "CDU": "#000000",
+    "CSU": "#0080C8",
+    "Greens": "#46962B",
+    "FDP": "#FFED00",
+    "AfD": "#009EE0",
+    "Left": "#BE3075",
+  };
+  return colors[party] || "#64748B";
+}
+
+function MemberImage({ src, name }: { src?: string; name: string }) {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return (
+      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1E3A5F] to-[#2563EB] flex items-center justify-center border-2 border-[#E2E8F0] flex-shrink-0">
+        <span className="text-white font-bold text-sm">
+          {getInitials(name)}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      onError={() => setError(true)}
+      alt={name}
+      className="w-16 h-16 rounded-full object-cover border-2 border-[#E2E8F0] flex-shrink-0"
+    />
+  );
+}
 
 export default function GermanyState({ params }: { params: { state: string } }) {
   const [members, setMembers] = useState([])
@@ -34,20 +83,14 @@ export default function GermanyState({ params }: { params: { state: string } }) 
             .join(" ")
         }
 
-        console.log("Loading state:", stateName)
-
         const res = await fetch("/api/germany/members")
         const data = await res.json()
-
-        console.log("Total members:", data.length)
 
         const filtered = data.filter((m: any) => {
           const memberState = m.state || ""
           return memberState === stateName || 
                  memberState.toLowerCase() === stateName.toLowerCase()
         })
-
-        console.log("Filtered:", filtered.length)
 
         setMembers(filtered)
         setLoading(false)
@@ -59,17 +102,6 @@ export default function GermanyState({ params }: { params: { state: string } }) 
 
     load()
   }, [params.state])
-
-  if (loading) {
-    return (
-      <div className="container">
-        <BackButton />
-        <div style={{ padding: "2rem", textAlign: "center", color: "#6B7280" }}>
-          Loading members...
-        </div>
-      </div>
-    )
-  }
 
   const stateSlug = decodeURIComponent(params.state)
   const stateNameMap: Record<string, string> = {
@@ -88,65 +120,60 @@ export default function GermanyState({ params }: { params: { state: string } }) 
     .join(" ")
 
   return (
-    <div className="container">
-      <BackButton />
-      <div className="sectionHeader">
-        <h2>{stateName}</h2>
-        <p>Bundestag members from {stateName}.</p>
+    <main className="max-w-6xl mx-auto px-6 py-12">
+      <Link href="/germany" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Germany
+      </Link>
+
+      <div className="mb-10">
+        <h1 className="text-[32px] font-bold text-[#1E3A5F] mb-2">{stateName}</h1>
+        <p className="text-[16px] text-[#64748B]">Bundestag members from {stateName}.</p>
       </div>
 
-      {members.length === 0 ? (
-        <div style={{ padding: "2rem", textAlign: "center", color: "#6B7280" }}>
-          No members found for {stateName}
-        </div>
+      {loading ? (
+        <div className="text-center py-12 text-[#64748B]">Loading members...</div>
+      ) : members.length === 0 ? (
+        <Card className="p-12 text-center">
+          <p className="text-[#64748B]">No members found for {stateName}</p>
+        </Card>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6 mt-8" style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          gap: "1.5rem"
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {members.map((m: any) => (
-            <a
+            <Link
               href={`/germany/member/${m.id}`}
               key={m.id}
-              className="bg-white shadow rounded-xl p-6 flex gap-4 hover:shadow-lg transition"
-              style={{
-                textDecoration: "none",
-                color: "inherit"
-              }}
+              className="block group"
             >
-              <div style={{
-                position: "relative",
-                width: "80px",
-                height: "80px",
-                borderRadius: "50%",
-                overflow: "hidden",
-                flexShrink: 0
-              }}>
-                <Image
-                  src={m.image || "/images/placeholder-avatar.svg"}
-                  alt={m.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              <Card className="p-6 flex items-center gap-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
+                <MemberImage src={m.image} name={m.name} />
+                
+                <div className="flex-grow min-w-0">
+                  <h3 className="text-[18px] font-semibold text-[#1E3A5F] mb-1 group-hover:text-[#2563EB] transition-colors truncate">
+                    {m.name}
+                  </h3>
+                  <Badge 
+                    variant="neutral"
+                    style={{ 
+                      backgroundColor: `${getPartyColor(m.party)}15`,
+                      color: getPartyColor(m.party),
+                      borderColor: getPartyColor(m.party)
+                    }}
+                  >
+                    {m.party}
+                  </Badge>
+                </div>
 
-              <div>
-                <div style={{
-                  fontSize: "1.125rem",
-                  fontWeight: 600,
-                  marginBottom: "0.25rem"
-                }}>
-                  {m.name}
-                </div>
-                <div style={{ color: "#6B7280" }}>
-                  {m.party}
-                </div>
-              </div>
-            </a>
+                <svg className="w-5 h-5 text-[#94A3B8] group-hover:text-[#2563EB] transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
-    </div>
+    </main>
   )
 }

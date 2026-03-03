@@ -1,0 +1,58 @@
+{
+  "senator": "Jerry Moran,",
+  "slug": "jerry-moran",
+  "totalTrades": 57,
+  "uniqueTickers": 24,
+  "startDate": "2023-12-14",
+  "endDate": "2025-09-23",
+  "topTickers": [
+    {
+      "ticker": "BRK.B",
+      "count": 8
+    },
+    {
+      "ticker": "GOOG",
+      "count": 8
+    },
+    {
+      "ticker": "VZ",
+      "count": 2
+    },
+    {
+      "ticker": "USB",
+      "count": 2
+    },
+    {
+      "ticker": "CI",
+      "count": 2
+    },
+    {
+      "ticker": "PII",
+      "count": 2
+    },
+    {
+      "ticker": "MSFT",
+      "count": 2
+    },
+    {
+      "ticker": "META",
+      "count": 2
+    },
+    {
+      "ticker": "KR",
+      "count": 2
+    },
+    {
+      "ticker": "KMB",
+      "count": 2
+    }
+  ],
+  "assetTypes": {
+    "Stock": 57
+  },
+  "tradesByYear": {
+    "2023": 45,
+    "2024": 5,
+    "2025": 7
+  }
+}

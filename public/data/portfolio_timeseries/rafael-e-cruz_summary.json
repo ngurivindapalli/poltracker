@@ -1,0 +1,21 @@
+{
+  "senator": "Rafael E Cruz",
+  "slug": "rafael-e-cruz",
+  "totalTrades": 2,
+  "uniqueTickers": 1,
+  "startDate": "2024-04-15",
+  "endDate": "2025-11-11",
+  "topTickers": [
+    {
+      "ticker": "GS",
+      "count": 2
+    }
+  ],
+  "assetTypes": {
+    "Stock": 2
+  },
+  "tradesByYear": {
+    "2024": 1,
+    "2025": 1
+  }
+}

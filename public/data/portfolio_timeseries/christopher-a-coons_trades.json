@@ -1,0 +1,41 @@
+[
+  {
+    "senator": "Christopher A Coons",
+    "office": "Coons, Chris (Senator)",
+    "reportTitle": "Periodic Transaction Report for 05/03/2022",
+    "reportDate": "2022-05-03",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/8edc0f02-be98-47ca-a4a4-0faa1c0f55da/",
+    "transactionDate": "2022-05-03",
+    "owner": "Self",
+    "ticker": "W.L",
+    "asset": "W.L. Gore & Associates, Inc. Company: W.L. Gore & Associates, Inc. (Newark, DE) Description: Advanced materials manufacturing",
+    "assetType": "Non-Public Stock",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Christopher A Coons",
+    "office": "Coons, Chris (Senator)",
+    "reportTitle": "Periodic Transaction Report for 02/10/2023",
+    "reportDate": "2023-02-10",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/a8f816e4-4530-48d0-8d61-9f2e853e93d3/",
+    "transactionDate": "2023-01-31",
+    "owner": "Self",
+    "ticker": "W.L",
+    "asset": "W.L. Gore & Associates, Inc. Company: W.L. Gore & Associates, Inc. (Newark, DE) Description: Advanced materials manufacturing",
+    "assetType": "Non-Public Stock",
+    "rawOwner": "--"
+  },
+  {
+    "senator": "Christopher A Coons",
+    "office": "Coons, Chris (Senator)",
+    "reportTitle": "Periodic Transaction Report for 02/10/2023",
+    "reportDate": "2023-02-10",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/a8f816e4-4530-48d0-8d61-9f2e853e93d3/",
+    "transactionDate": "2023-02-03",
+    "owner": "Self",
+    "ticker": "W.L",
+    "asset": "W.L. Gore & Associates, Inc. Company: W.L. Gore & Associates, Inc. (Newark, DE) Description: Advanced materials manufacturing",
+    "assetType": "Non-Public Stock",
+    "rawOwner": "--"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "senator": "Markwayne Mullin",
+  "slug": "markwayne-mullin",
+  "totalTrades": 539,
+  "uniqueTickers": 134,
+  "startDate": "2023-01-03",
+  "endDate": "2026-01-21",
+  "topTickers": [
+    {
+      "ticker": "GS",
+      "count": 14
+    },
+    {
+      "ticker": "ZTS",
+      "count": 12
+    },
+    {
+      "ticker": "LRN",
+      "count": 11
+    },
+    {
+      "ticker": "ADBE",
+      "count": 9
+    },
+    {
+      "ticker": "AMAT",
+      "count": 8
+    },
+    {
+      "ticker": "LRCX",
+      "count": 7
+    },
+    {
+      "ticker": "FCFS",
+      "count": 6
+    },
+    {
+      "ticker": "AUSTIN",
+      "count": 6
+    },
+    {
+      "ticker": "SFM",
+      "count": 6
+    },
+    {
+      "ticker": "OLLI",
+      "count": 6
+    }
+  ],
+  "assetTypes": {
+    "Stock": 427,
+    "Municipal Security": 112
+  },
+  "tradesByYear": {
+    "2023": 172,
+    "2024": 170,
+    "2025": 158,
+    "2026": 39
+  }
+}

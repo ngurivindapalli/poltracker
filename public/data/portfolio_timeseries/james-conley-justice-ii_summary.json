@@ -1,0 +1,20 @@
+{
+  "senator": "James Conley Justice, II",
+  "slug": "james-conley-justice-ii",
+  "totalTrades": 1,
+  "uniqueTickers": 1,
+  "startDate": "2025-08-28",
+  "endDate": "2025-08-28",
+  "topTickers": [
+    {
+      "ticker": "PEBO",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 1
+  },
+  "tradesByYear": {
+    "2025": 1
+  }
+}

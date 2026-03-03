@@ -1,0 +1,15 @@
+{
+  "senator": "Roger W Marshall",
+  "slug": "roger-w-marshall",
+  "totalTrades": 1,
+  "uniqueTickers": 0,
+  "startDate": "2023-08-29",
+  "endDate": "2023-08-29",
+  "topTickers": [],
+  "assetTypes": {
+    "Non-Public Stock": 1
+  },
+  "tradesByYear": {
+    "2023": 1
+  }
+}

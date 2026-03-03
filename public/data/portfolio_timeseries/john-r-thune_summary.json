@@ -1,0 +1,20 @@
+{
+  "senator": "John R Thune",
+  "slug": "john-r-thune",
+  "totalTrades": 1,
+  "uniqueTickers": 1,
+  "startDate": "2022-05-05",
+  "endDate": "2022-05-05",
+  "topTickers": [
+    {
+      "ticker": "IRT",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 1
+  },
+  "tradesByYear": {
+    "2022": 1
+  }
+}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import fs from 'fs'
+import path from 'path'
 
 export const runtime = 'nodejs'
 
@@ -7,17 +8,15 @@ export async function GET() {
   console.log('API investments loaded')
   
   try {
-    const baseUrl = getBaseUrl()
-    const res = await fetch(`${baseUrl}/data/investments.json`, {
-      cache: 'no-store'
-    })
+    const filePath = path.join(process.cwd(), 'public', 'data', 'investments.json')
     
-    if (!res.ok) {
-      console.error('Failed to fetch investments.json:', res.status)
+    if (!fs.existsSync(filePath)) {
+      console.log('investments.json not found')
       return NextResponse.json({ investments: [] })
     }
     
-    const data = await res.json()
+    const raw = fs.readFileSync(filePath, 'utf8')
+    const data = JSON.parse(raw)
     
     // Flatten all investments from all countries and members
     const allInvestments: any[] = []

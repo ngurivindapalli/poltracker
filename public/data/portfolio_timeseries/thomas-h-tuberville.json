@@ -1,0 +1,1052 @@
+[
+  {
+    "date": "2022-02-28",
+    "tradeCount": 5,
+    "cumulativeTrades": 5
+  },
+  {
+    "date": "2022-03-07",
+    "tradeCount": 4,
+    "cumulativeTrades": 9
+  },
+  {
+    "date": "2022-03-14",
+    "tradeCount": 2,
+    "cumulativeTrades": 11
+  },
+  {
+    "date": "2022-03-21",
+    "tradeCount": 9,
+    "cumulativeTrades": 20
+  },
+  {
+    "date": "2022-03-28",
+    "tradeCount": 44,
+    "cumulativeTrades": 64
+  },
+  {
+    "date": "2022-04-04",
+    "tradeCount": 1,
+    "cumulativeTrades": 65
+  },
+  {
+    "date": "2022-04-11",
+    "tradeCount": 4,
+    "cumulativeTrades": 69
+  },
+  {
+    "date": "2022-04-18",
+    "tradeCount": 1,
+    "cumulativeTrades": 70
+  },
+  {
+    "date": "2022-04-25",
+    "tradeCount": 4,
+    "cumulativeTrades": 74
+  },
+  {
+    "date": "2022-05-02",
+    "tradeCount": 1,
+    "cumulativeTrades": 75
+  },
+  {
+    "date": "2022-05-09",
+    "tradeCount": 1,
+    "cumulativeTrades": 76
+  },
+  {
+    "date": "2022-05-16",
+    "tradeCount": 2,
+    "cumulativeTrades": 78
+  },
+  {
+    "date": "2022-05-23",
+    "tradeCount": 0,
+    "cumulativeTrades": 78
+  },
+  {
+    "date": "2022-05-30",
+    "tradeCount": 4,
+    "cumulativeTrades": 82
+  },
+  {
+    "date": "2022-06-06",
+    "tradeCount": 9,
+    "cumulativeTrades": 91
+  },
+  {
+    "date": "2022-06-13",
+    "tradeCount": 13,
+    "cumulativeTrades": 104
+  },
+  {
+    "date": "2022-06-20",
+    "tradeCount": 9,
+    "cumulativeTrades": 113
+  },
+  {
+    "date": "2022-06-27",
+    "tradeCount": 6,
+    "cumulativeTrades": 119
+  },
+  {
+    "date": "2022-07-04",
+    "tradeCount": 2,
+    "cumulativeTrades": 121
+  },
+  {
+    "date": "2022-07-11",
+    "tradeCount": 1,
+    "cumulativeTrades": 122
+  },
+  {
+    "date": "2022-07-18",
+    "tradeCount": 1,
+    "cumulativeTrades": 123
+  },
+  {
+    "date": "2022-07-25",
+    "tradeCount": 3,
+    "cumulativeTrades": 126
+  },
+  {
+    "date": "2022-08-01",
+    "tradeCount": 21,
+    "cumulativeTrades": 147
+  },
+  {
+    "date": "2022-08-08",
+    "tradeCount": 5,
+    "cumulativeTrades": 152
+  },
+  {
+    "date": "2022-08-15",
+    "tradeCount": 3,
+    "cumulativeTrades": 155
+  },
+  {
+    "date": "2022-08-22",
+    "tradeCount": 5,
+    "cumulativeTrades": 160
+  },
+  {
+    "date": "2022-08-29",
+    "tradeCount": 3,
+    "cumulativeTrades": 163
+  },
+  {
+    "date": "2022-09-05",
+    "tradeCount": 4,
+    "cumulativeTrades": 167
+  },
+  {
+    "date": "2022-09-12",
+    "tradeCount": 3,
+    "cumulativeTrades": 170
+  },
+  {
+    "date": "2022-09-19",
+    "tradeCount": 5,
+    "cumulativeTrades": 175
+  },
+  {
+    "date": "2022-09-26",
+    "tradeCount": 0,
+    "cumulativeTrades": 175
+  },
+  {
+    "date": "2022-10-03",
+    "tradeCount": 57,
+    "cumulativeTrades": 232
+  },
+  {
+    "date": "2022-10-10",
+    "tradeCount": 3,
+    "cumulativeTrades": 235
+  },
+  {
+    "date": "2022-10-17",
+    "tradeCount": 0,
+    "cumulativeTrades": 235
+  },
+  {
+    "date": "2022-10-24",
+    "tradeCount": 8,
+    "cumulativeTrades": 243
+  },
+  {
+    "date": "2022-10-31",
+    "tradeCount": 4,
+    "cumulativeTrades": 247
+  },
+  {
+    "date": "2022-11-07",
+    "tradeCount": 8,
+    "cumulativeTrades": 255
+  },
+  {
+    "date": "2022-11-14",
+    "tradeCount": 2,
+    "cumulativeTrades": 257
+  },
+  {
+    "date": "2022-11-21",
+    "tradeCount": 9,
+    "cumulativeTrades": 266
+  },
+  {
+    "date": "2022-11-28",
+    "tradeCount": 4,
+    "cumulativeTrades": 270
+  },
+  {
+    "date": "2022-12-05",
+    "tradeCount": 15,
+    "cumulativeTrades": 285
+  },
+  {
+    "date": "2022-12-12",
+    "tradeCount": 1,
+    "cumulativeTrades": 286
+  },
+  {
+    "date": "2022-12-19",
+    "tradeCount": 3,
+    "cumulativeTrades": 289
+  },
+  {
+    "date": "2022-12-26",
+    "tradeCount": 1,
+    "cumulativeTrades": 290
+  },
+  {
+    "date": "2023-01-02",
+    "tradeCount": 10,
+    "cumulativeTrades": 300
+  },
+  {
+    "date": "2023-01-09",
+    "tradeCount": 7,
+    "cumulativeTrades": 307
+  },
+  {
+    "date": "2023-01-16",
+    "tradeCount": 4,
+    "cumulativeTrades": 311
+  },
+  {
+    "date": "2023-01-23",
+    "tradeCount": 2,
+    "cumulativeTrades": 313
+  },
+  {
+    "date": "2023-01-30",
+    "tradeCount": 1,
+    "cumulativeTrades": 314
+  },
+  {
+    "date": "2023-02-06",
+    "tradeCount": 1,
+    "cumulativeTrades": 315
+  },
+  {
+    "date": "2023-02-13",
+    "tradeCount": 1,
+    "cumulativeTrades": 316
+  },
+  {
+    "date": "2023-02-20",
+    "tradeCount": 0,
+    "cumulativeTrades": 316
+  },
+  {
+    "date": "2023-02-27",
+    "tradeCount": 1,
+    "cumulativeTrades": 317
+  },
+  {
+    "date": "2023-03-06",
+    "tradeCount": 4,
+    "cumulativeTrades": 321
+  },
+  {
+    "date": "2023-03-13",
+    "tradeCount": 0,
+    "cumulativeTrades": 321
+  },
+  {
+    "date": "2023-03-20",
+    "tradeCount": 12,
+    "cumulativeTrades": 333
+  },
+  {
+    "date": "2023-03-27",
+    "tradeCount": 0,
+    "cumulativeTrades": 333
+  },
+  {
+    "date": "2023-04-03",
+    "tradeCount": 105,
+    "cumulativeTrades": 438
+  },
+  {
+    "date": "2023-04-10",
+    "tradeCount": 14,
+    "cumulativeTrades": 452
+  },
+  {
+    "date": "2023-04-17",
+    "tradeCount": 2,
+    "cumulativeTrades": 454
+  },
+  {
+    "date": "2023-04-24",
+    "tradeCount": 30,
+    "cumulativeTrades": 484
+  },
+  {
+    "date": "2023-05-01",
+    "tradeCount": 2,
+    "cumulativeTrades": 486
+  },
+  {
+    "date": "2023-05-08",
+    "tradeCount": 18,
+    "cumulativeTrades": 504
+  },
+  {
+    "date": "2023-05-15",
+    "tradeCount": 14,
+    "cumulativeTrades": 518
+  },
+  {
+    "date": "2023-05-22",
+    "tradeCount": 15,
+    "cumulativeTrades": 533
+  },
+  {
+    "date": "2023-05-29",
+    "tradeCount": 5,
+    "cumulativeTrades": 538
+  },
+  {
+    "date": "2023-06-05",
+    "tradeCount": 10,
+    "cumulativeTrades": 548
+  },
+  {
+    "date": "2023-06-12",
+    "tradeCount": 19,
+    "cumulativeTrades": 567
+  },
+  {
+    "date": "2023-06-19",
+    "tradeCount": 5,
+    "cumulativeTrades": 572
+  },
+  {
+    "date": "2023-06-26",
+    "tradeCount": 5,
+    "cumulativeTrades": 577
+  },
+  {
+    "date": "2023-07-03",
+    "tradeCount": 7,
+    "cumulativeTrades": 584
+  },
+  {
+    "date": "2023-07-10",
+    "tradeCount": 3,
+    "cumulativeTrades": 587
+  },
+  {
+    "date": "2023-07-17",
+    "tradeCount": 3,
+    "cumulativeTrades": 590
+  },
+  {
+    "date": "2023-07-24",
+    "tradeCount": 20,
+    "cumulativeTrades": 610
+  },
+  {
+    "date": "2023-07-31",
+    "tradeCount": 8,
+    "cumulativeTrades": 618
+  },
+  {
+    "date": "2023-08-07",
+    "tradeCount": 2,
+    "cumulativeTrades": 620
+  },
+  {
+    "date": "2023-08-14",
+    "tradeCount": 4,
+    "cumulativeTrades": 624
+  },
+  {
+    "date": "2023-08-21",
+    "tradeCount": 4,
+    "cumulativeTrades": 628
+  },
+  {
+    "date": "2023-08-28",
+    "tradeCount": 2,
+    "cumulativeTrades": 630
+  },
+  {
+    "date": "2023-09-04",
+    "tradeCount": 7,
+    "cumulativeTrades": 637
+  },
+  {
+    "date": "2023-09-11",
+    "tradeCount": 9,
+    "cumulativeTrades": 646
+  },
+  {
+    "date": "2023-09-18",
+    "tradeCount": 7,
+    "cumulativeTrades": 653
+  },
+  {
+    "date": "2023-09-25",
+    "tradeCount": 1,
+    "cumulativeTrades": 654
+  },
+  {
+    "date": "2023-10-02",
+    "tradeCount": 1,
+    "cumulativeTrades": 655
+  },
+  {
+    "date": "2023-10-09",
+    "tradeCount": 16,
+    "cumulativeTrades": 671
+  },
+  {
+    "date": "2023-10-16",
+    "tradeCount": 53,
+    "cumulativeTrades": 724
+  },
+  {
+    "date": "2023-10-23",
+    "tradeCount": 4,
+    "cumulativeTrades": 728
+  },
+  {
+    "date": "2023-10-30",
+    "tradeCount": 13,
+    "cumulativeTrades": 741
+  },
+  {
+    "date": "2023-11-06",
+    "tradeCount": 3,
+    "cumulativeTrades": 744
+  },
+  {
+    "date": "2023-11-13",
+    "tradeCount": 5,
+    "cumulativeTrades": 749
+  },
+  {
+    "date": "2023-11-20",
+    "tradeCount": 5,
+    "cumulativeTrades": 754
+  },
+  {
+    "date": "2023-11-27",
+    "tradeCount": 0,
+    "cumulativeTrades": 754
+  },
+  {
+    "date": "2023-12-04",
+    "tradeCount": 0,
+    "cumulativeTrades": 754
+  },
+  {
+    "date": "2023-12-11",
+    "tradeCount": 5,
+    "cumulativeTrades": 759
+  },
+  {
+    "date": "2023-12-18",
+    "tradeCount": 6,
+    "cumulativeTrades": 765
+  },
+  {
+    "date": "2023-12-25",
+    "tradeCount": 4,
+    "cumulativeTrades": 769
+  },
+  {
+    "date": "2024-01-01",
+    "tradeCount": 9,
+    "cumulativeTrades": 778
+  },
+  {
+    "date": "2024-01-08",
+    "tradeCount": 1,
+    "cumulativeTrades": 779
+  },
+  {
+    "date": "2024-01-15",
+    "tradeCount": 34,
+    "cumulativeTrades": 813
+  },
+  {
+    "date": "2024-01-22",
+    "tradeCount": 16,
+    "cumulativeTrades": 829
+  },
+  {
+    "date": "2024-01-29",
+    "tradeCount": 0,
+    "cumulativeTrades": 829
+  },
+  {
+    "date": "2024-02-05",
+    "tradeCount": 0,
+    "cumulativeTrades": 829
+  },
+  {
+    "date": "2024-02-12",
+    "tradeCount": 3,
+    "cumulativeTrades": 832
+  },
+  {
+    "date": "2024-02-19",
+    "tradeCount": 0,
+    "cumulativeTrades": 832
+  },
+  {
+    "date": "2024-02-26",
+    "tradeCount": 5,
+    "cumulativeTrades": 837
+  },
+  {
+    "date": "2024-03-04",
+    "tradeCount": 1,
+    "cumulativeTrades": 838
+  },
+  {
+    "date": "2024-03-11",
+    "tradeCount": 11,
+    "cumulativeTrades": 849
+  },
+  {
+    "date": "2024-03-18",
+    "tradeCount": 7,
+    "cumulativeTrades": 856
+  },
+  {
+    "date": "2024-03-25",
+    "tradeCount": 0,
+    "cumulativeTrades": 856
+  },
+  {
+    "date": "2024-04-01",
+    "tradeCount": 46,
+    "cumulativeTrades": 902
+  },
+  {
+    "date": "2024-04-08",
+    "tradeCount": 0,
+    "cumulativeTrades": 902
+  },
+  {
+    "date": "2024-04-15",
+    "tradeCount": 2,
+    "cumulativeTrades": 904
+  },
+  {
+    "date": "2024-04-22",
+    "tradeCount": 0,
+    "cumulativeTrades": 904
+  },
+  {
+    "date": "2024-04-29",
+    "tradeCount": 73,
+    "cumulativeTrades": 977
+  },
+  {
+    "date": "2024-05-06",
+    "tradeCount": 40,
+    "cumulativeTrades": 1017
+  },
+  {
+    "date": "2024-05-13",
+    "tradeCount": 4,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-05-20",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-05-27",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-06-03",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-06-10",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-06-17",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-06-24",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-07-01",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-07-08",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-07-15",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-07-22",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-07-29",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-08-05",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-08-12",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-08-19",
+    "tradeCount": 0,
+    "cumulativeTrades": 1021
+  },
+  {
+    "date": "2024-08-26",
+    "tradeCount": 6,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-09-02",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-09-09",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-09-16",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-09-23",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-09-30",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-10-07",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-10-14",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-10-21",
+    "tradeCount": 0,
+    "cumulativeTrades": 1027
+  },
+  {
+    "date": "2024-10-28",
+    "tradeCount": 12,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-11-04",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-11-11",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-11-18",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-11-25",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-12-02",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-12-09",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-12-16",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-12-23",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2024-12-30",
+    "tradeCount": 0,
+    "cumulativeTrades": 1039
+  },
+  {
+    "date": "2025-01-06",
+    "tradeCount": 6,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-01-13",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-01-20",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-01-27",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-02-03",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-02-10",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-02-17",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-02-24",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-03-03",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-03-10",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-03-17",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-03-24",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-03-31",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-04-07",
+    "tradeCount": 0,
+    "cumulativeTrades": 1045
+  },
+  {
+    "date": "2025-04-14",
+    "tradeCount": 16,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-04-21",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-04-28",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-05-05",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-05-12",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-05-19",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-05-26",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-06-02",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-06-09",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-06-16",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-06-23",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-06-30",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-07-07",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-07-14",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-07-21",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-07-28",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-08-04",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-08-11",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-08-18",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-08-25",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-09-01",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-09-08",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-09-15",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-09-22",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-09-29",
+    "tradeCount": 0,
+    "cumulativeTrades": 1061
+  },
+  {
+    "date": "2025-10-06",
+    "tradeCount": 7,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-10-13",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-10-20",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-10-27",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-11-03",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-11-10",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-11-17",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-11-24",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-12-01",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-12-08",
+    "tradeCount": 0,
+    "cumulativeTrades": 1068
+  },
+  {
+    "date": "2025-12-15",
+    "tradeCount": 5,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2025-12-22",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2025-12-29",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-01-05",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-01-12",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-01-19",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-01-26",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-02-02",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-02-09",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-02-16",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-02-23",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  },
+  {
+    "date": "2026-03-02",
+    "tradeCount": 0,
+    "cumulativeTrades": 1073
+  }
+]

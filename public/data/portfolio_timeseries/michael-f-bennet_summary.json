@@ -1,0 +1,16 @@
+{
+  "senator": "Michael F Bennet",
+  "slug": "michael-f-bennet",
+  "totalTrades": 2,
+  "uniqueTickers": 0,
+  "startDate": "2022-10-04",
+  "endDate": "2023-04-26",
+  "topTickers": [],
+  "assetTypes": {
+    "Other": 2
+  },
+  "tradesByYear": {
+    "2022": 1,
+    "2023": 1
+  }
+}

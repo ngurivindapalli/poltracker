@@ -1,0 +1,60 @@
+{
+  "senator": "John W Hickenlooper",
+  "slug": "john-w-hickenlooper",
+  "totalTrades": 61,
+  "uniqueTickers": 19,
+  "startDate": "2022-03-14",
+  "endDate": "2026-01-14",
+  "topTickers": [
+    {
+      "ticker": "FWONK",
+      "count": 17
+    },
+    {
+      "ticker": "LBRDK",
+      "count": 9
+    },
+    {
+      "ticker": "BATRK",
+      "count": 7
+    },
+    {
+      "ticker": "LBRDA",
+      "count": 4
+    },
+    {
+      "ticker": "CMG",
+      "count": 4
+    },
+    {
+      "ticker": "LSXMK",
+      "count": 3
+    },
+    {
+      "ticker": "FWONA",
+      "count": 2
+    },
+    {
+      "ticker": "BATRA",
+      "count": 2
+    },
+    {
+      "ticker": "SIRI",
+      "count": 2
+    },
+    {
+      "ticker": "NOK",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 61
+  },
+  "tradesByYear": {
+    "2022": 24,
+    "2023": 13,
+    "2024": 8,
+    "2025": 12,
+    "2026": 4
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "senator": "Rick Scott",
+  "slug": "rick-scott",
+  "totalTrades": 220,
+  "uniqueTickers": 2,
+  "startDate": "2022-03-09",
+  "endDate": "2025-10-02",
+  "topTickers": [
+    {
+      "ticker": "WTT",
+      "count": 3
+    },
+    {
+      "ticker": "VAXX",
+      "count": 3
+    }
+  ],
+  "assetTypes": {
+    "Municipal Security": 214,
+    "Stock": 6
+  },
+  "tradesByYear": {
+    "2022": 43,
+    "2023": 29,
+    "2024": 134,
+    "2025": 14
+  }
+}

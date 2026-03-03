@@ -1,0 +1,60 @@
+{
+  "senator": "Gary C Peters",
+  "slug": "gary-c-peters",
+  "totalTrades": 18,
+  "uniqueTickers": 16,
+  "startDate": "2022-04-08",
+  "endDate": "2025-12-12",
+  "topTickers": [
+    {
+      "ticker": "WBD",
+      "count": 1
+    },
+    {
+      "ticker": "NUE",
+      "count": 1
+    },
+    {
+      "ticker": "TFC",
+      "count": 1
+    },
+    {
+      "ticker": "O",
+      "count": 1
+    },
+    {
+      "ticker": "COOK",
+      "count": 1
+    },
+    {
+      "ticker": "COMAL",
+      "count": 1
+    },
+    {
+      "ticker": "IFF",
+      "count": 1
+    },
+    {
+      "ticker": "D",
+      "count": 1
+    },
+    {
+      "ticker": "OTIS",
+      "count": 1
+    },
+    {
+      "ticker": "CARR",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Stock": 16,
+    "Municipal Security": 2
+  },
+  "tradesByYear": {
+    "2022": 3,
+    "2023": 7,
+    "2024": 5,
+    "2025": 3
+  }
+}

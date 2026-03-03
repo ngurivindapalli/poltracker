@@ -1,0 +1,59 @@
+{
+  "senator": "Angus S King, Jr.",
+  "slug": "angus-s-king-jr",
+  "totalTrades": 31,
+  "uniqueTickers": 27,
+  "startDate": "2023-10-23",
+  "endDate": "2025-07-21",
+  "topTickers": [
+    {
+      "ticker": "MAINE",
+      "count": 4
+    },
+    {
+      "ticker": "VZ",
+      "count": 2
+    },
+    {
+      "ticker": "MUNI",
+      "count": 1
+    },
+    {
+      "ticker": "EA",
+      "count": 1
+    },
+    {
+      "ticker": "UNH",
+      "count": 1
+    },
+    {
+      "ticker": "VRT",
+      "count": 1
+    },
+    {
+      "ticker": "UBER",
+      "count": 1
+    },
+    {
+      "ticker": "TMO",
+      "count": 1
+    },
+    {
+      "ticker": "PWR",
+      "count": 1
+    },
+    {
+      "ticker": "PYPL",
+      "count": 1
+    }
+  ],
+  "assetTypes": {
+    "Municipal Security": 5,
+    "Stock": 26
+  },
+  "tradesByYear": {
+    "2023": 5,
+    "2024": 1,
+    "2025": 25
+  }
+}

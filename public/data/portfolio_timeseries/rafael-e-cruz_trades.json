@@ -1,0 +1,28 @@
+[
+  {
+    "senator": "Rafael E Cruz",
+    "office": "Cruz, Ted (Senator)",
+    "reportTitle": "Periodic Transaction Report for 04/24/2024",
+    "reportDate": "2024-04-24",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/5b2f06bb-dccb-478e-a503-f840a312ed92/",
+    "transactionDate": "2024-04-15",
+    "owner": "Spouse",
+    "ticker": "GS",
+    "asset": "Goldman Sachs Group",
+    "assetType": "Stock",
+    "rawOwner": "GS"
+  },
+  {
+    "senator": "Rafael E Cruz",
+    "office": "Cruz, Ted (Senator)",
+    "reportTitle": "Periodic Transaction Report for 11/12/2025",
+    "reportDate": "2025-11-12",
+    "reportUrl": "https://efdsearch.senate.gov/search/view/ptr/4290febc-6042-4538-a193-08a9f941647c/",
+    "transactionDate": "2025-11-11",
+    "owner": "Spouse",
+    "ticker": "GS",
+    "asset": "Goldman Sachs Group",
+    "assetType": "Stock",
+    "rawOwner": "GS"
+  }
+]

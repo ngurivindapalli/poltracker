@@ -3,8 +3,7 @@ import { getBaseUrl } from '@/lib/getBaseUrl'
 import NewsSection from '@/components/NewsSection'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
-import PortfolioPanel from '@/components/senator/PortfolioPanel'
-import PortfolioChart from '@/components/senator/PortfolioChart'
+import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
@@ -153,15 +152,9 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         {/* LEFT COLUMN (70% - Data Heavy) */}
         <div className="lg:col-span-2 space-y-10">
            
-           {/* INVESTMENTS */}
+           {/* INVESTMENT HISTORY & TRADING ACTIVITY */}
            <section>
-             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-               Financial Disclosures
-             </h2>
-             <div className="space-y-6">
-               <PortfolioChart bioguideId={bioguideId} />
-               <PortfolioPanel bioguideId={bioguideId} />
-             </div>
+             <InvestmentHistorySection senatorName={profile.name} />
            </section>
 
            {/* FAMILY TREE */}
