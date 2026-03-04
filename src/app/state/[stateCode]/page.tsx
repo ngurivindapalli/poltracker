@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import { getBaseUrl } from '@/lib/baseUrl'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import StateElectionsSection from '@/components/state/StateElectionsSection'

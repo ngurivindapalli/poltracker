@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import { getBaseUrl } from '@/lib/baseUrl'
 import NewsSection from '@/components/NewsSection'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'

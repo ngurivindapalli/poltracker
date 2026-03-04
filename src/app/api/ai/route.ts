@@ -48,8 +48,8 @@ export async function POST(req: Request) {
     let context = ""
     
     try {
-      const { getServerUrl } = await import('@/lib/serverUrl')
-      const base = getServerUrl()
+      const { getBaseUrl } = await import('@/lib/baseUrl')
+      const base = getBaseUrl()
       const contextRes = await fetch(`${base}/api/context`, { cache: 'no-store' })
       if (contextRes.ok) {
         const data = await contextRes.json()

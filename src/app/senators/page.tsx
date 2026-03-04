@@ -1,4 +1,4 @@
-import { getServerUrl } from "@/lib/serverUrl";
+import { getBaseUrl } from "@/lib/baseUrl";
 import SenatorsList from "@/components/SenatorsList";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 async function getSenators() {
   try {
-    const res = await fetch(`${getServerUrl()}/api/senators`, {
+    const res = await fetch(`${getBaseUrl()}/api/senators`, {
       cache: 'no-store',
     });
     if (!res.ok) {

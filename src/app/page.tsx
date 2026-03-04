@@ -4,7 +4,7 @@ import USStateMap from "@/components/USStateMap";
 import SenatorsList from "@/components/SenatorsList";
 import LeadersList from "@/components/home/LeadersList";
 import { Section } from "@/components/ui/Section";
-import { getServerUrl } from "@/lib/serverUrl";
+import { getBaseUrl } from "@/lib/baseUrl";
 import leadersData from "@/data/global-leaders.json";
 
 // Force dynamic rendering so senators are fetched at request time
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 // Fetch Senators
 async function getSenators() {
   try {
-    const res = await fetch(`${getServerUrl()}/api/senators`, {
+    const res = await fetch(`${getBaseUrl()}/api/senators`, {
       cache: 'no-store',
     });
     if (!res.ok) {

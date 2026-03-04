@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getServerUrl } from '@/lib/serverUrl'
+import { getBaseUrl } from '@/lib/baseUrl'
 
 export async function GET() {
   try {
-    const base = getServerUrl()
+    const base = getBaseUrl()
     // Fetch all data in parallel
     const [senatorsRes, germanyRes, ukNewsRes] = await Promise.all([
       fetch(`${base}/api/senators`, { cache: 'no-store' }).catch(() => null),

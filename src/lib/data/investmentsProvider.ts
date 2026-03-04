@@ -4,7 +4,7 @@
  */
 
 import { Investment } from '../types/senatorExtended'
-import { getBaseUrl } from '../getBaseUrl'
+import { getBaseUrl } from '../baseUrl'
 
 export async function getSenatorInvestments(bioguideId: string): Promise<Investment[]> {
   // This function is deprecated - use /api/investments/[name] instead
