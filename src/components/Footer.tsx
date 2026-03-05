@@ -34,6 +34,7 @@ export function Footer() {
           <h4 className="text-[#1E3A5F] font-bold mb-4">Data</h4>
           <ul className="space-y-2 text-sm text-[#64748B]">
             <li><Link href="/senators" className="hover:text-[#2563EB]">Senators</Link></li>
+            <li><Link href="/representatives" className="hover:text-[#2563EB]">Representatives</Link></li>
             <li><Link href="/investments" className="hover:text-[#2563EB]">Investments</Link></li>
             <li><Link href="/cspan" className="hover:text-[#2563EB]">C-SPAN Schedule</Link></li>
             <li><Link href="/bills" className="hover:text-[#2563EB]">Legislation</Link></li>

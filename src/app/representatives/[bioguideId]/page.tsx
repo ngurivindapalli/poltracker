@@ -32,15 +32,15 @@ async function getJson(path: string) {
   }
 }
 
-export default async function SenatorPage({ params }: { params: { bioguideId: string } }) {
+export default async function RepresentativePage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
 
-  const [senator, news] = await Promise.all([
-    getJson(`/api/senator/${bioguideId}`),
+  const [representative, news] = await Promise.all([
+    getJson(`/api/representative/${bioguideId}`),
     getJson(`/api/senator/${bioguideId}/news`).catch(() => null)
   ])
 
-  if (!senator || !senator.profile) {
+  if (!representative || !representative.profile) {
     return (
       <main className="max-w-6xl mx-auto px-6 py-12">
         <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
@@ -51,7 +51,7 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         </Link>
         <Card className="p-12 text-center bg-red-50 border-red-100">
           <h2 className="text-[20px] font-bold text-red-800 mb-2">
-            Unable to load senator data right now.
+            Unable to load representative data right now.
           </h2>
           <p className="text-red-600">Please try again later.</p>
         </Card>
@@ -59,7 +59,7 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
     )
   }
 
-  const profile = senator.profile
+  const profile = representative.profile
   const newsArticles = news?.articles ?? []
   const newsFailed = news === null
 
@@ -102,7 +102,7 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
                     </span>
                     <span className="text-[#E2E8F0]">•</span>
                     <span className="text-[16px] text-[#64748B]">
-                        U.S. Senator
+                        U.S. Representative
                     </span>
                 </div>
             </div>
@@ -112,13 +112,13 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
           </div>
 
           {/* Profile Info Grid */}
-          {senator.member && (
+          {representative.member && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-[#F1F5F9]">
-              {senator.member.officialWebsiteUrl && (
+              {representative.member.officialWebsiteUrl && (
                 <div>
                   <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Official Website</div>
                   <a 
-                    href={senator.member.officialWebsiteUrl} 
+                    href={representative.member.officialWebsiteUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-[15px] font-medium text-[#2563EB] hover:underline"
@@ -127,11 +127,11 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
                   </a>
                 </div>
               )}
-              {(senator.member.addressInformation?.phoneNumber || senator.member.phoneNumber) && (
+              {(representative.member.addressInformation?.phoneNumber || representative.member.phoneNumber) && (
                 <div>
                   <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Contact</div>
                   <div className="text-[15px] text-[#111827]">
-                    {senator.member.addressInformation?.phoneNumber ?? senator.member.phoneNumber}
+                    {representative.member.addressInformation?.phoneNumber ?? representative.member.phoneNumber}
                   </div>
                 </div>
               )}

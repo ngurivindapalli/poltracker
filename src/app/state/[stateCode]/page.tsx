@@ -9,6 +9,8 @@ import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { getCountiesForState, STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
+import SenatorsList from '@/components/SenatorsList'
+import { representatives } from "@/data/representatives"
 
 async function getJson(path: string) {
   try {
@@ -24,6 +26,30 @@ async function getJson(path: string) {
   }
 }
 
+async function getSenators() {
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/senators`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.senators || [];
+  } catch (e) {
+    console.error("Failed to fetch senators", e);
+    return [];
+  }
+}
+
+async function getRepresentatives() {
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/representatives`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.representatives || [];
+  } catch (e) {
+    console.error("Failed to fetch representatives", e);
+    return [];
+  }
+}
+
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const { stateCode } = params
   const stateData = await getJson(`/api/state/${stateCode.toUpperCase()}`)
@@ -31,6 +57,19 @@ export default async function StatePage({ params }: { params: { stateCode: strin
   // Get counties for this state
   const counties = getCountiesForState(stateCode)
   const fullStateName = STATE_CODE_TO_NAME[stateCode.toUpperCase()] || stateData?.stateName || stateCode
+  
+  // Fetch senators
+  const allSenators = await getSenators()
+  
+  // Filter by state
+  const stateSenators = allSenators.filter((s: any) => s.state === stateCode.toUpperCase())
+  const stateReps = representatives
+    .filter((r) => r.state === stateCode.toUpperCase())
+    .sort((a, b) => {
+      const distA = typeof a.district === 'number' ? a.district : parseInt(a.district) || 999
+      const distB = typeof b.district === 'number' ? b.district : parseInt(b.district) || 999
+      return distA - distB
+    })
 
   if (!stateData || stateData.error) {
     return (
@@ -80,6 +119,37 @@ export default async function StatePage({ params }: { params: { stateCode: strin
             stateName={fullStateName} 
             counties={counties} 
           />
+        </Section>
+      )}
+
+      {/* Senators Section */}
+      {stateSenators.length > 0 && (
+        <Section title="U.S. Senators" subtitle={`${stateSenators.length} Senator${stateSenators.length !== 1 ? 's' : ''} representing ${fullStateName}`}>
+          <SenatorsList senators={stateSenators} />
+        </Section>
+      )}
+
+      {/* House Representatives Section */}
+      {stateReps.length > 0 && (
+        <Section title="House Representatives" subtitle={`${stateReps.length} Representative${stateReps.length !== 1 ? 's' : ''} by district`}>
+          <div className="grid grid-cols-3 gap-4">
+            {stateReps.map((rep) => (
+              <Link
+                key={rep.bioguideId}
+                href={`/representatives/${rep.bioguideId}`}
+                className="block"
+              >
+                <Card className="p-4 bg-white border border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-md transition-all duration-200 h-full">
+                  <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-2">
+                    District {rep.district || 'At-Large'}
+                  </div>
+                  <div className="text-[15px] font-semibold text-[#1E3A5F] leading-tight">
+                    {rep.name}
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </Section>
       )}
 

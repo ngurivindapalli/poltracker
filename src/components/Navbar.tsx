@@ -60,6 +60,9 @@ export function Navbar() {
           <Link href="/senators" className={isActive("/senators")}>
             Senators
           </Link>
+          <Link href="/representatives" className={isActive("/representatives")}>
+            House
+          </Link>
           <Link href="/uk" className={isActive("/uk")}>
             UK
           </Link>
@@ -120,6 +123,13 @@ export function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             Senators
+          </Link>
+          <Link
+            href="/representatives"
+            className="text-[#334155] font-semibold py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            House
           </Link>
           <Link
             href="/uk"
