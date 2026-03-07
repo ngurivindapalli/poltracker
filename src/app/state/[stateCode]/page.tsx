@@ -5,73 +5,52 @@ import { Button } from '@/components/ui/Button'
 import StateElectionsSection from '@/components/state/StateElectionsSection'
 import StateNewsSection from '@/components/state/StateNewsSection'
 import CountySelector from '@/components/state/CountySelector'
+import FederalOfficialsList from '@/components/state/FederalOfficialsList'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { getCountiesForState, STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
 import SenatorsList from '@/components/SenatorsList'
-import { representatives } from "@/data/representatives"
 
-async function getJson(path: string) {
-  try {
-    const base = getBaseUrl()
-    const res = await fetch(base + path, {
-      cache: 'no-store'
-    })
-    if (!res.ok) return null
-    return await res.json()
-  } catch (e) {
-    console.error("Fetch error:", path, e)
-    return null
-  }
-}
-
-async function getSenators() {
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/senators`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.senators || [];
-  } catch (e) {
-    console.error("Failed to fetch senators", e);
-    return [];
-  }
-}
-
-async function getRepresentatives() {
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/representatives`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.representatives || [];
-  } catch (e) {
-    console.error("Failed to fetch representatives", e);
-    return [];
-  }
-}
+export const revalidate = 3600 // ISR: regenerate page every hour
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
-  const { stateCode } = params
-  const stateData = await getJson(`/api/state/${stateCode.toUpperCase()}`)
+  const state = params.stateCode.toUpperCase()
+  const baseUrl = getBaseUrl()
   
-  // Get counties for this state
-  const counties = getCountiesForState(stateCode)
-  const fullStateName = STATE_CODE_TO_NAME[stateCode.toUpperCase()] || stateData?.stateName || stateCode
-  
-  // Fetch senators
-  const allSenators = await getSenators()
-  
+  // Parallel fetch with caching
+  const [senatorsRes, repsRes, stateDataRes] = await Promise.all([
+    fetch(`${baseUrl}/api/senators`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
+    }),
+    fetch(`${baseUrl}/api/representatives`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
+    }),
+    fetch(`${baseUrl}/api/state/${state}`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
+    })
+  ])
+
+  const senatorsData = senatorsRes.ok ? await senatorsRes.json() : { senators: [] }
+  const repsData = repsRes.ok ? await repsRes.json() : { representatives: [] }
+  const stateData = stateDataRes.ok ? await stateDataRes.json() : null
+
   // Filter by state
-  const stateSenators = allSenators.filter((s: any) => s.state === stateCode.toUpperCase())
-  const stateReps = representatives
-    .filter((r) => r.state === stateCode.toUpperCase())
-    .sort((a, b) => {
+  const stateSenators = (senatorsData.senators || []).filter((s: any) => s.state === state)
+  const stateReps = (repsData.representatives || [])
+    .filter((r: any) => r.state === state)
+    .sort((a: any, b: any) => {
       const distA = typeof a.district === 'number' ? a.district : parseInt(a.district) || 999
       const distB = typeof b.district === 'number' ? b.district : parseInt(b.district) || 999
       return distA - distB
     })
+  
+  // Get counties for this state
+  const counties = getCountiesForState(state)
+  const { stateName, bills = {} } = stateData || {}
+  const fullStateName = STATE_CODE_TO_NAME[state] || stateName || state
 
-  if (!stateData || stateData.error) {
+  if (stateData?.error) {
     return (
       <main className="max-w-[1000px] mx-auto px-6 py-12">
         <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
@@ -89,8 +68,6 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       </main>
     )
   }
-
-  const { stateName, bills } = stateData
 
   return (
     <main className="max-w-[1300px] mx-auto px-6 py-12">
@@ -111,11 +88,16 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         }
       />
 
+      {/* Federal Officials Section */}
+      <Section title="Federal Officials" subtitle="U.S. Senators and House Representatives">
+        <FederalOfficialsList stateCode={state} />
+      </Section>
+
       {/* County Selector Section */}
       {counties.length > 0 && (
         <Section title="Local Government" subtitle="Select a county to view local elections, events, and news">
           <CountySelector 
-            stateCode={stateCode} 
+            stateCode={params.stateCode} 
             stateName={fullStateName} 
             counties={counties} 
           />
@@ -157,10 +139,10 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-12">
            {/* Upcoming Elections */}
-           <StateElectionsSection stateCode={stateCode} />
+           <StateElectionsSection stateCode={params.stateCode} />
 
            {/* State Political News */}
-           <StateNewsSection stateCode={stateCode} stateName={stateName || fullStateName} />
+           <StateNewsSection stateCode={params.stateCode} stateName={stateName || fullStateName} />
         </div>
 
         {/* Sidebar / Legislation */}

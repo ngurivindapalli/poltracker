@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getBaseUrl } from '@/lib/baseUrl'
-import NewsSection from '@/components/NewsSection'
+import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
 import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
@@ -197,10 +197,9 @@ export default async function RepresentativePage({ params }: { params: { bioguid
                     Unable to load recent news.
                 </Card>
                 ) : (
-                <NewsSection
+                <OfficialNewsFeed
                     bioguideId={bioguideId}
-                    initialArticles={newsArticles}
-                    initialSourceType={news?.sourceType || 'major'}
+                    defaultMode="aligned"
                 />
                 )}
             </section>

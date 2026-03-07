@@ -1,0 +1,147 @@
+[
+  {
+    "id": "state",
+    "name": "Marco Rubio",
+    "position": "Secretary of State",
+    "department": "Department of State",
+    "twitter": "SecRubio",
+    "budget": "$58 Billion",
+    "employees": "75,000",
+    "agencies": [
+      "Foreign Service",
+      "Bureau of Intelligence and Research",
+      "USAID Coordination"
+    ],
+    "oversight_committees": [
+      "Senate Foreign Relations Committee",
+      "House Foreign Affairs Committee"
+    ],
+    "major_contractors": [
+      "Booz Allen Hamilton",
+      "Leidos",
+      "General Dynamics"
+    ],
+    "confirmation_vote": "Confirmed 55–45 Senate Vote",
+    "career_history": [
+      "U.S. Senator (Florida)",
+      "Florida House of Representatives"
+    ]
+  },
+  {
+    "id": "defense",
+    "name": "Pete Hegseth",
+    "position": "Secretary of Defense",
+    "department": "Department of Defense",
+    "twitter": "PeteHegseth",
+    "budget": "$842 Billion",
+    "employees": "3.4 Million",
+    "agencies": [
+      "Army",
+      "Navy",
+      "Air Force",
+      "DARPA",
+      "NSA"
+    ],
+    "oversight_committees": [
+      "Senate Armed Services Committee",
+      "House Armed Services Committee"
+    ],
+    "major_contractors": [
+      "Lockheed Martin",
+      "Raytheon",
+      "Northrop Grumman",
+      "Boeing"
+    ],
+    "confirmation_vote": "",
+    "career_history": [
+      "Fox News Host",
+      "Army National Guard Officer"
+    ]
+  },
+  {
+    "id": "treasury",
+    "name": "Scott Bessent",
+    "position": "Secretary of the Treasury",
+    "department": "Department of the Treasury",
+    "twitter": "SecScottBessent",
+    "budget": "$15 Billion",
+    "employees": "100,000",
+    "agencies": [
+      "IRS",
+      "Bureau of Engraving and Printing",
+      "U.S. Mint"
+    ],
+    "oversight_committees": [
+      "Senate Finance Committee",
+      "House Ways and Means Committee"
+    ],
+    "major_contractors": [
+      "Deloitte",
+      "Accenture",
+      "IBM"
+    ],
+    "confirmation_vote": "",
+    "career_history": [
+      "Hedge Fund Manager",
+      "Investment Advisor"
+    ]
+  },
+  {
+    "id": "justice",
+    "name": "Pam Bondi",
+    "position": "Attorney General",
+    "department": "Department of Justice",
+    "twitter": "PamBondi",
+    "budget": "$38 Billion",
+    "employees": "115,000",
+    "agencies": [
+      "FBI",
+      "DEA",
+      "ATF",
+      "U.S. Marshals Service"
+    ],
+    "oversight_committees": [
+      "Senate Judiciary Committee",
+      "House Judiciary Committee"
+    ],
+    "major_contractors": [
+      "CACI International",
+      "SAIC",
+      "ManTech"
+    ],
+    "confirmation_vote": "",
+    "career_history": [
+      "Florida Attorney General",
+      "Prosecutor"
+    ]
+  },
+  {
+    "id": "transportation",
+    "name": "Sean Duffy",
+    "position": "Secretary of Transportation",
+    "department": "Department of Transportation",
+    "twitter": "SeanDuffyWI",
+    "budget": "$105 Billion",
+    "employees": "55,000",
+    "agencies": [
+      "FAA",
+      "FHWA",
+      "FTA",
+      "NHTSA"
+    ],
+    "oversight_committees": [
+      "Senate Commerce Committee",
+      "House Transportation Committee"
+    ],
+    "major_contractors": [
+      "AECOM",
+      "Jacobs Engineering",
+      "Bechtel"
+    ],
+    "confirmation_vote": "",
+    "career_history": [
+      "U.S. Representative (Wisconsin)",
+      "District Attorney"
+    ]
+  }
+]

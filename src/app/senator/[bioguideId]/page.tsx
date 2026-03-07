@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getBaseUrl } from '@/lib/baseUrl'
-import NewsSection from '@/components/NewsSection'
+import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
 import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
@@ -8,7 +8,8 @@ import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
 import SenatorBillsSection from '@/components/senator/SenatorBillsSection'
-import MemberTweets from '@/components/MemberTweets'
+import Tweets from '@/components/Tweets'
+import { getMemberByBioguide } from '@/lib/congressData'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -62,6 +63,10 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const profile = senator.profile
   const newsArticles = news?.articles ?? []
   const newsFailed = news === null
+  
+  // Get Twitter handle from congress data
+  const memberData = getMemberByBioguide(bioguideId)
+  const twitterHandle = memberData?.twitter || ""
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
@@ -197,10 +202,9 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
                     Unable to load recent news.
                 </Card>
                 ) : (
-                <NewsSection
+                <OfficialNewsFeed
                     bioguideId={bioguideId}
-                    initialArticles={newsArticles}
-                    initialSourceType={news?.sourceType || 'major'}
+                    defaultMode="aligned"
                 />
                 )}
             </section>
@@ -215,7 +219,16 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
 
             {/* LATEST TWEETS */}
             <section>
-                <MemberTweets bioguideId={bioguideId} />
+                <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+                  Latest Tweets
+                </h2>
+                {twitterHandle ? (
+                  <Tweets handle={twitterHandle} />
+                ) : (
+                  <div className="text-gray-500">
+                    No public Twitter/X account available.
+                  </div>
+                )}
             </section>
 
         </div>

@@ -54,15 +54,40 @@ export function Navbar() {
 
         {/* Desktop Navigation - Right */}
         <div className="hidden md:flex items-center gap-6 text-[14px] font-semibold">
-          <Link href="/" className={isActive("/")}>
-            US
-          </Link>
-          <Link href="/senators" className={isActive("/senators")}>
-            Senators
-          </Link>
-          <Link href="/representatives" className={isActive("/representatives")}>
-            House
-          </Link>
+          {/* US Dropdown */}
+          <div className="relative group">
+            <button className={isActive("/")}>
+              US
+            </button>
+            <div
+              className="
+                absolute left-0 top-full
+                pt-1
+                hidden group-hover:block
+              "
+            >
+              <div className="bg-white shadow-lg rounded-xl p-4 w-44">
+                <Link
+                  href="/senators"
+                  className="block py-2 hover:text-blue-600"
+                >
+                  Senators
+                </Link>
+                <Link
+                  href="/representatives"
+                  className="block py-2 hover:text-blue-600"
+                >
+                  House
+                </Link>
+                <Link
+                  href="/cabinet"
+                  className="block py-2 hover:text-blue-600"
+                >
+                  Cabinet
+                </Link>
+              </div>
+            </div>
+          </div>
           <Link href="/uk" className={isActive("/uk")}>
             UK
           </Link>
@@ -72,8 +97,8 @@ export function Navbar() {
           <Link href="/india" className={isActive("/india")}>
             India
           </Link>
-          <Link href="/cspan" className={isActive("/cspan")}>
-            C-SPAN
+          <Link href="/chat" className={isActive("/chat")}>
+            AI Chat
           </Link>
         </div>
 
@@ -132,6 +157,13 @@ export function Navbar() {
             House
           </Link>
           <Link
+            href="/cabinet"
+            className="text-[#334155] font-semibold py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Cabinet
+          </Link>
+          <Link
             href="/uk"
             className="text-[#334155] font-semibold py-2"
             onClick={() => setIsMenuOpen(false)}
@@ -153,11 +185,11 @@ export function Navbar() {
             India
           </Link>
           <Link
-            href="/cspan"
+            href="/chat"
             className="text-[#334155] font-semibold py-2"
             onClick={() => setIsMenuOpen(false)}
           >
-            C-SPAN
+            AI Chat
           </Link>
         </div>
       )}
