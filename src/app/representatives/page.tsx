@@ -1,7 +1,7 @@
-import { getBaseUrl } from "@/lib/baseUrl";
 import RepresentativesList from "@/components/RepresentativesList";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { getBaseUrl } from "@/lib/getBaseUrl";
 import Link from "next/link";
 
 // Force dynamic rendering so representatives are fetched at request time

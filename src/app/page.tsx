@@ -4,7 +4,7 @@ import USStateMap from "@/components/USStateMap";
 import SenatorsList from "@/components/SenatorsList";
 import LeadersList from "@/components/home/LeadersList";
 import { Section } from "@/components/ui/Section";
-import { getBaseUrl } from "@/lib/baseUrl";
+import { getBaseUrl } from "@/lib/getBaseUrl";
 import leadersData from "@/data/global-leaders.json";
 
 // Force dynamic rendering so senators are fetched at request time

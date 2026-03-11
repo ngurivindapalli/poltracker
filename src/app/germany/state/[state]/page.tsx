@@ -83,7 +83,9 @@ export default function GermanyState({ params }: { params: { state: string } }) 
             .join(" ")
         }
 
-        const res = await fetch("/api/germany/members")
+        const { getBaseUrl } = await import('@/lib/getBaseUrl')
+        const base = getBaseUrl()
+        const res = await fetch(`${base}/api/germany/members`)
         const data = await res.json()
 
         const filtered = data.filter((m: any) => {

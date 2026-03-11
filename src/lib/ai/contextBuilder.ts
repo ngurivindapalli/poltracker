@@ -1,14 +1,14 @@
-import { getBaseUrl } from "@/lib/baseUrl"
+import { getBaseUrl } from "@/lib/getBaseUrl"
 
 export async function buildContext(question: string): Promise<string> {
   const lower = question.toLowerCase()
   const context: string[] = []
-  const baseUrl = getBaseUrl()
+  const base = getBaseUrl()
 
   // Bills context
   if (lower.includes("bill") || lower.includes("legislation")) {
     try {
-      const res = await fetch(`${baseUrl}/api/bills`, {
+      const res = await fetch(`${base}/api/bills`, {
         next: { revalidate: 3600 }
       })
       
@@ -56,8 +56,8 @@ Link: ${link}`
   if (lower.includes("senator") || lower.includes("representative") || lower.includes("congress")) {
     try {
       const [senRes, repRes] = await Promise.all([
-        fetch(`${baseUrl}/api/senators`, { next: { revalidate: 3600 } }),
-        fetch(`${baseUrl}/api/representatives`, { next: { revalidate: 3600 } })
+        fetch(`${base}/api/senators`, { next: { revalidate: 3600 } }),
+        fetch(`${base}/api/representatives`, { next: { revalidate: 3600 } })
       ])
       
       if (senRes.ok) {
@@ -99,7 +99,7 @@ Link: ${link}`
       const stateMatch = question.match(/\b([A-Z]{2})\b/i)
       if (stateMatch) {
         const stateCode = stateMatch[1].toUpperCase()
-        const res = await fetch(`${baseUrl}/api/state/${stateCode}/news`, {
+        const res = await fetch(`${base}/api/state/${stateCode}/news`, {
           next: { revalidate: 900 }
         })
         

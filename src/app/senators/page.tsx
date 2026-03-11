@@ -1,7 +1,7 @@
-import { getBaseUrl } from "@/lib/baseUrl";
 import SenatorsList from "@/components/SenatorsList";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
+import { getBaseUrl } from "@/lib/getBaseUrl";
 import Link from "next/link";
 
 // Force dynamic rendering so senators are fetched at request time

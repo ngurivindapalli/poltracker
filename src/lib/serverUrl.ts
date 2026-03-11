@@ -24,6 +24,6 @@ export function getServerUrl() {
     return ""
   }
 
-  // Local development fallback
-  return process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+  // Local development fallback - use relative paths
+  return ""
 }

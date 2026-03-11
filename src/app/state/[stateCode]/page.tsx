@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/baseUrl'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import StateElectionsSection from '@/components/state/StateElectionsSection'
@@ -16,17 +16,17 @@ export const revalidate = 3600 // ISR: regenerate page every hour
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const state = params.stateCode.toUpperCase()
-  const baseUrl = getBaseUrl()
+  const base = getBaseUrl()
   
   // Parallel fetch with caching
   const [senatorsRes, repsRes, stateDataRes] = await Promise.all([
-    fetch(`${baseUrl}/api/senators`, {
+    fetch(`${base}/api/senators`, {
       next: { revalidate: 3600 } // Cache for 1 hour
     }),
-    fetch(`${baseUrl}/api/representatives`, {
+    fetch(`${base}/api/representatives`, {
       next: { revalidate: 3600 } // Cache for 1 hour
     }),
-    fetch(`${baseUrl}/api/state/${state}`, {
+    fetch(`${base}/api/state/${state}`, {
       next: { revalidate: 3600 } // Cache for 1 hour
     })
   ])

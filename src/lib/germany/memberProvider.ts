@@ -1,4 +1,4 @@
-import { getBaseUrl } from '@/lib/baseUrl'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 
 export async function fetchGermanMembers() {
   const base = getBaseUrl()

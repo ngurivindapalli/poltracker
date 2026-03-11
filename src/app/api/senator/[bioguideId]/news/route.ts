@@ -135,7 +135,7 @@ export async function GET(
     // Fetch family data to include in news query
     let familyNames: string[] = []
     try {
-      const { getBaseUrl } = await import('@/lib/baseUrl')
+      const { getBaseUrl } = await import('@/lib/getBaseUrl')
       const base = getBaseUrl()
       const familyRes = await fetch(`${base}/api/member/${bioguideId}/family?country=US`, {
         cache: 'no-store'

@@ -44,9 +44,8 @@ export default function ConnectionsPanel({ bioguideId }: ConnectionsPanelProps) 
     try {
       setLoading(true);
       setError(null);
-      const base = process.env.NEXT_PUBLIC_BASE_URL || "";
       const response = await fetch(
-        `${base}/api/member/${bioguideId}/connections`
+        `/api/member/${bioguideId}/connections`
       );
       if (!response.ok) throw new Error("Failed to fetch connections");
       const json: GraphData = await response.json();

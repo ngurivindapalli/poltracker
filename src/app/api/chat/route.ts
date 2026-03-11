@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { fetchMember } from '@/lib/congress'
 import { getLatestBillsForOfficial } from '@/lib/bills/latestBills'
 import { buildContext } from '@/lib/ai/contextBuilder'
+import { getCongressMembers } from '@/lib/congressData'
 import OpenAI from 'openai'
 
 type ChatRequest = {
@@ -103,6 +104,8 @@ function formatBill(bill: any): { text: string; link: string } {
   }
 }
 
+const conversationMemory: Record<string, any> = {}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || ''
 })
@@ -134,6 +137,13 @@ export async function POST(req: Request) {
         const latestBill = bills[0]
         const formattedBill = formatBill(latestBill)
         
+        // Store bill in memory
+        conversationMemory["lastBill"] = {
+          id: latestBill.billId,
+          title: latestBill.title,
+          summary: latestBill.summary || ""
+        }
+        
         return NextResponse.json({
           answer: formattedBill.text,
           link: formattedBill.link,
@@ -152,6 +162,58 @@ export async function POST(req: Request) {
 
     // Build RAG context from question
     const context = await buildContext(message)
+    
+    // Handle bill context for follow-up questions
+    let billContext = ""
+    if (
+      message.toLowerCase().includes("summary") &&
+      conversationMemory["lastBill"]
+    ) {
+      billContext = `
+The user previously asked about this bill:
+
+${conversationMemory["lastBill"].title}
+
+Bill summary:
+${conversationMemory["lastBill"].summary}
+`
+    }
+    
+    // Detect senator mentions and get tweet context
+    const senatorMatch = message.match(
+      /(bernie sanders|elizabeth warren|ted cruz|marco rubio|pete hegseth|scott bessent|pam bondi|sean duffy)/i
+    )
+    
+    let tweetContext = ""
+    if (senatorMatch) {
+      const senatorName = senatorMatch[0]
+      
+      try {
+        // Find senator in congress data
+        const members = getCongressMembers()
+        const senator = members.find((m: any) => 
+          m.name.toLowerCase().includes(senatorName.toLowerCase()) ||
+          senatorName.toLowerCase().includes(m.name.toLowerCase())
+        )
+        
+        if (senator && senator.twitter) {
+          const tweets = await fetch(
+            `/api/twitter/${senator.twitter}`
+          )
+          
+          const tweetData = await tweets.json()
+          
+          if (tweetData.tweets && tweetData.tweets.length > 0) {
+            tweetContext = tweetData.tweets
+              .slice(0, 2)
+              .map((t: any) => `- ${t.text}`)
+              .join("\n")
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching tweets:", err)
+      }
+    }
     
     // Add official-specific context if bioguideId provided
     let officialContext = ''
@@ -193,6 +255,22 @@ export async function POST(req: Request) {
     // Build full context
     const fullContext = officialContext + (context ? `General Context:\n${context}` : '')
 
+    // Build final prompt with all context
+    const prompt = `
+You are a US legislative assistant.
+
+User question:
+${message}
+
+${billContext ? `Bill context:\n${billContext}` : ''}
+
+${tweetContext ? `Recent tweets from the senator:\n${tweetContext}` : ''}
+
+${fullContext ? `Additional context:\n${fullContext}` : ''}
+
+Provide a clear and concise response.
+`
+
     // Call OpenAI with RAG context
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -213,7 +291,7 @@ Be concise and helpful.`
         },
         {
           role: "user",
-          content: `Question: ${message}\n\n${fullContext ? `Context:\n${fullContext}` : ''}`
+          content: prompt
         }
       ],
       temperature: 0.2,

@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/baseUrl'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
 import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
+import EstimatedNetWorthChart from '@/components/politicians/EstimatedNetWorthChart'
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
@@ -17,7 +18,7 @@ import { Card } from '@/components/ui/Card'
 async function getJson(path: string) {
   try {
     const base = getBaseUrl()
-    const res = await fetch(base + path, {
+    const res = await fetch(`${base}${path}`, {
       cache: "no-store"
     })
 
@@ -161,6 +162,11 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
            {/* INVESTMENT HISTORY & TRADING ACTIVITY */}
            <section>
              <InvestmentHistorySection senatorName={profile.name} />
+           </section>
+
+           {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
+           <section>
+             <EstimatedNetWorthChart bioguideId={bioguideId} />
            </section>
 
            {/* FAMILY TREE */}

@@ -1,11 +1,11 @@
 export function getBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
+  // Use relative paths for internal API calls
+  // This works in both server and client components
+  if (typeof window !== "undefined") {
+    return ""
   }
 
-  if (process.env.RENDER_EXTERNAL_URL) {
-    return process.env.RENDER_EXTERNAL_URL
-  }
-
-  return "http://localhost:3000"
+  // For server-side, use empty string for relative paths
+  // Next.js will automatically resolve to the correct host
+  return ""
 }

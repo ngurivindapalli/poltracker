@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getBaseUrl } from '@/lib/baseUrl'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 
 export async function GET() {
   try {

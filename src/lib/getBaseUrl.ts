@@ -1,5 +1,5 @@
 export function getBaseUrl() {
-  // In browser, use relative paths (works everywhere)
+  // In browser (client-side), use relative paths (works everywhere)
   if (typeof window !== "undefined") {
     return ""
   }
@@ -19,11 +19,7 @@ export function getBaseUrl() {
     return process.env.NEXT_PUBLIC_SITE_URL
   }
 
-  // Detect if we're on Vercel but URL vars aren't set - use empty string for relative paths
-  if (process.env.VERCEL) {
-    return ""
-  }
-
-  // Local development fallback
-  return process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+  // Server-side: need absolute URL for fetch
+  // Use localhost with PORT from environment or default to 3000
+  return `http://localhost:${process.env.PORT || 3000}`
 }

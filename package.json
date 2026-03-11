@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean-install": "rm -rf node_modules package-lock.json && npm install"
+    "clean-install": "rm -rf node_modules package-lock.json && npm install",
+    "build:trading": "node scripts/buildCongressTradingDataset.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",
@@ -40,6 +41,7 @@
     "postcss": "8.4.39",
     "tailwindcss": "3.4.7",
     "tsx": "^4.21.0",
-    "typescript": "5.5.3"
+    "typescript": "5.5.3",
+    "xlsx": "^0.18.5"
   }
 }
