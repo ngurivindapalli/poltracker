@@ -3,7 +3,6 @@ import { getBaseUrl } from '@/lib/getBaseUrl'
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
-import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
 import EstimatedNetWorthChart from '@/components/politicians/EstimatedNetWorthChart'
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
@@ -154,11 +153,8 @@ export default async function RepresentativePage({ params }: { params: { bioguid
         {/* LEFT COLUMN (70% - Data Heavy) */}
         <div className="lg:col-span-2 space-y-10">
            
-           {/* INVESTMENT HISTORY & TRADING ACTIVITY */}
-           <section>
-             <InvestmentHistorySection senatorName={profile.name} />
-           </section>
-
+           {/* STOCK Act investments intentionally disabled for House members */}
+           
            {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
            <section>
              <EstimatedNetWorthChart bioguideId={bioguideId} />

@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "Example Candidate",
+    "office": "U.S. Senate",
+    "state": "TX",
+    "party": "Independent",
+    "date": "2026-01-05",
+    "content": "Launching my campaign to bring transparency and innovation to government."
+  }
+]

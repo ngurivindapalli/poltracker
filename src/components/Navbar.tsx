@@ -100,6 +100,9 @@ export function Navbar() {
           <Link href="/chat" className={isActive("/chat")}>
             AI Chat
           </Link>
+          <Link href="/candidates" className={isActive("/candidates")}>
+            Candidates
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -190,6 +193,13 @@ export function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             AI Chat
+          </Link>
+          <Link
+            href="/candidates"
+            className="text-[#334155] font-semibold py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Candidates
           </Link>
         </div>
       )}
