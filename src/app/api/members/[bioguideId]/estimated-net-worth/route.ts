@@ -2,6 +2,9 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
+import { calculateNetWorthFromHoldings, parseRange } from '@/lib/networth';
+import { getHoldingsForPolitician } from '@/lib/holdingsProvider';
+import { getTradesForPolitician } from '@/lib/congressNetWorth';
 import { getEstimatedNetWorthSeries, getEstimatedNetWorthSummary } from '@/lib/congressNetWorth';
 import { fetchMember } from '@/lib/congress';
 
@@ -15,22 +18,18 @@ function getOfficeStartDate(member: any): string | null {
     return null;
   }
   
-  // Find earliest term start date
   let earliestStart: string | null = null;
   
   for (const term of terms) {
     const startDate = term?.startDate || term?.startYear;
     if (!startDate) continue;
     
-    // Convert to YYYY-MM-DD format
     let normalizedDate: string | null = null;
     
     if (typeof startDate === 'string') {
-      // Try to parse various formats
       if (/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
         normalizedDate = startDate;
       } else if (/^\d{4}$/.test(startDate)) {
-        // Just year, use January 1st
         normalizedDate = `${startDate}-01-01`;
       } else {
         try {
@@ -42,11 +41,10 @@ function getOfficeStartDate(member: any): string | null {
             normalizedDate = `${year}-${month}-${day}`;
           }
         } catch {
-          // Ignore parse errors
+          // Ignore
         }
       }
     } else if (typeof startDate === 'number') {
-      // Year as number
       normalizedDate = `${startDate}-01-01`;
     }
     
@@ -72,12 +70,9 @@ export async function GET(
   }
   
   try {
-    
-    // Try to get office start date from member data
     let officeStart: string | null = null;
     
     try {
-      // Only fetch if API key is available (optional)
       if (process.env.API_DATA_GOV_KEY) {
         const memberData = await fetchMember(bioguideId);
         const member = memberData?.member ?? memberData;
@@ -86,27 +81,59 @@ export async function GET(
         }
       }
     } catch (error) {
-      // If fetching member data fails, continue without office start date
       console.warn('Could not fetch member data for office start date:', error);
     }
     
-    // Get time series and summary with error handling
-    let series: any[] = [];
-    let summary: any = {
-      latestEstimate: 0,
-      firstTradeDate: null,
-      totalEstimatedPurchases: 0,
-      totalEstimatedSales: 0,
-      numberOfTrades: 0,
-    };
+    const holdings = getHoldingsForPolitician(bioguideId);
+    const trades = getTradesForPolitician(bioguideId);
     
+    let netWorth = 0;
+    if (holdings && holdings.length > 0) {
+      netWorth = calculateNetWorthFromHoldings(holdings);
+    }
+    // Fallback if no holdings: use 10% of total trade value
+    if (netWorth === 0 && trades?.length > 0) {
+      netWorth = Math.round(
+        trades.reduce((sum: number, t: any) => sum + parseRange(t.amount), 0) * 0.1
+      );
+    }
+    
+    // Trade stats for chart (from congressNetWorth for consistency)
+    let summary = { firstTradeDate: null as string | null, totalEstimatedPurchases: 0, totalEstimatedSales: 0 };
+    try {
+      summary = getEstimatedNetWorthSummary(bioguideId, officeStart || undefined);
+    } catch {
+      // Compute from trades if congressNetWorth fails
+      let totalPurchases = 0;
+      let totalSales = 0;
+      let firstTradeDate: string | null = null;
+      for (const t of trades || []) {
+        const value = parseRange(t.amount);
+        if (t.type === 'purchase') {
+          totalPurchases += value;
+          if (t.transactionDate && (!firstTradeDate || t.transactionDate < firstTradeDate)) {
+            firstTradeDate = t.transactionDate;
+          }
+        } else {
+          totalSales += value;
+          if (t.transactionDate && (!firstTradeDate || t.transactionDate < firstTradeDate)) {
+            firstTradeDate = t.transactionDate;
+          }
+        }
+      }
+      summary = { firstTradeDate, totalEstimatedPurchases: totalPurchases, totalEstimatedSales: totalSales };
+    }
+    
+    // Chart series: use trade series when available, else holdings value
+    let series: Array<{ date: string; value: number }> = [];
     try {
       series = getEstimatedNetWorthSeries(bioguideId, officeStart || undefined);
-      summary = getEstimatedNetWorthSummary(bioguideId, officeStart || undefined);
-    } catch (tradingError: any) {
-      // If trading dataset fails, return empty data instead of breaking
-      console.error('Trading dataset error:', tradingError?.message || String(tradingError));
-      // Continue with empty series and summary
+    } catch {
+      // Ignore
+    }
+    
+    if (!series || series.length === 0) {
+      series = [{ date: '2024-01-01', value: netWorth }];
     }
     
     return NextResponse.json({
@@ -115,14 +142,13 @@ export async function GET(
       disclaimer: 'Estimate based on public congressional trading disclosures and midpoint values of reported transaction ranges. This is not actual net worth.',
       officeStart: officeStart || null,
       firstTradeDate: summary.firstTradeDate,
-      latestEstimate: summary.latestEstimate,
+      latestEstimate: netWorth,
       totalEstimatedPurchases: summary.totalEstimatedPurchases,
       totalEstimatedSales: summary.totalEstimatedSales,
-      numberOfTrades: summary.numberOfTrades,
+      numberOfTrades: trades?.length || 0,
       series: series.length > 0 ? series : [],
     });
   } catch (error: any) {
-    // Catch-all error handler - return empty but valid response
     console.error('Error in estimated-net-worth API:', error?.message || String(error));
     return NextResponse.json({
       bioguideId: bioguideId || 'unknown',

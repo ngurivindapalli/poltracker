@@ -8,7 +8,7 @@ import NewsFeed from "@/components/news/NewsFeed";
 interface CountySelectorProps {
   stateCode: string;
   stateName: string;
-  counties: string[];
+  counties?: string[]; // Optional - fetched client-side when not provided
 }
 
 interface LocalElection {
@@ -35,12 +35,35 @@ interface Article {
   publishedAt: string;
 }
 
-export default function CountySelector({ stateCode, stateName, counties }: CountySelectorProps) {
+export default function CountySelector({ stateCode, stateName, counties: countiesProp }: CountySelectorProps) {
+  const [counties, setCounties] = useState<string[]>(countiesProp || []);
   const [selectedCounty, setSelectedCounty] = useState<string>("");
   const [news, setNews] = useState<Article[]>([]);
   const [elections, setElections] = useState<LocalElection[]>([]);
   const [events, setEvents] = useState<LocalEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [countiesLoading, setCountiesLoading] = useState(!countiesProp || countiesProp.length === 0);
+
+  // Lazy-load counties when not provided (client-side only)
+  useEffect(() => {
+    if (countiesProp && countiesProp.length > 0) {
+      setCounties(countiesProp);
+      setCountiesLoading(false);
+      return;
+    }
+    async function fetchCounties() {
+      try {
+        const res = await fetch(`/api/counties/${stateCode}`);
+        const data = await res.json();
+        setCounties(data.counties || []);
+      } catch {
+        setCounties([]);
+      } finally {
+        setCountiesLoading(false);
+      }
+    }
+    fetchCounties();
+  }, [stateCode, countiesProp]);
 
   useEffect(() => {
     if (!selectedCounty) return;
@@ -102,8 +125,9 @@ export default function CountySelector({ stateCode, stateName, counties }: Count
           value={selectedCounty}
           onChange={(e) => setSelectedCounty(e.target.value)}
           className="w-full max-w-md h-[44px] px-4 rounded-[8px] border border-[#E2E8F0] bg-white text-[#1E3A5F] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+          disabled={countiesLoading}
         >
-          <option value="">— Select a County —</option>
+          <option value="">{countiesLoading ? "Loading counties..." : "— Select a County —"}</option>
           {counties.map((county) => (
             <option key={county} value={county}>
               {county}

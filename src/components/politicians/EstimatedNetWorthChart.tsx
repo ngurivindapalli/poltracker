@@ -138,7 +138,7 @@ export default function EstimatedNetWorthChart({
           Estimated Disclosed Portfolio Value Over Time
         </h2>
         <p className="text-sm text-[#64748B] mb-4">
-          Based on public trade disclosures and midpoint estimates of reported ranges. Not actual net worth.
+          Based on financial disclosures (holdings + trades estimate). Not actual net worth.
         </p>
         <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-8 text-center">
           <p className="text-sm text-[#64748B]">
@@ -156,7 +156,7 @@ export default function EstimatedNetWorthChart({
           Estimated Disclosed Portfolio Value Over Time
         </h2>
         <p className="text-sm text-[#64748B] mb-4">
-          Based on public trade disclosures and midpoint estimates of reported ranges. Not actual net worth.
+          Based on financial disclosures (holdings + trades estimate). Not actual net worth.
         </p>
 
         {/* Summary Stats */}

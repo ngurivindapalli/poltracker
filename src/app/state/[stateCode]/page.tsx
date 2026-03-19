@@ -9,8 +9,11 @@ import FederalOfficialsList from '@/components/state/FederalOfficialsList'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { getCountiesForState, STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
+import { STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
 import SenatorsList from '@/components/SenatorsList'
+import { MAYORS } from "@/data/mayors"
+import { GOVERNOR_BY_STATE } from "@/data/governorsByState"
+import { getMayorImage } from "@/lib/getMayorImage"
 
 export const revalidate = 3600 // ISR: regenerate page every hour
 
@@ -45,10 +48,10 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       return distA - distB
     })
   
-  // Get counties for this state
-  const counties = getCountiesForState(state)
   const { stateName, bills = {} } = stateData || {}
   const fullStateName = STATE_CODE_TO_NAME[state] || stateName || state
+  const mayor = MAYORS.find((m) => m.state === state)
+  const governor = GOVERNOR_BY_STATE[state]
 
   if (stateData?.error) {
     return (
@@ -93,16 +96,10 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         <FederalOfficialsList stateCode={state} />
       </Section>
 
-      {/* County Selector Section */}
-      {counties.length > 0 && (
-        <Section title="Local Government" subtitle="Select a county to view local elections, events, and news">
-          <CountySelector 
-            stateCode={params.stateCode} 
-            stateName={fullStateName} 
-            counties={counties} 
-          />
-        </Section>
-      )}
+      {/* County Selector Section - counties lazy-loaded client-side */}
+      <Section title="Local Government" subtitle="Select a county to view local elections, events, and news">
+        <CountySelector stateCode={state} stateName={fullStateName} />
+      </Section>
 
       {/* Senators Section */}
       {stateSenators.length > 0 && (
@@ -139,10 +136,66 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-12">
            {/* Upcoming Elections */}
-           <StateElectionsSection stateCode={params.stateCode} />
+           <StateElectionsSection stateCode={state} />
 
            {/* State Political News */}
-           <StateNewsSection stateCode={params.stateCode} stateName={stateName || fullStateName} />
+           <StateNewsSection stateCode={state} stateName={stateName || fullStateName} />
+
+           {/* Major City Mayor */}
+           {mayor && (
+             <div className="bg-white rounded-xl shadow p-6 mb-8">
+               <h2 className="text-xl font-semibold mb-4">
+                 Major City Mayor
+               </h2>
+
+               <div className="flex items-center gap-4">
+                 <img
+                   src={getMayorImage(mayor.name)}
+                   alt={mayor.name}
+                   className="w-20 h-20 rounded-full object-cover"
+                 />
+
+                 <div>
+                   <h3 className="text-lg font-semibold">
+                     {mayor.name}
+                   </h3>
+
+                   <p className="text-gray-500">
+                     Mayor of {mayor.city}
+                   </p>
+
+                   <Link
+                     href={`/us/mayors/${mayor.slug}`}
+                     className="text-blue-600 text-sm hover:underline mt-1 inline-block"
+                   >
+                     View Profile →
+                   </Link>
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* State Governor */}
+           {governor && (
+             <div className="bg-white rounded-xl shadow p-6 mb-8">
+               <h2 className="text-xl font-semibold mb-4">
+                 State Governor
+               </h2>
+
+               <div>
+                 <h3 className="text-lg font-semibold">
+                   {governor.name}
+                 </h3>
+
+                 <Link
+                   href={`/us/governors/${governor.slug}`}
+                   className="text-blue-600 text-sm hover:underline"
+                 >
+                   View Profile →
+                 </Link>
+               </div>
+             </div>
+           )}
         </div>
 
         {/* Sidebar / Legislation */}
@@ -156,7 +209,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
                   <h3 className="text-[14px] font-semibold text-[#64748B] uppercase tracking-wide">
                     Sponsored Bills
                   </h3>
-                  {bills.sponsored.slice(0, 5).map((bill: any, i: number) => (
+                  {(bills.sponsored || []).slice(0, 5).map((bill: any, i: number) => (
                     <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-2">
                         <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>
@@ -175,7 +228,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
                   <h3 className="text-[14px] font-semibold text-[#64748B] uppercase tracking-wide">
                     Cosponsored Bills
                   </h3>
-                   {bills.cosponsored.slice(0, 3).map((bill: any, i: number) => (
+                   {(bills.cosponsored || []).slice(0, 5).map((bill: any, i: number) => (
                     <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-2">
                         <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>

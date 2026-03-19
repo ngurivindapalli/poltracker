@@ -1,0 +1,53 @@
+[
+  {
+    "id": "nyc",
+    "name": "Eric Adams",
+    "city": "New York",
+    "state": "NY",
+    "party": "Democrat",
+    "population": 8467513,
+    "twitter": "NYCMayor",
+    "electionYear": 2021,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Eric_Adams_2023.jpg/440px-Eric_Adams_2023.jpg"
+  },
+  {
+    "id": "la",
+    "name": "Karen Bass",
+    "city": "Los Angeles",
+    "state": "CA",
+    "party": "Democrat",
+    "population": 3820000,
+    "twitter": "MayorOfLA",
+    "electionYear": 2022,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Karen_Bass_118th_Congress_portrait.jpg/440px-Karen_Bass_118th_Congress_portrait.jpg"
+  },
+  {
+    "id": "chicago",
+    "name": "Brandon Johnson",
+    "city": "Chicago",
+    "state": "IL",
+    "party": "Democrat",
+    "population": 2660000,
+    "twitter": "ChicagosMayor",
+    "electionYear": 2023,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Brandon_Johnson_2023.jpg/440px-Brandon_Johnson_2023.jpg"
+  },
+  {
+    "id": "houston",
+    "name": "John Whitmire",
+    "city": "Houston",
+    "state": "TX",
+    "population": 2300000,
+    "twitter": "HoustonMayor",
+    "electionYear": 2023
+  },
+  {
+    "id": "phoenix",
+    "name": "Kate Gallego",
+    "city": "Phoenix",
+    "state": "AZ",
+    "population": 1600000,
+    "twitter": "MayorGallego",
+    "electionYear": 2020
+  }
+]

@@ -348,6 +348,43 @@ export function getEstimatedNetWorthSeries(
 }
 
 /**
+ * Get trades for a politician in the format expected by networth calculation.
+ * Uses congress-trading-all.json filtered by BioGuideID.
+ */
+export function getTradesForPolitician(bioguideId: string): Array<{
+  ticker: string;
+  type: string;
+  amount: string;
+  transactionDate: string;
+}> {
+  const data = loadTradingData();
+  const memberTrades = data.filter(
+    (row) =>
+      row.BioGuideID &&
+      row.BioGuideID.toUpperCase() === bioguideId.toUpperCase()
+  );
+
+  return memberTrades
+    .filter((t) => {
+      const tradeDateStr = parseDate(t.Traded) || parseDate(t.Filed);
+      return tradeDateStr && t.Ticker && t.Trade_Size_USD;
+    })
+    .map((t) => {
+      const transaction = (t.Transaction || "").toLowerCase();
+      const type =
+        transaction.includes("purchase") || transaction.includes("buy")
+          ? "purchase"
+          : "sale";
+      return {
+        ticker: (t.Ticker || "").trim(),
+        type,
+        amount: t.Trade_Size_USD || "",
+        transactionDate: parseDate(t.Traded) || parseDate(t.Filed) || "",
+      };
+    });
+}
+
+/**
  * Get summary statistics for a member's estimated disclosed portfolio
  */
 export function getEstimatedNetWorthSummary(

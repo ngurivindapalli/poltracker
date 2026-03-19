@@ -1,0 +1,62 @@
+export type Governor = {
+  name: string;
+  slug: string;
+};
+
+export const GOVERNOR_BY_STATE: Record<string, Governor> = {
+  AL: { name: "Kay Ivey", slug: "kay-ivey" },
+  AK: { name: "Mike Dunleavy", slug: "mike-dunleavy" },
+  AZ: { name: "Katie Hobbs", slug: "katie-hobbs" },
+  AR: { name: "Sarah Huckabee Sanders", slug: "sarah-sanders" },
+  CA: { name: "Gavin Newsom", slug: "gavin-newsom" },
+  CO: { name: "Jared Polis", slug: "jared-polis" },
+  CT: { name: "Ned Lamont", slug: "ned-lamont" },
+  DE: { name: "John Carney", slug: "john-carney" },
+  FL: { name: "Ron DeSantis", slug: "ron-desantis" },
+  GA: { name: "Brian Kemp", slug: "brian-kemp" },
+  HI: { name: "Josh Green", slug: "josh-green" },
+  ID: { name: "Brad Little", slug: "brad-little" },
+  IL: { name: "J.B. Pritzker", slug: "jb-pritzker" },
+  IN: { name: "Eric Holcomb", slug: "eric-holcomb" },
+  IA: { name: "Kim Reynolds", slug: "kim-reynolds" },
+  KS: { name: "Laura Kelly", slug: "laura-kelly" },
+  KY: { name: "Andy Beshear", slug: "andy-beshear" },
+  LA: { name: "Jeff Landry", slug: "jeff-landry" },
+  ME: { name: "Janet Mills", slug: "janet-mills" },
+  MD: { name: "Wes Moore", slug: "wes-moore" },
+  MA: { name: "Maura Healey", slug: "maura-healey" },
+  MI: { name: "Gretchen Whitmer", slug: "gretchen-whitmer" },
+  MN: { name: "Tim Walz", slug: "tim-walz" },
+  MS: { name: "Tate Reeves", slug: "tate-reeves" },
+  MO: { name: "Mike Parson", slug: "mike-parson" },
+  MT: { name: "Greg Gianforte", slug: "greg-gianforte" },
+  NE: { name: "Jim Pillen", slug: "jim-pillen" },
+  NV: { name: "Joe Lombardo", slug: "joe-lombardo" },
+  NH: { name: "Chris Sununu", slug: "chris-sununu" },
+  NJ: { name: "Phil Murphy", slug: "phil-murphy" },
+  NM: { name: "Michelle Lujan Grisham", slug: "lujan-grisham" },
+  NY: { name: "Kathy Hochul", slug: "kathy-hochul" },
+  NC: { name: "Roy Cooper", slug: "roy-cooper" },
+  ND: { name: "Doug Burgum", slug: "doug-burgum" },
+  OH: { name: "Mike DeWine", slug: "mike-dewine" },
+  OK: { name: "Kevin Stitt", slug: "kevin-stitt" },
+  OR: { name: "Tina Kotek", slug: "tina-kotek" },
+  PA: { name: "Josh Shapiro", slug: "josh-shapiro" },
+  RI: { name: "Dan McKee", slug: "dan-mckee" },
+  SC: { name: "Henry McMaster", slug: "henry-mcmaster" },
+  SD: { name: "Kristi Noem", slug: "kristi-noem" },
+  TN: { name: "Bill Lee", slug: "bill-lee" },
+  TX: { name: "Greg Abbott", slug: "greg-abbott" },
+  UT: { name: "Spencer Cox", slug: "spencer-cox" },
+  VT: { name: "Phil Scott", slug: "phil-scott" },
+  VA: { name: "Glenn Youngkin", slug: "glenn-youngkin" },
+  WA: { name: "Jay Inslee", slug: "jay-inslee" },
+  WV: { name: "Jim Justice", slug: "jim-justice" },
+  WI: { name: "Tony Evers", slug: "tony-evers" },
+  WY: { name: "Mark Gordon", slug: "mark-gordon" },
+  DC: { name: "Muriel Bowser", slug: "muriel-bowser" },
+};
+
+export function getGovernorBySlug(slug: string): Governor | null {
+  return Object.values(GOVERNOR_BY_STATE).find((g) => g.slug === slug) ?? null;
+}

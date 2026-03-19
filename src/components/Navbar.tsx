@@ -85,6 +85,12 @@ export function Navbar() {
                 >
                   Cabinet
                 </Link>
+                <Link
+                  href="/us/mayors"
+                  className="block py-2 hover:text-blue-600"
+                >
+                  Mayors
+                </Link>
               </div>
             </div>
           </div>

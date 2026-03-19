@@ -37,9 +37,10 @@ async function getJson(path: string) {
 export default async function SenatorPage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
 
-  const [senator, news] = await Promise.all([
+  const [senator, news, networth] = await Promise.all([
     getJson(`/api/senator/${bioguideId}`),
-    getJson(`/api/senator/${bioguideId}/news`).catch(() => null)
+    getJson(`/api/senator/${bioguideId}/news`).catch(() => null),
+    getJson(`/api/networth/${bioguideId}`).catch(() => ({ totalNetWorth: 0, holdings: {} }))
   ])
 
   if (!senator || !senator.profile) {
@@ -163,6 +164,17 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
            <section>
              <InvestmentHistorySection senatorName={profile.name} />
            </section>
+
+           {/* ESTIMATED NET WORTH */}
+           <div className="bg-white rounded-xl p-6 shadow mb-6">
+             <h2 className="text-xl font-semibold mb-2">Estimated Net Worth</h2>
+             <p className="text-3xl font-bold text-green-600">
+               ${(networth?.totalNetWorth ?? 0).toLocaleString()}
+             </p>
+             <p className="text-sm text-gray-500 mt-1">
+               Based on financial disclosures (holdings + trades estimate)
+             </p>
+           </div>
 
            {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
            <section>

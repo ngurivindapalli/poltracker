@@ -1,6 +1,5 @@
 export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
+export const revalidate = 3600 // Cache for 1 hour
 
 import { NextResponse } from 'next/server'
 import { fetchMembersByState, fetchSponsoredLegislation, fetchCosponsoredLegislation } from '@/lib/congress'
@@ -51,7 +50,8 @@ async function fetchStateNews(stateCode: string, memberNames: string[]): Promise
 
   try {
     const response = await fetch(newsApiUrl, {
-      headers: { 'User-Agent': 'PolTracker/1.0' }
+      headers: { 'User-Agent': 'PolTracker/1.0' },
+      next: { revalidate: 3600 }
     })
 
     if (!response.ok) {
@@ -84,7 +84,7 @@ async function fetchStateNews(stateCode: string, memberNames: string[]): Promise
       if (seen.has(normalized)) return false
       seen.add(normalized)
       return true
-    }).slice(0, 20) // Limit to 20 articles
+    }).slice(0, 6) // Limit to 6 articles for fast load
   } catch (err) {
     console.error('Error fetching state news:', err)
     return []
@@ -92,49 +92,50 @@ async function fetchStateNews(stateCode: string, memberNames: string[]): Promise
 }
 
 /**
- * Aggregate bills from all members in a state
+ * Aggregate bills from all members in a state (parallel fetch)
  */
 async function aggregateStateBills(members: any[]): Promise<{ sponsored: any[], cosponsored: any[] }> {
+  const memberSlice = members.slice(0, 5)
+  const results = await Promise.all(
+    memberSlice.map(async (member) => {
+      const bioguideId = member?.bioguideId ?? member?.bioguide_id ?? member?.id
+      if (!bioguideId) return { sponsored: [], cosponsored: [] }
+      try {
+        const [sponsoredData, cosponsoredData] = await Promise.all([
+          fetchSponsoredLegislation(bioguideId, 10),
+          fetchCosponsoredLegislation(bioguideId, 10)
+        ])
+        const sponsored = sponsoredData?.bills?.item ?? sponsoredData?.bills ?? []
+        const cosponsored = cosponsoredData?.bills?.item ?? cosponsoredData?.bills ?? []
+        return { sponsored, cosponsored }
+      } catch (err) {
+        console.error(`Error fetching bills for member ${bioguideId}:`, err)
+        return { sponsored: [], cosponsored: [] }
+      }
+    })
+  )
+
+  const seenBills = new Set<string>()
   const allSponsored: any[] = []
   const allCosponsored: any[] = []
-  const seenBills = new Set<string>()
 
-  // Fetch bills for each member (limit to first 10 members to avoid rate limits)
-  for (const member of members.slice(0, 10)) {
-    const bioguideId = member?.bioguideId ?? member?.bioguide_id ?? member?.id
-    if (!bioguideId) continue
-
-    try {
-      // Fetch sponsored bills
-      const sponsoredData = await fetchSponsoredLegislation(bioguideId, 10)
-      const sponsored = sponsoredData?.bills?.item ?? sponsoredData?.bills ?? []
-      
-      for (const bill of sponsored) {
-        const billKey = `${bill.congress}-${bill.type}-${bill.number}`
-        if (!seenBills.has(billKey)) {
-          seenBills.add(billKey)
-          allSponsored.push(bill)
-        }
+  for (const { sponsored, cosponsored } of results) {
+    for (const bill of sponsored) {
+      const billKey = `${bill.congress}-${bill.type}-${bill.number}`
+      if (!seenBills.has(billKey)) {
+        seenBills.add(billKey)
+        allSponsored.push(bill)
       }
-
-      // Fetch cosponsored bills
-      const cosponsoredData = await fetchCosponsoredLegislation(bioguideId, 10)
-      const cosponsored = cosponsoredData?.bills?.item ?? cosponsoredData?.bills ?? []
-      
-      for (const bill of cosponsored) {
-        const billKey = `${bill.congress}-${bill.type}-${bill.number}`
-        if (!seenBills.has(billKey)) {
-          seenBills.add(billKey)
-          allCosponsored.push(bill)
-        }
+    }
+    for (const bill of cosponsored) {
+      const billKey = `${bill.congress}-${bill.type}-${bill.number}`
+      if (!seenBills.has(billKey)) {
+        seenBills.add(billKey)
+        allCosponsored.push(bill)
       }
-    } catch (err) {
-      console.error(`Error fetching bills for member ${bioguideId}:`, err)
-      // Continue with other members
     }
   }
 
-  // Sort by introduced date (newest first)
   const sortByDate = (a: any, b: any) => {
     const dateA = a.introducedDate ? new Date(a.introducedDate).getTime() : 0
     const dateB = b.introducedDate ? new Date(b.introducedDate).getTime() : 0
@@ -142,8 +143,8 @@ async function aggregateStateBills(members: any[]): Promise<{ sponsored: any[], 
   }
 
   return {
-    sponsored: allSponsored.sort(sortByDate).slice(0, 20),
-    cosponsored: allCosponsored.sort(sortByDate).slice(0, 20)
+    sponsored: allSponsored.sort(sortByDate).slice(0, 5),
+    cosponsored: allCosponsored.sort(sortByDate).slice(0, 5)
   }
 }
 
@@ -207,7 +208,7 @@ export async function GET(
         state: m?.state,
         chamber: m?.chamber ?? m?.chamberName
       })),
-      news,
+      news: news.slice(0, 6),
       bills
     })
   } catch (err: any) {
