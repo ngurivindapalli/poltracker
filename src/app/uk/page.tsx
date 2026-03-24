@@ -59,7 +59,7 @@ export default function UKPage() {
       />
 
       {/* Prime Minister Section */}
-      <Link href="/leader/starmer">
+      <Link href="/global/keir-starmer">
         <Card className="mb-12 p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-lg transition-shadow cursor-pointer">
           <LeaderImage
             src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Official_portrait_of_Keir_Starmer_crop_2.jpg"

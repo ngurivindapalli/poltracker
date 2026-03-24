@@ -2,10 +2,10 @@ import { LandingHero } from "@/components/home/LandingHero";
 import CspanSchedule from "@/components/home/CspanSchedule";
 import USStateMap from "@/components/USStateMap";
 import SenatorsList from "@/components/SenatorsList";
-import LeadersList from "@/components/home/LeadersList";
+import LeaderCard from "@/components/LeaderCard";
 import { Section } from "@/components/ui/Section";
 import { getBaseUrl } from "@/lib/getBaseUrl";
-import leadersData from "@/data/global-leaders.json";
+import { GLOBAL_LEADERS } from "@/data/globalLeaders";
 
 // Force dynamic rendering so senators are fetched at request time
 export const dynamic = 'force-dynamic'
@@ -29,16 +29,6 @@ async function getSenators() {
   }
 }
 
-// Transform JSON data to LeadersList format
-const FEATURED_LEADERS = leadersData.map(leader => ({
-  id: leader.id,
-  name: leader.name,
-  title: leader.title,
-  country: leader.country,
-  imageUrl: leader.image,
-  link: `/leader/${leader.id}`,
-}));
-
 export default async function HomePage() {
   const senators = await getSenators();
 
@@ -52,7 +42,7 @@ export default async function HomePage() {
           title="Explore By State" 
           subtitle="Click on any state to view local representatives, news, and legislative updates."
         >
-          <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-1 overflow-hidden shadow-sm">
+          <div className="panel flex justify-center overflow-hidden p-1">
              <USStateMap />
           </div>
         </Section>
@@ -62,7 +52,11 @@ export default async function HomePage() {
           title="Global Leadership"
           subtitle="Track key international political figures."
         >
-          <LeadersList leaders={FEATURED_LEADERS} />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {GLOBAL_LEADERS.map((leader) => (
+              <LeaderCard key={leader.slug} leader={leader} />
+            ))}
+          </div>
         </Section>
 
         {/* Senators Section */}
@@ -75,7 +69,7 @@ export default async function HomePage() {
           <div className="mt-8 text-center">
             <a 
               href="/senators" 
-              className="inline-flex items-center justify-center px-6 py-3 border border-[#E2E8F0] rounded-[8px] text-[14px] font-semibold text-[#1E3A5F] bg-white hover:bg-[#F8FAFC] transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-border rounded-[8px] text-[14px] font-semibold text-foreground bg-card hover:bg-muted transition-colors"
             >
               View All Senators
             </a>

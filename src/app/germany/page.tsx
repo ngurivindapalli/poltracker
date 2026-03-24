@@ -48,7 +48,7 @@ export default function Germany() {
       />
 
       {/* Chancellor Section */}
-      <Link href="/leader/scholz">
+      <Link href="/global/olaf-scholz">
         <Card className="mb-12 p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-lg transition-shadow cursor-pointer">
           <LeaderImage
             src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Olaf_Scholz_in_2023.jpg"

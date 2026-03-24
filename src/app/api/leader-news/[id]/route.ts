@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
-import leaders from "@/data/global-leaders.json";
-
-interface Leader {
-  id: string;
-  name: string;
-  title: string;
-  country: string;
-  party: string;
-  image: string;
-}
+import { GLOBAL_LEADERS } from "@/data/globalLeaders";
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const leader = leaders.find((l: Leader) => l.id === params.id);
+  const leader = GLOBAL_LEADERS.find((l) => l.slug === params.id);
 
   if (!leader) {
     return NextResponse.json([]);

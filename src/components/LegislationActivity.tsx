@@ -34,7 +34,7 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
   const bills = tab === "sponsored" ? data.sponsored : data.cosponsored;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
+    <div className="panel">
       <h2 className="text-xl font-semibold mb-6">
         Legislative Activity
       </h2>
@@ -42,10 +42,10 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setTab("sponsored")}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded border-b-2 ${
             tab === "sponsored"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+              ? "text-primary border-primary"
+              : "text-muted-foreground bg-muted border-transparent"
           }`}
         >
           Sponsored ({data.sponsored.length})
@@ -53,10 +53,10 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
 
         <button
           onClick={() => setTab("cosponsored")}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded border-b-2 ${
             tab === "cosponsored"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+              ? "text-primary border-primary"
+              : "text-muted-foreground bg-muted border-transparent"
           }`}
         >
           Cosponsored ({data.cosponsored.length})
@@ -71,7 +71,7 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
           return (
             <div
               key={id}
-              className="border rounded-lg p-4 hover:bg-gray-50 transition"
+              className="border border-border rounded-lg p-4 hover:bg-muted transition"
             >
               <div className="flex justify-between">
                 <div>
@@ -79,17 +79,17 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
                     {bill.type.toUpperCase()} {bill.number}
                   </div>
 
-                  <div className="text-gray-700">
+                  <div className="text-muted-foreground">
                     {bill.title}
                   </div>
 
-                  <div className="text-sm text-gray-500 mt-1">
+                  <div className="text-sm text-muted-foreground mt-1">
                     {bill.latestAction}
                   </div>
                 </div>
 
                 <button
-                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm h-fit"
+                  className="bg-primary text-primary-foreground px-3 py-1 rounded text-sm h-fit"
                   onClick={async () => {
                     if (open) {
                       setOpenBill(null);
@@ -125,13 +125,13 @@ export default function LegislationActivity({ bioguideId }: { bioguideId: string
               </div>
 
               {loading === id && (
-                <div className="mt-3 text-gray-400">
+                <div className="mt-3 text-muted-foreground">
                   Generating summary...
                 </div>
               )}
 
               {open && summary[id] && (
-                <div className="mt-4 bg-gray-50 border rounded-lg p-4">
+                <div className="mt-4 bg-muted border border-border rounded-lg p-4">
                   <div className="text-sm leading-relaxed">
                     {summary[id]}
                   </div>

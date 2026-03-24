@@ -46,7 +46,7 @@ const resolveStateColor = (stateCode?: string) => {
 
 export default function USStateMap() {
   return (
-    <div style={{ width: "100%", height: "500px", backgroundColor: "#F9FAFB", borderRadius: "8px", overflow: "hidden" }}>
+    <div className="w-full h-[500px] bg-card rounded-[8px] overflow-hidden">
       <ComposableMap 
         projection="geoAlbersUsa"
         style={{ width: "100%", height: "100%" }}

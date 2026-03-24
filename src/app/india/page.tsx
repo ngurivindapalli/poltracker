@@ -41,7 +41,7 @@ export default function IndiaPage() {
       />
 
       {/* Prime Minister Section */}
-      <Link href="/leader/modi">
+      <Link href="/global/narendra-modi">
         <Card className="mb-12 p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-lg transition-shadow cursor-pointer">
           <LeaderImage
             src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Narendra_Modi_2023.jpg"

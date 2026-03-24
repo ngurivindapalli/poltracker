@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getBaseUrl } from '@/lib/getBaseUrl'
+import networthData from "@/data/networth.json"
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
@@ -65,7 +66,13 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
   const profile = senator.profile
   const newsArticles = news?.articles ?? []
   const newsFailed = news === null
-  
+
+  const networthDataTyped = networthData as { name: string; netWorth: string | null; bioguideId?: string }[]
+  const normalize = (name: string) => name.toLowerCase().replace(/[^a-z ]/g, "").trim()
+  const networthEntry = networthDataTyped.find((p) => p.bioguideId === bioguideId)
+    ?? networthDataTyped.find((p) => normalize(p.name) === normalize(profile.name))
+  const displayNetWorth = networthEntry?.netWorth ?? `$${(networth?.totalNetWorth ?? 0).toLocaleString()}`
+
   // Get Twitter handle from congress data
   const memberData = getMemberByBioguide(bioguideId)
   const twitterHandle = memberData?.twitter || ""
@@ -169,10 +176,13 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
            <div className="bg-white rounded-xl p-6 shadow mb-6">
              <h2 className="text-xl font-semibold mb-2">Estimated Net Worth</h2>
              <p className="text-3xl font-bold text-green-600">
-               ${(networth?.totalNetWorth ?? 0).toLocaleString()}
+               {displayNetWorth}
              </p>
              <p className="text-sm text-gray-500 mt-1">
                Based on financial disclosures (holdings + trades estimate)
+             </p>
+             <p className="text-xs text-gray-400 mt-2 italic">
+               Data source: Quiver Quantitative estimates
              </p>
            </div>
 

@@ -1,26 +1,34 @@
 import React from "react";
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
 export function LandingHero() {
   return (
-    <section className="bg-white border-b border-[#E2E8F0] py-24 text-center">
-      <div className="max-w-[800px] mx-auto px-6">
-        <h1 className="text-[48px] md:text-[56px] font-bold text-[#1E3A5F] mb-6 leading-[1.1] tracking-tight">
-          Political Transparency Made Accessible
-        </h1>
-        <p className="text-[20px] text-[#64748B] mb-10 leading-relaxed max-w-[600px] mx-auto">
-          Track investments, relationships, and influence across government with 
-          professional-grade data and visualizations.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button variant="primary" size="lg" className="w-full sm:w-auto">
-            Explore U.S. Senate
-          </Button>
-          <Button variant="outline" size="lg" className="w-full sm:w-auto">
-            View Global Leaders
-          </Button>
+    <section className="text-center py-24 px-6 max-w-4xl mx-auto">
+      <h1 className="text-5xl font-semibold tracking-tight leading-tight">
+        Political Transparency,
+        <span className="text-primary"> Refined</span>
+      </h1>
+
+      <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+        Track investments, relationships, and influence across global governments
+        with institutional-grade data and visualization.
+      </p>
+
+      <div className="mt-10 flex justify-center gap-4">
+        <Link
+          href="/senators"
+          className="px-6 py-3 rounded-lg bg-primary text-primary-foreground shadow-subtle hover:opacity-90 transition"
+        >
+          Explore U.S. Senate
+        </Link>
+
+        <Link
+          href="/global/narendra-modi"
+          className="px-6 py-3 rounded-lg border border-border bg-card hover:bg-muted transition"
+        >
+          View Global Leaders
+        </Link>
         </div>
-      </div>
     </section>
   );
 }

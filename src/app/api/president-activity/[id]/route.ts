@@ -4,7 +4,7 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (params.id !== "trump") {
+  if (params.id !== "trump" && params.id !== "donald-trump") {
     return NextResponse.json([]);
   }
 

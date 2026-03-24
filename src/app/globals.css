@@ -1,45 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: 210 20% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 210 16% 93%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 10%;
+  --card-foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 11%;
+  --muted: 222 47% 14%;
+  --muted-foreground: 215 20% 70%;
+  --border: 222 47% 18%;
+}
+
 @layer base {
   body {
-    @apply font-sans antialiased;
-    background-color: #F8FAFC;
-    color: #1E3A5F;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
-    color: #1E3A5F;
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
-:root {
-  --bg: #F8FAFC;
-  --panel: #FFFFFF;
-  --text: #1E3A5F;
-  --muted: #64748B;
-  --border: #E2E8F0;
-  --primary: #1E3A5F;
-  --accent: #2563EB;
+@layer components {
+  .card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
+
+  .section {
+    max-width: 72rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .panel {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
 }
 
-/* Custom Utilities */
-.glass-panel {
-  background-color: white;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+/* Fix washed-out text in dark mode */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Stronger text hierarchy */
+h1, h2, h3, h4 {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+p {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Fix cards being too light */
+.card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
-.hover-card {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+/* Fix sections like your Financial Interests panel */
+.section-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
-.hover-card:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Fix faint text issue */
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.9;
+}
+
+.section + .section {
+  margin-top: 2rem;
 }

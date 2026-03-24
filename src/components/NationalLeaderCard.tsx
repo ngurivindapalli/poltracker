@@ -15,7 +15,7 @@ export default function NationalLeaderCard({
 }: NationalLeaderCardProps) {
   return (
     <div className="max-w-4xl mx-auto mb-10">
-      <div className="flex items-center gap-6 bg-white rounded-2xl shadow p-6">
+      <div className="flex items-center gap-6 bg-card border border-border rounded-2xl shadow-subtle p-6">
         <Image
           src={image}
           width={140}
@@ -28,13 +28,13 @@ export default function NationalLeaderCard({
         />
 
         <div>
-          <div className="text-sm text-gray-500 mb-1">
+          <div className="text-sm text-muted-foreground mb-1">
             {title}
           </div>
-          <div className="text-3xl font-bold">
+          <div className="text-3xl font-semibold text-foreground">
             {name}
           </div>
-          <div className="text-gray-500">
+          <div className="text-muted-foreground">
             {state}
           </div>
         </div>

@@ -10,16 +10,16 @@ interface SectionProps {
 
 export function Section({ title, subtitle, children, className = "", id }: SectionProps) {
   return (
-    <section id={id} className={`mt-12 mb-8 ${className}`}>
+    <section id={id} className={`section ${className}`}>
       {(title || subtitle) && (
         <div className="mb-6">
           {title && (
-            <h2 className="text-[24px] font-semibold text-[#1E3A5F] mb-2">
+            <h2 className="text-[24px] font-semibold text-foreground mb-2">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-[16px] text-[#64748B]">{subtitle}</p>
+            <p className="text-[16px] text-muted-foreground">{subtitle}</p>
           )}
         </div>
       )}

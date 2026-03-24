@@ -8,14 +8,18 @@
     "start": "next start",
     "lint": "next lint",
     "clean-install": "rm -rf node_modules package-lock.json && npm install",
-    "build:trading": "node scripts/buildCongressTradingDataset.js"
+    "build:trading": "node scripts/buildCongressTradingDataset.js",
+    "scrape:networth": "node scripts/scrapeQuiverNetWorth.js",
+    "build:networth": "node scripts/buildNetWorthDataset.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",
     "@xyflow/react": "^12.10.1",
     "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
     "js-yaml": "^4.1.1",
     "next": "14.2.5",
+    "next-themes": "^0.4.6",
     "openai": "^6.17.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -23,6 +27,7 @@
     "reactflow": "^11.11.4",
     "recharts": "^3.7.0",
     "rss-parser": "^3.13.0",
+    "tailwind-merge": "^3.5.0",
     "xml2js": "^0.6.2"
   },
   "overrides": {
@@ -39,6 +44,7 @@
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.5",
     "node-fetch": "^3.3.2",
+    "playwright": "^1.58.2",
     "postcss": "8.4.39",
     "tailwindcss": "3.4.7",
     "tsx": "^4.21.0",

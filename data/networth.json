@@ -1,0 +1,507 @@
+[
+  {
+    "name": "James C. Justice",
+    "bioguideId": "J000312",
+    "netWorth": "$ 664.33 M"
+  },
+  {
+    "name": "Jefferson Shreve",
+    "bioguideId": "S001229",
+    "netWorth": "$ 597.78 M"
+  },
+  {
+    "name": "Rick Scott",
+    "bioguideId": "S001217",
+    "netWorth": "$ 512.52 M"
+  },
+  {
+    "name": "Darrell Issa",
+    "bioguideId": "I000056",
+    "netWorth": "$ 284.91 M"
+  },
+  {
+    "name": "Nancy Pelosi",
+    "bioguideId": "P000197",
+    "netWorth": "$ 267.58 M"
+  },
+  {
+    "name": "Vern Buchanan",
+    "bioguideId": "B001260",
+    "netWorth": "$ 261.59 M"
+  },
+  {
+    "name": "Daniel S. Goldman",
+    "bioguideId": "G000599",
+    "netWorth": "$ 206.32 M"
+  },
+  {
+    "name": "Pete Ricketts",
+    "bioguideId": "R000618",
+    "netWorth": "$ 205.25 M"
+  },
+  {
+    "name": "Mark R. Warner",
+    "bioguideId": "W000805",
+    "netWorth": "$ 201.86 M"
+  },
+  {
+    "name": "David McCormick",
+    "bioguideId": "M001243",
+    "netWorth": "$ 174.38 M"
+  },
+  {
+    "name": "Tim Sheehy",
+    "bioguideId": "S001232",
+    "netWorth": "$ 154.87 M"
+  },
+  {
+    "name": "April McClain Delaney",
+    "bioguideId": "M001232",
+    "netWorth": "$ 152.67 M"
+  },
+  {
+    "name": "Suzan K. DelBene",
+    "bioguideId": "D000617",
+    "netWorth": "$ 140.83 M"
+  },
+  {
+    "name": "Bernie Moreno",
+    "bioguideId": "M001242",
+    "netWorth": "$ 139.06 M"
+  },
+  {
+    "name": "Kevin Hern",
+    "bioguideId": "H001082",
+    "netWorth": "$ 109.94 M"
+  },
+  {
+    "name": "Donald S. Beyer, Jr.",
+    "bioguideId": "B001292",
+    "netWorth": "$ 106.87 M"
+  },
+  {
+    "name": "Jay Obernolte",
+    "bioguideId": "O000019",
+    "netWorth": "$ 97.76 M"
+  },
+  {
+    "name": "Sara Jacobs",
+    "bioguideId": "J000305",
+    "netWorth": "$ 82.83 M"
+  },
+  {
+    "name": "Gilbert Ray Cisneros, Jr.",
+    "bioguideId": "C001123",
+    "netWorth": "$ 78.22 M"
+  },
+  {
+    "name": "Roger Williams",
+    "bioguideId": "W000816",
+    "netWorth": "$ 74.66 M"
+  },
+  {
+    "name": "Daniel Meuser",
+    "bioguideId": "M001204",
+    "netWorth": "$ 69.04 M"
+  },
+  {
+    "name": "Ron Johnson",
+    "bioguideId": "J000293",
+    "netWorth": "$ 67.28 M"
+  },
+  {
+    "name": "Markwayne Mullin",
+    "bioguideId": "M001190",
+    "netWorth": "$ 65.91 M"
+  },
+  {
+    "name": "Mitch McConnell",
+    "bioguideId": "M000355",
+    "netWorth": "$ 63.90 M"
+  },
+  {
+    "name": "Scott H. Peters",
+    "bioguideId": "P000608",
+    "netWorth": "$ 59.07 M"
+  },
+  {
+    "name": "Ralph Norman",
+    "bioguideId": "N000190",
+    "netWorth": "$ 57.03 M"
+  },
+  {
+    "name": "John W. Rose",
+    "bioguideId": "R000612",
+    "netWorth": "$ 56.70 M"
+  },
+  {
+    "name": "James E. Risch",
+    "bioguideId": "R000584",
+    "netWorth": "$ 56.50 M"
+  },
+  {
+    "name": "Marlin A. Stutzman",
+    "bioguideId": "S001188",
+    "netWorth": "$ 54.38 M"
+  },
+  {
+    "name": "Bill Hagerty",
+    "bioguideId": "H000601",
+    "netWorth": "$ 53.46 M"
+  },
+  {
+    "name": "Lloyd Doggett",
+    "bioguideId": "D000399",
+    "netWorth": "$ 52.58 M"
+  },
+  {
+    "name": "John Hoeven",
+    "bioguideId": "H001061",
+    "netWorth": "$ 48.48 M"
+  },
+  {
+    "name": "Julie Johnson",
+    "bioguideId": "J000310",
+    "netWorth": "$ 47.20 M"
+  },
+  {
+    "name": "Kelly Morrison",
+    "bioguideId": "M001234",
+    "netWorth": "$ 41.14 M"
+  },
+  {
+    "name": "Shri Thanedar",
+    "bioguideId": "T000488",
+    "netWorth": "$ 39.81 M"
+  },
+  {
+    "name": "Cleo Fields",
+    "bioguideId": "F000110",
+    "netWorth": "$ 39.39 M"
+  },
+  {
+    "name": "Josh Gottheimer",
+    "bioguideId": "G000583",
+    "netWorth": "$ 38.26 M"
+  },
+  {
+    "name": "Robert Bresnahan",
+    "bioguideId": "B001327",
+    "netWorth": "$ 36.25 M"
+  },
+  {
+    "name": "George Whitesides",
+    "bioguideId": "W000830",
+    "netWorth": "$ 34.88 M"
+  },
+  {
+    "name": "Lori Trahan",
+    "bioguideId": "T000482",
+    "netWorth": "$ 34.09 M"
+  },
+  {
+    "name": "James R. Baird",
+    "bioguideId": "B001307",
+    "netWorth": "$ 30.93 M"
+  },
+  {
+    "name": "Kim Schrier",
+    "bioguideId": "S001216",
+    "netWorth": "$ 29.78 M"
+  },
+  {
+    "name": "John W. Hickenlooper",
+    "bioguideId": "H000273",
+    "netWorth": "$ 29.51 M"
+  },
+  {
+    "name": "Scott Franklin",
+    "bioguideId": "F000472",
+    "netWorth": "$ 28.62 M"
+  },
+  {
+    "name": "Earl L. \"Buddy\" Carter",
+    "bioguideId": "C001103",
+    "netWorth": "$ 28.11 M"
+  },
+  {
+    "name": "Carol D. Miller",
+    "bioguideId": "M001205",
+    "netWorth": "$ 27.68 M"
+  },
+  {
+    "name": "Michael A. Rulli",
+    "bioguideId": "R000619",
+    "netWorth": "$ 26.91 M"
+  },
+  {
+    "name": "Ann Wagner",
+    "bioguideId": "W000812",
+    "netWorth": "$ 26.14 M"
+  },
+  {
+    "name": "Victoria Spartz",
+    "bioguideId": "S000929",
+    "netWorth": "$ 25.54 M"
+  },
+  {
+    "name": "Craig Goldman",
+    "bioguideId": "G000601",
+    "netWorth": "$ 25.41 M"
+  },
+  {
+    "name": "Marjorie Taylor Greene",
+    "bioguideId": "G000596",
+    "netWorth": "$ 25.12 M"
+  },
+  {
+    "name": "Sheldon Whitehouse",
+    "bioguideId": "W000802",
+    "netWorth": "$ 24.03 M"
+  },
+  {
+    "name": "Gregory F. Murphy",
+    "bioguideId": "M001210",
+    "netWorth": "$ 23.90 M"
+  },
+  {
+    "name": "Rick W. Allen",
+    "bioguideId": "A000372",
+    "netWorth": "$ 22.98 M"
+  },
+  {
+    "name": "Ron Wyden",
+    "bioguideId": "W000779",
+    "netWorth": "$ 22.88 M"
+  },
+  {
+    "name": "Ken Calvert",
+    "bioguideId": "C000059",
+    "netWorth": "$ 22.85 M"
+  },
+  {
+    "name": "Angus S. King Jr.",
+    "bioguideId": "K000383",
+    "netWorth": "$ 21.73 M"
+  },
+  {
+    "name": "Steve Daines",
+    "bioguideId": "D000618",
+    "netWorth": "$ 21.37 M"
+  },
+  {
+    "name": "William R. Timmons IV",
+    "bioguideId": "T000480",
+    "netWorth": "$ 21.35 M"
+  },
+  {
+    "name": "Nicholas Begich",
+    "bioguideId": "B001323",
+    "netWorth": "$ 21.33 M"
+  },
+  {
+    "name": "Cory Mills",
+    "bioguideId": "M001216",
+    "netWorth": "$ 21.25 M"
+  },
+  {
+    "name": "Mark Kelly",
+    "bioguideId": "K000377",
+    "netWorth": "$ 20.45 M"
+  },
+  {
+    "name": "Dale W. Strong",
+    "bioguideId": "S001220",
+    "netWorth": "$ 20.12 M"
+  },
+  {
+    "name": "John Kennedy",
+    "bioguideId": "K000393",
+    "netWorth": "$ 20.10 M"
+  },
+  {
+    "name": "J. French Hill",
+    "bioguideId": "H001072",
+    "netWorth": "$ 20.09 M"
+  },
+  {
+    "name": "Bill Foster",
+    "bioguideId": "F000454",
+    "netWorth": "$ 19.77 M"
+  },
+  {
+    "name": "Andrew S. Clyde",
+    "bioguideId": "C001116",
+    "netWorth": "$ 19.18 M"
+  },
+  {
+    "name": "Mike Collins",
+    "bioguideId": "C001129",
+    "netWorth": "$ 18.75 M"
+  },
+  {
+    "name": "Dan Newhouse",
+    "bioguideId": "N000189",
+    "netWorth": "$ 18.27 M"
+  },
+  {
+    "name": "Ilhan Omar",
+    "bioguideId": "O000173",
+    "netWorth": "$ 18.06 M"
+  },
+  {
+    "name": "Pat Fallon",
+    "bioguideId": "F000246",
+    "netWorth": "$ 18.03 M"
+  },
+  {
+    "name": "John R. Curtis",
+    "bioguideId": "C001114",
+    "netWorth": "$ 18.01 M"
+  },
+  {
+    "name": "Michael F. Bennet",
+    "bioguideId": "B001267",
+    "netWorth": "$ 17.89 M"
+  },
+  {
+    "name": "Robert Onder",
+    "bioguideId": "O000177",
+    "netWorth": "$ 17.82 M"
+  },
+  {
+    "name": "Jacky Rosen",
+    "bioguideId": "R000608",
+    "netWorth": "$ 17.27 M"
+  },
+  {
+    "name": "John Joyce",
+    "bioguideId": "J000302",
+    "netWorth": "$ 17.07 M"
+  },
+  {
+    "name": "David Taylor",
+    "bioguideId": "T000490",
+    "netWorth": "$ 16.68 M"
+  },
+  {
+    "name": "Christopher A. Coons",
+    "bioguideId": "C001088",
+    "netWorth": "$ 16.34 M"
+  },
+  {
+    "name": "Chuck Edwards",
+    "bioguideId": "E000246",
+    "netWorth": "$ 16.22 M"
+  },
+  {
+    "name": "Janelle Bynum",
+    "bioguideId": "B001326",
+    "netWorth": "$ 16.13 M"
+  },
+  {
+    "name": "Mary E. Miller",
+    "bioguideId": "M001211",
+    "netWorth": "$ 15.79 M"
+  },
+  {
+    "name": "Mike Kelly",
+    "bioguideId": "K000376",
+    "netWorth": "$ 15.72 M"
+  },
+  {
+    "name": "Cynthia M. Lummis",
+    "bioguideId": "L000571",
+    "netWorth": "$ 15.50 M"
+  },
+  {
+    "name": "Sheri Biggs",
+    "bioguideId": "B001325",
+    "netWorth": "$ 15.25 M"
+  },
+  {
+    "name": "Kathy Castor",
+    "bioguideId": "C001066",
+    "netWorth": "$ 15.16 M"
+  },
+  {
+    "name": "Judy Chu",
+    "bioguideId": "C001080",
+    "netWorth": "$ 14.70 M"
+  },
+  {
+    "name": "Mikie Sherrill",
+    "bioguideId": "S001207",
+    "netWorth": "$ 14.68 M"
+  },
+  {
+    "name": "Debbie Dingell",
+    "bioguideId": "D000624",
+    "netWorth": "$ 14.62 M"
+  },
+  {
+    "name": "Katherine M. Clark",
+    "bioguideId": "C001101",
+    "netWorth": "$ 14.62 M"
+  },
+  {
+    "name": "Laurel M. Lee",
+    "bioguideId": "L000597",
+    "netWorth": "$ 14.28 M"
+  },
+  {
+    "name": "James A. Himes",
+    "bioguideId": "H001047",
+    "netWorth": "$ 13.88 M"
+  },
+  {
+    "name": "Rudy Yakym III",
+    "bioguideId": "Y000067",
+    "netWorth": "$ 13.85 M"
+  },
+  {
+    "name": "Ryan K. Zinke",
+    "bioguideId": "Z000018",
+    "netWorth": "$ 13.67 M"
+  },
+  {
+    "name": "Ami Bera",
+    "bioguideId": "B001287",
+    "netWorth": "$ 13.65 M"
+  },
+  {
+    "name": "Thomas H. Kean, Jr.",
+    "bioguideId": "K000398",
+    "netWorth": "$ 13.53 M"
+  },
+  {
+    "name": "Thomas R. Suozzi",
+    "bioguideId": "S001201",
+    "netWorth": "$ 12.15 M"
+  },
+  {
+    "name": "Lisa Blunt Rochester",
+    "bioguideId": "B001303",
+    "netWorth": "$ 12.13 M"
+  },
+  {
+    "name": "Jared Moskowitz",
+    "bioguideId": "M001217",
+    "netWorth": "$ 11.99 M"
+  },
+  {
+    "name": "Max L. Miller",
+    "bioguideId": "M001222",
+    "netWorth": "$ 11.47 M"
+  },
+  {
+    "name": "Jeff Merkley",
+    "bioguideId": "M001176",
+    "netWorth": "$ 10.99 M"
+  },
+  {
+    "name": "Marsha Blackburn",
+    "bioguideId": "B001243",
+    "netWorth": "$ 1.14 M"
+  }
+]

@@ -1,5 +1,6 @@
 import "./globals.css"
 import { Layout } from "@/components/Layout"
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata = {
   title: "Politeia | Government Transparency Platform",
@@ -15,11 +16,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased text-[#0F172A] bg-[#F8FAFC]">
-        <Layout>
-          {children}
-        </Layout>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>
+          <Layout>
+            {children}
+          </Layout>
+        </ThemeProvider>
       </body>
     </html>
   )
