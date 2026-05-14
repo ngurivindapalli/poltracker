@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
+import { AuthButton } from "@/components/auth/AuthButton";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -18,17 +20,18 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
             P
           </div>
           <span className="font-semibold text-lg tracking-tight">Politeia</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+        <div className="hidden md:flex items-center gap-5 text-sm font-medium">
+          {/* US dropdown */}
           <div className="relative group">
             <button className={isActive("/")}>US</button>
-            <div className="absolute left-0 top-full pt-2 hidden group-hover:block">
+            <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50">
               <div className="card w-44 p-3">
                 <Link href="/senators" className="block py-2 text-muted-foreground hover:text-foreground">
                   Senators
@@ -45,14 +48,39 @@ export function Navbar() {
               </div>
             </div>
           </div>
-          <Link href="/uk" className={isActive("/uk")}>
-            UK
-          </Link>
-          <Link href="/germany" className={isActive("/germany")}>
-            Germany
-          </Link>
-          <Link href="/india" className={isActive("/india")}>
-            India
+
+          {/* Countries dropdown */}
+          <div className="relative group">
+            <button className={`${isActive("/uk")} ${isActive("/germany")} ${isActive("/india")} ${isActive("/europe")} ${isActive("/canada")} ${isActive("/latin-america")}`}>
+              Countries
+            </button>
+            <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50">
+              <div className="card w-48 p-3">
+                <Link href="/uk" className="block py-2 text-muted-foreground hover:text-foreground">
+                  United Kingdom
+                </Link>
+                <Link href="/germany" className="block py-2 text-muted-foreground hover:text-foreground">
+                  Germany
+                </Link>
+                <Link href="/india" className="block py-2 text-muted-foreground hover:text-foreground">
+                  India
+                </Link>
+                <div className="border-t border-border my-1" />
+                <Link href="/europe" className="block py-2 text-muted-foreground hover:text-foreground font-medium">
+                  Europe Hub
+                </Link>
+                <Link href="/canada" className="block py-2 text-muted-foreground hover:text-foreground font-medium">
+                  Canada
+                </Link>
+                <Link href="/latin-america" className="block py-2 text-muted-foreground hover:text-foreground font-medium">
+                  Latin America
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <Link href="/campaigns" className={isActive("/campaigns")}>
+            Campaigns
           </Link>
           <Link href="/chat" className={isActive("/chat")}>
             AI Chat
@@ -60,6 +88,9 @@ export function Navbar() {
           <Link href="/candidates" className={isActive("/candidates")}>
             Candidates
           </Link>
+
+          <LanguageSelector />
+          <AuthButton />
           <ThemeToggle />
         </div>
 
@@ -106,12 +137,28 @@ export function Navbar() {
             <Link href="/india" className={isActive("/india")} onClick={() => setIsMenuOpen(false)}>
               India
             </Link>
+            <Link href="/europe" className={isActive("/europe")} onClick={() => setIsMenuOpen(false)}>
+              Europe
+            </Link>
+            <Link href="/canada" className={isActive("/canada")} onClick={() => setIsMenuOpen(false)}>
+              Canada
+            </Link>
+            <Link href="/latin-america" className={isActive("/latin-america")} onClick={() => setIsMenuOpen(false)}>
+              Latin America
+            </Link>
+            <Link href="/campaigns" className={isActive("/campaigns")} onClick={() => setIsMenuOpen(false)}>
+              Campaigns
+            </Link>
             <Link href="/chat" className={isActive("/chat")} onClick={() => setIsMenuOpen(false)}>
               AI Chat
             </Link>
             <Link href="/candidates" className={isActive("/candidates")} onClick={() => setIsMenuOpen(false)}>
               Candidates
             </Link>
+            <div className="flex items-center gap-3 pt-2 border-t border-border">
+              <LanguageSelector />
+              <AuthButton />
+            </div>
           </div>
         </div>
       )}

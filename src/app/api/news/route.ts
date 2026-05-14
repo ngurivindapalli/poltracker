@@ -3,6 +3,11 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { getCache, setCache } from '@/lib/cache'
+import {
+  resolveNewsSourcesQuery,
+  buildNewsApiSourcesQueryParam,
+  filterArticlesBySourceIds
+} from '@/lib/newsSources'
 
 export async function GET(req: Request) {
   try {
@@ -10,9 +15,11 @@ export async function GET(req: Request) {
     const query = url.searchParams.get('q')
     const scope = url.searchParams.get('scope')
     const state = url.searchParams.get('state')
+    const { ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
+    const sourcesKey = buildNewsApiSourcesQueryParam(sourceIds)
 
-    // Build cache key
-    const cacheKey = `news-${scope || 'general'}-${state || ''}-${query || ''}`
+    // Build cache key (include sources so different filters don't collide)
+    const cacheKey = `news-${scope || 'general'}-${state || ''}-${query || ''}-src-${sourcesKey}`
 
     // Check cache first
     const cached = getCache(cacheKey)
@@ -32,7 +39,8 @@ export async function GET(req: Request) {
 
     // Build query
     const searchQuery = query || (state ? `${state} politics` : 'US politics')
-    const newsApiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}`
+    const sourcesParam = `&sources=${encodeURIComponent(sourcesKey)}`
+    const newsApiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}${sourcesParam}`
 
     const response = await fetch(newsApiUrl, {
       headers: {
@@ -46,15 +54,18 @@ export async function GET(req: Request) {
     }
 
     const data = await response.json()
+    const raw = data.articles || []
+    const articles = filterArticlesBySourceIds(raw, sourceIds)
+
     const result = {
-      articles: data.articles || []
+      articles
     }
 
     // Cache the result (15 minutes)
     setCache(cacheKey, result, 900000)
 
     return NextResponse.json(result)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching news:', err)
     return NextResponse.json({ articles: [] })
   }

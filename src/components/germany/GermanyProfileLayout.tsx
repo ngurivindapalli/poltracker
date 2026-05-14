@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { tweets } from "@/data/tweets"
+import { FilteredNewsFeedSuspended } from "@/components/news/FilteredNewsFeed"
 
 type Member = {
   id: string
@@ -19,7 +20,6 @@ type GermanyProfileLayoutProps = {
 }
 
 export default function GermanyProfileLayout({ member }: GermanyProfileLayoutProps) {
-  const [news, setNews] = useState<any[]>([])
   const [bills, setBills] = useState<any[]>([])
   const [loadingBills, setLoadingBills] = useState(true)
 
@@ -34,13 +34,6 @@ export default function GermanyProfileLayout({ member }: GermanyProfileLayoutPro
   }
 
   const color = partyColors[member.party] || "#333"
-
-  useEffect(() => {
-    fetch(`/api/news?q=${encodeURIComponent(member.name + " Germany")}`)
-      .then((r) => r.json())
-      .then((data) => setNews(data.articles || []))
-      .catch(() => setNews([]))
-  }, [member.name])
 
   useEffect(() => {
     async function loadBills() {
@@ -278,53 +271,15 @@ export default function GermanyProfileLayout({ member }: GermanyProfileLayoutPro
         padding: "1.5rem",
         marginBottom: "2.5rem"
       }}>
-        <h2 style={{
-          fontSize: "1.5rem",
-          fontWeight: 600,
-          marginBottom: "1.5rem"
-        }}>
-          Recent News
-        </h2>
-        {news.length === 0 ? (
-          <div style={{ color: "#6B7280" }}>No recent news found</div>
-        ) : (
-          <div>
-            {news.map((n: any, i: number) => (
-              <div key={i} className="news-card">
-                {n.urlToImage && (
-                  <img
-                    src={n.urlToImage}
-                    alt={n.title}
-                    className="news-image"
-                  />
-                )}
-
-                <div className="news-content">
-                  <div className="news-source">
-                    {n.source?.name}
-                  </div>
-
-                  <h3 className="news-title">
-                    {n.title}
-                  </h3>
-
-                  <p className="news-description">
-                    {n.description}
-                  </p>
-
-                  <a
-                    href={n.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="news-link"
-                  >
-                    Read Article →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <FilteredNewsFeedSuspended
+          title="Recent News"
+          buildApiUrl={(sp) =>
+            `/api/news?q=${encodeURIComponent(
+              member.name + " Germany"
+            )}&sources=${encodeURIComponent(sp)}`
+          }
+          reloadDeps={[member.name]}
+        />
       </div>
 
       {/* RECENT TWEETS */}

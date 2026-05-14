@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBaseUrl } from "@/lib/getBaseUrl";
 import { getGovernorBySlug } from "@/data/governorsByState";
+import { GovernorNewsBlock } from "@/components/news/GovernorNewsBlock";
 
 export default async function GovernorPage({
   params,
@@ -12,19 +12,6 @@ export default async function GovernorPage({
 
   const governor = getGovernorBySlug(slug);
   if (!governor) return notFound();
-
-  const base = getBaseUrl();
-  let news: any[] = [];
-
-  try {
-    const res = await fetch(`${base}/api/governor-news/${slug}`, {
-      cache: "no-store",
-    });
-    news = await res.json();
-    if (!Array.isArray(news)) news = [];
-  } catch {
-    news = [];
-  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -52,36 +39,7 @@ export default async function GovernorPage({
 
       <p className="text-[#64748B] mb-8">State Governor</p>
 
-      <h2 className="text-xl font-semibold mb-4">Latest News</h2>
-
-      <div className="space-y-4">
-        {news.length === 0 ? (
-          <p className="text-[#64748B] italic">No recent news available.</p>
-        ) : (
-          news.map((article: any, i: number) => (
-            <div
-              key={article?.url || i}
-              className="border border-[#E2E8F0] p-4 rounded-lg hover:border-[#2563EB] transition-colors"
-            >
-              <a
-                href={article?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <h3 className="font-semibold text-[#1E3A5F] hover:text-[#2563EB]">
-                  {article?.title || "Untitled"}
-                </h3>
-                {article?.source?.name && (
-                  <p className="text-sm text-[#64748B] mt-1">
-                    {article.source.name}
-                  </p>
-                )}
-              </a>
-            </div>
-          ))
-        )}
-      </div>
+      <GovernorNewsBlock slug={slug} />
     </div>
   );
 }

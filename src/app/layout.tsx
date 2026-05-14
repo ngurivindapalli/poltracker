@@ -1,6 +1,8 @@
 import "./globals.css"
 import { Layout } from "@/components/Layout"
 import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/components/i18n/I18nProvider";
+import { UserProvider } from "@/components/auth/UserProvider";
 
 export const metadata = {
   title: "Politeia | Government Transparency Platform",
@@ -19,9 +21,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <Layout>
-            {children}
-          </Layout>
+          <I18nProvider>
+            <UserProvider>
+              <Layout>
+                {children}
+              </Layout>
+            </UserProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

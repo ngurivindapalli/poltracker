@@ -3,6 +3,11 @@ export const revalidate = 3600 // Cache for 1 hour
 
 import { NextResponse } from 'next/server'
 import { fetchMembersByState, fetchSponsoredLegislation, fetchCosponsoredLegislation } from '@/lib/congress'
+import {
+  resolveNewsSourcesQuery,
+  buildNewsApiSourcesQueryParam,
+  getArticleSourceKey
+} from '@/lib/newsSources'
 
 // State code to full name mapping
 const STATE_NAMES: Record<string, string> = {
@@ -21,31 +26,24 @@ const STATE_NAMES: Record<string, string> = {
   WI: 'Wisconsin', WY: 'Wyoming', DC: 'District of Columbia'
 }
 
-// Major news sources allowlist (reused from senator news route)
-const MAJOR_NEWS_SOURCES = [
-  'reuters', 'associated-press', 'bbc-news', 'cnn', 'fox-news',
-  'nbc-news', 'abc-news', 'cbs-news', 'the-new-york-times',
-  'the-washington-post', 'the-wall-street-journal', 'politico',
-  'axios', 'bloomberg', 'usa-today', 'al-jazeera-english', 'the-guardian-uk'
-]
-
 /**
  * Fetch news articles for a state
  * Uses member names + state name as search query
  */
-async function fetchStateNews(stateCode: string, memberNames: string[]): Promise<any[]> {
+async function fetchStateNews(stateCode: string, memberNames: string[], allowedSourceIds: string[]): Promise<any[]> {
   if (!process.env.NEWS_API_KEY) {
     console.error('NEWS_API_KEY missing for state news')
     return []
   }
 
   const stateName = STATE_NAMES[stateCode] || stateCode
+  const allow = new Set(allowedSourceIds.map((x) => x.toLowerCase()))
   
   // Build query: state name + member names (limit to first 5 to avoid query length issues)
   const nameQueries = memberNames.slice(0, 5).map(name => `"${name}"`).join(' OR ')
   const query = encodeURIComponent(`${stateName} politics ${nameQueries}`)
   
-  const sourcesParam = `&sources=${MAJOR_NEWS_SOURCES.join(',')}`
+  const sourcesParam = `&sources=${encodeURIComponent(buildNewsApiSourcesQueryParam(allowedSourceIds))}`
   const newsApiUrl = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=30&apiKey=${process.env.NEWS_API_KEY}${sourcesParam}`
 
   try {
@@ -65,10 +63,10 @@ async function fetchStateNews(stateCode: string, memberNames: string[]): Promise
       const url = (article.url || '').toLowerCase()
       if (url.includes('opinion') || url.includes('/blog')) return false
       
-      // Must have title and be from major source
+      // Must have title and be from selected sources
       if (!article.title || !article.title.trim()) return false
-      const sourceId = (article.source?.id || article.source?.name || '').toLowerCase().replace(/\s+/g, '-')
-      return MAJOR_NEWS_SOURCES.includes(sourceId)
+      const key = getArticleSourceKey(article.source)
+      return !!key && allow.has(key)
     }).map((article: any) => ({
       title: article.title || '',
       description: article.description || '',
@@ -149,11 +147,13 @@ async function aggregateStateBills(members: any[]): Promise<{ sponsored: any[], 
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { stateCode: string } }
 ) {
   try {
     const stateCode = params.stateCode.toUpperCase()
+    const urlObj = new URL(req.url)
+    const { ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
     
     if (!STATE_NAMES[stateCode]) {
       return NextResponse.json(
@@ -191,7 +191,7 @@ export async function GET(
 
     // Fetch news and bills in parallel
     const [news, bills] = await Promise.all([
-      fetchStateNews(stateCode, memberNames),
+      fetchStateNews(stateCode, memberNames, sourceIds),
       aggregateStateBills(members)
     ])
 

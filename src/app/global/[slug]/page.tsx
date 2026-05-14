@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { GLOBAL_LEADERS } from "@/data/globalLeaders";
+import { LeaderNewsFeed } from "@/components/news/LeaderNewsFeed";
 
 type LeaderAssets = {
   name: string;
@@ -66,15 +67,6 @@ function formatCurrency(value: number, currency: string): string {
   return value.toLocaleString();
 }
 
-interface Article {
-  url: string;
-  urlToImage?: string;
-  title: string;
-  source?: {
-    name?: string;
-  };
-}
-
 interface ActivityItem {
   document_number: string;
   title: string;
@@ -88,23 +80,13 @@ export default function GlobalLeaderPage({
   params: { slug: string };
 }) {
   const leader = GLOBAL_LEADERS.find((l) => l.slug === params.slug);
-  const [news, setNews] = useState<Article[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [assets, setAssets] = useState<LeaderAssets | null>(null);
-  const [loadingNews, setLoadingNews] = useState(true);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingAssets, setLoadingAssets] = useState(true);
 
   useEffect(() => {
     if (leader) {
-      fetch(`/api/leader-news/${leader.slug}`)
-        .then((r) => r.json())
-        .then((data) => {
-          setNews(data);
-          setLoadingNews(false);
-        })
-        .catch(() => setLoadingNews(false));
-
       fetch(`/api/president-activity/${leader.slug}`)
         .then((r) => r.json())
         .then((data) => {
@@ -311,53 +293,7 @@ export default function GlobalLeaderPage({
 
       {/* Recent News */}
       <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
-        <h2 className="text-xl font-semibold text-[#1E3A5F] mb-6">
-          Recent News
-        </h2>
-
-        {loadingNews ? (
-          <div className="text-[#64748B] text-center py-8">
-            Loading news...
-          </div>
-        ) : news.length > 0 ? (
-          <div className="grid md:grid-cols-3 gap-6">
-            {news.map((article) => (
-              <div
-                key={article.url}
-                className="border border-border rounded-xl overflow-hidden hover:shadow-md transition bg-card"
-              >
-                <img
-                  src={article.urlToImage || "/images/placeholder-avatar.svg"}
-                  alt={article.title}
-                  className="w-full h-48 object-cover bg-[#F1F5F9]"
-                />
-
-                <div className="p-4">
-                  <div className="text-sm text-[#94A3B8]">
-                    {article.source?.name}
-                  </div>
-
-                  <div className="font-semibold text-[#1E3A5F] mt-1 line-clamp-2">
-                    {article.title}
-                  </div>
-
-                  <a
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#2563EB] text-sm mt-3 inline-block hover:underline"
-                  >
-                    Read Article →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-[#64748B] text-center py-8 italic">
-            No recent news available
-          </div>
-        )}
+        <LeaderNewsFeed leaderSlug={leader.slug} />
       </div>
 
       {/* Policy Activity */}

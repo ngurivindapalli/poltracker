@@ -45,7 +45,7 @@ export default function NewsFeed({ articles }: NewsFeedProps) {
         >
           <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg p-0">
             {article.urlToImage && (
-              <div className="relative h-48 overflow-hidden bg-gray-100">
+              <div className="relative h-48 overflow-hidden bg-muted">
                 <img
                   src={article.urlToImage}
                   alt={article.title}
@@ -55,27 +55,27 @@ export default function NewsFeed({ articles }: NewsFeedProps) {
             )}
             
             <div className="p-5 flex flex-col flex-grow">
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="neutral" className="text-[11px] px-2">
+              <div className="flex items-center justify-between mb-3 gap-2">
+                <Badge variant="neutral" className="text-[11px] px-2 max-w-[60%] truncate">
                   {typeof article.source === 'object' ? article.source?.name : article.source}
                 </Badge>
-                <span className="text-[12px] text-[#94A3B8]">
+                <span className="text-[12px] text-muted-foreground shrink-0">
                   {formatDate(article.publishedAt)}
                 </span>
               </div>
               
-              <h3 className="text-[18px] font-bold text-[#1E3A5F] mb-3 leading-snug group-hover:text-[#2563EB] transition-colors line-clamp-3">
+              <h3 className="text-[18px] font-bold text-foreground mb-3 leading-snug group-hover:text-primary transition-colors line-clamp-3">
                 {article.title}
               </h3>
               
               {(article.summary || article.description) && (
-                <p className="text-[14px] text-[#64748B] line-clamp-4 leading-relaxed flex-grow">
+                <p className="text-[14px] text-muted-foreground line-clamp-4 leading-relaxed flex-grow">
                   {article.summary || article.description}
                 </p>
               )}
               
-              <div className="mt-4 pt-4 border-t border-[#F1F5F9] flex justify-end">
-                <span className="text-[13px] font-semibold text-[#2563EB] flex items-center gap-1">
+              <div className="mt-4 pt-4 border-t border-border flex justify-end">
+                <span className="text-[13px] font-semibold text-primary flex items-center gap-1">
                   Read Article
                   <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />

@@ -10,7 +10,8 @@
     "clean-install": "rm -rf node_modules package-lock.json && npm install",
     "build:trading": "node scripts/buildCongressTradingDataset.js",
     "scrape:networth": "node scripts/scrapeQuiverNetWorth.js",
-    "build:networth": "node scripts/buildNetWorthDataset.js"
+    "build:networth": "node scripts/buildNetWorthDataset.js",
+    "validate:news-sources": "node scripts/validate-news-sources.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",

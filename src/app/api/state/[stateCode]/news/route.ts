@@ -3,6 +3,11 @@ export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
 
 import { NextResponse } from 'next/server'
+import {
+  resolveNewsSourcesQuery,
+  buildNewsApiSourcesQueryParam,
+  getArticleSourceKey
+} from '@/lib/newsSources'
 
 // State code to full name mapping
 const STATE_NAMES: Record<string, string> = {
@@ -236,14 +241,6 @@ const BLOCKED_TERMS = [
   'washington dc'
 ]
 
-// Major news sources allowlist
-const MAJOR_NEWS_SOURCES = [
-  'reuters', 'associated-press', 'bbc-news', 'cnn', 'fox-news',
-  'nbc-news', 'abc-news', 'cbs-news', 'the-new-york-times',
-  'the-washington-post', 'the-wall-street-journal', 'politico',
-  'axios', 'bloomberg', 'usa-today', 'al-jazeera-english', 'the-guardian-uk'
-]
-
 // In-memory cache: Map<cacheKey, { timestamp: number; data: any }>
 const cache = new Map<string, { timestamp: number; data: any }>()
 const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
@@ -342,11 +339,15 @@ async function fetchNewsWithLocalQueries(
   stateName: string,
   stateCode: string,
   scope: string,
-  locationValue?: string
+  locationValue: string | undefined,
+  allowedSourceIds: string[]
 ): Promise<any[]> {
   if (!process.env.NEWS_API_KEY) {
     return []
   }
+  
+  const allow = new Set(allowedSourceIds.map((x) => x.toLowerCase()))
+  const sourcesQuery = encodeURIComponent(buildNewsApiSourcesQueryParam(allowedSourceIds))
   
   const stateMeta = STATE_METADATA[stateCode] || {
     name: stateName,
@@ -393,7 +394,7 @@ async function fetchNewsWithLocalQueries(
   // Fetch all queries in parallel
   const fetchPromises = queries.map(async (query) => {
     const encodedQuery = encodeURIComponent(query)
-    const sourcesParam = `&sources=${MAJOR_NEWS_SOURCES.join(',')}`
+    const sourcesParam = `&sources=${sourcesQuery}`
     const newsApiUrl = `https://newsapi.org/v2/everything?q=${encodedQuery}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${process.env.NEWS_API_KEY}${sourcesParam}`
     
     try {
@@ -410,8 +411,8 @@ async function fetchNewsWithLocalQueries(
         if (url.includes('opinion') || url.includes('/blog')) return false
         if (!article.title || !article.title.trim()) return false
         
-        const sourceId = (article.source?.id || article.source?.name || '').toLowerCase().replace(/\s+/g, '-')
-        if (!MAJOR_NEWS_SOURCES.includes(sourceId)) return false
+        const sourceKey = getArticleSourceKey(article.source)
+        if (!sourceKey || !allow.has(sourceKey)) return false
         
         // Deduplicate by URL
         if (seenUrls.has(article.url)) return false
@@ -629,9 +630,11 @@ export async function GET(
     const url = new URL(req.url)
     const scope = url.searchParams.get('scope') || 'state'
     const locationValue = url.searchParams.get('value') || undefined
+    const { ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
+    const sourcesKey = buildNewsApiSourcesQueryParam(sourceIds)
     
     // Build cache key
-    const cacheKey = `${stateCode}:${scope}:${locationValue || 'statewide'}`
+    const cacheKey = `${stateCode}:${scope}:${locationValue || 'statewide'}:src:${sourcesKey}`
     
     // Check cache first
     const cached = cache.get(cacheKey)
@@ -654,7 +657,7 @@ export async function GET(
     }
     
     // Fetch news with local-focused queries
-    const allArticles = await fetchNewsWithLocalQueries(stateName, stateCode, scope, locationValue)
+    const allArticles = await fetchNewsWithLocalQueries(stateName, stateCode, scope, locationValue, sourceIds)
     
     // Apply strict ownership scoring and filtering
     const filteredArticles = allArticles.filter((article: any) => {

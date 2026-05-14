@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MAYORS } from "@/data/mayors";
 import { getMayorImage } from "@/lib/getMayorImage";
-import { getBaseUrl } from "@/lib/getBaseUrl";
+import { MayorNewsBlock } from "@/components/news/MayorNewsBlock";
 
 export default async function MayorPage({
   params,
@@ -12,19 +12,6 @@ export default async function MayorPage({
   const mayor = MAYORS.find((m) => m.slug === params.slug);
 
   if (!mayor) return notFound();
-
-  let news: any[] = [];
-  try {
-    const base = getBaseUrl();
-    const res = await fetch(
-      `${base}/api/mayor-news/${mayor.slug}`,
-      { cache: "no-store" }
-    );
-    const data = await res.json();
-    news = Array.isArray(data) ? data : data?.articles ?? [];
-  } catch {
-    news = [];
-  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -62,25 +49,7 @@ export default async function MayorPage({
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold mb-4">Latest News</h2>
-
-      <div className="space-y-4">
-        {news.length === 0 ? (
-          <p className="text-[#64748B] italic">No recent news available.</p>
-        ) : (
-          news.slice(0, 10).map((article: any, i: number) => (
-            <a
-              key={article?.url || i}
-              href={article?.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block border-b border-[#E2E8F0] py-3 hover:text-blue-600 transition-colors"
-            >
-              {article?.title || "Untitled"}
-            </a>
-          ))
-        )}
-      </div>
+      <MayorNewsBlock slug={mayor.slug} />
     </div>
   );
 }
