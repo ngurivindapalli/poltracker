@@ -7,6 +7,7 @@ import {
   addComment,
 } from "@/lib/comments"
 import { useUser } from "@/components/auth/UserProvider"
+import { useTranslation } from "@/components/i18n/I18nProvider"
 import { CommentCard } from "./CommentCard"
 import { Card } from "@/components/ui/Card"
 
@@ -19,6 +20,7 @@ interface CommentSectionProps {
 
 export function CommentSection({ entityType, entityId }: CommentSectionProps) {
   const { user } = useUser()
+  const { t } = useTranslation()
   const [comments, setComments] = useState<Comment[]>([])
   const [body, setBody] = useState("")
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
@@ -86,8 +88,8 @@ export function CommentSection({ entityType, entityId }: CommentSectionProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">Community Discussion</h3>
-        <span className="text-sm text-muted-foreground">{comments.length} comment{comments.length !== 1 ? "s" : ""}</span>
+        <h3 className="text-lg font-semibold text-foreground">{t("Community Discussion")}</h3>
+        <span className="text-sm text-muted-foreground">{comments.length} {t("Comments").toLowerCase()}</span>
       </div>
 
       <p className="text-[11px] text-muted-foreground italic border border-border rounded-lg px-3 py-2 bg-muted/30">
@@ -120,7 +122,7 @@ export function CommentSection({ entityType, entityId }: CommentSectionProps) {
                 disabled={!body.trim()}
                 className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
               >
-                Post
+                {t("Save")}
               </button>
             </div>
           </div>
@@ -165,14 +167,14 @@ export function CommentSection({ entityType, entityId }: CommentSectionProps) {
                       onClick={() => setReplyingTo(null)}
                       className="px-3 py-1.5 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
                     >
-                      Cancel
+                      {t("Cancel")}
                     </button>
                     <button
                       onClick={() => handleReply(comment.id)}
                       disabled={!replyBody.trim()}
                       className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
                     >
-                      Reply
+                      {t("Reply")}
                     </button>
                   </div>
                 </div>

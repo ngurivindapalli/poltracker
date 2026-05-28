@@ -1,55 +1,63 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
-  LanguageCode,
-  TranslationKey,
-  getStoredLanguage,
-  setStoredLanguage,
-  translate,
+  DEFAULT_LANGUAGE,
+  translations,
+  type LanguageCode,
+  type TranslationKey,
 } from "@/lib/i18n"
 
-interface I18nContextValue {
+type I18nContextValue = {
   language: LanguageCode
-  setLanguage: (code: LanguageCode) => void
+  setLanguage: (language: LanguageCode) => void
   t: (key: TranslationKey) => string
 }
 
-const I18nContext = createContext<I18nContextValue>({
-  language: "en",
-  setLanguage: () => {},
-  t: (key) => key,
-})
+const I18nContext = createContext<I18nContextValue | null>(null)
+
+const STORAGE_KEY = "poltracker-language"
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>("en")
-  const [mounted, setMounted] = useState(false)
+  const [language, setLanguageState] = useState<LanguageCode>(DEFAULT_LANGUAGE)
 
   useEffect(() => {
-    setLanguageState(getStoredLanguage())
-    setMounted(true)
+    const saved = window.localStorage.getItem(STORAGE_KEY) as LanguageCode | null
+    if (saved && translations[saved]) {
+      setLanguageState(saved)
+    }
   }, [])
 
-  function setLanguage(code: LanguageCode) {
-    setLanguageState(code)
-    setStoredLanguage(code)
+  const setLanguage = (nextLanguage: LanguageCode) => {
+    if (!translations[nextLanguage]) return
+    setLanguageState(nextLanguage)
+    window.localStorage.setItem(STORAGE_KEY, nextLanguage)
   }
 
-  function t(key: TranslationKey): string {
-    return translate(key, language)
-  }
-
-  if (!mounted) {
-    return <>{children}</>
-  }
-
-  return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </I18nContext.Provider>
+  const value = useMemo<I18nContextValue>(
+    () => ({
+      language,
+      setLanguage,
+      t: (key: TranslationKey) =>
+        translations[language]?.[key] ?? translations[DEFAULT_LANGUAGE][key] ?? key,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [language],
   )
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 
 export function useTranslation(): I18nContextValue {
-  return useContext(I18nContext)
+  const context = useContext(I18nContext)
+  if (!context) {
+    throw new Error("useTranslation must be used inside I18nProvider")
+  }
+  return context
 }

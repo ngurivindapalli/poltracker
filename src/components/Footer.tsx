@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
+import { SupportLinks } from "@/components/SupportLinks";
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background py-12 mt-auto">
-      <div className="max-w-[1300px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-[1300px] mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-xs">
@@ -48,6 +49,11 @@ export function Footer() {
             <li><Link href="/terms" className="hover:text-primary">Terms of Service</Link></li>
             <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
           </ul>
+        </div>
+
+        <div>
+          <h4 className="text-foreground font-bold mb-4">Support Politeia</h4>
+          <SupportLinks variant="footer" />
         </div>
       </div>
       <div className="max-w-[1300px] mx-auto px-6 mt-12 pt-8 border-t border-border text-center">

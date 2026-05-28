@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Comment, deleteComment, toggleLike } from "@/lib/comments"
 import { useUser } from "@/components/auth/UserProvider"
+import { useTranslation } from "@/components/i18n/I18nProvider"
 import { Card } from "@/components/ui/Card"
 
 interface CommentCardProps {
@@ -32,6 +33,7 @@ export function CommentCard({
   onReply,
 }: CommentCardProps) {
   const { user } = useUser()
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
 
   const isOwn = user?.username === comment.authorUsername
@@ -101,7 +103,7 @@ export function CommentCard({
               />
             </svg>
             {comment.likes > 0 && <span>{comment.likes}</span>}
-            <span>Like</span>
+            <span>{t("Like")}</span>
           </button>
 
           <button
@@ -122,7 +124,7 @@ export function CommentCard({
                 d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
               />
             </svg>
-            Reply
+            {t("Reply")}
           </button>
 
           {isOwn && (
@@ -131,7 +133,7 @@ export function CommentCard({
               disabled={deleting}
               className="flex items-center gap-1.5 text-[12px] font-medium text-destructive/70 hover:text-destructive transition-colors ml-auto disabled:opacity-40"
             >
-              Delete
+              {t("Delete")}
             </button>
           )}
         </div>

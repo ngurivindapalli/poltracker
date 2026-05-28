@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/Card"
+import { useTranslation } from "@/components/i18n/I18nProvider"
 
 interface Article {
   title: string
@@ -29,10 +30,12 @@ function formatDate(dateString: string): string {
   }
 }
 
-export function InternationalNewsFeed({ query, title = "Latest News" }: InternationalNewsFeedProps) {
+export function InternationalNewsFeed({ query, title }: InternationalNewsFeedProps) {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
+  const resolvedTitle = title ?? t("Latest News")
 
   useEffect(() => {
     async function fetchNews() {
@@ -59,7 +62,7 @@ export function InternationalNewsFeed({ query, title = "Latest News" }: Internat
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+      <h3 className="text-lg font-semibold text-foreground">{resolvedTitle}</h3>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -117,7 +120,7 @@ export function InternationalNewsFeed({ query, title = "Latest News" }: Internat
                     </p>
                   )}
                   <div className="mt-3 flex items-center text-[12px] text-primary font-medium">
-                    Read more
+                    {t("Read more")}
                     <svg className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>

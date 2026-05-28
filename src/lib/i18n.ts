@@ -1,4 +1,4 @@
-"use client"
+export const DEFAULT_LANGUAGE = "en" as const
 
 export type LanguageCode = "en" | "es" | "fr" | "de" | "pt" | "hi"
 
@@ -268,22 +268,3 @@ export const translations: Translations = {
   },
 }
 
-export const LANGUAGE_STORAGE_KEY = "poltracker-language"
-
-export function getStoredLanguage(): LanguageCode {
-  if (typeof window === "undefined") return "en"
-  const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
-  if (stored && Object.keys(translations).includes(stored)) {
-    return stored as LanguageCode
-  }
-  return "en"
-}
-
-export function setStoredLanguage(code: LanguageCode): void {
-  if (typeof window === "undefined") return
-  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, code)
-}
-
-export function translate(key: TranslationKey, lang: LanguageCode): string {
-  return translations[lang]?.[key] ?? translations.en[key] ?? key
-}
