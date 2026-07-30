@@ -1,48 +1,80 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
-import { UserProfile, getStoredUser, saveUser, clearUser } from "@/lib/user"
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
+import {
+  UserProfile,
+  CreateLocalUserInput,
+  getStoredUser,
+  saveStoredUser,
+  clearStoredUser,
+  createLocalUser,
+} from "@/lib/user"
 
 interface UserContextValue {
   user: UserProfile | null
-  login: (profile: UserProfile) => void
+  /** Whether the stored user has been read from localStorage yet. */
+  ready: boolean
+  /** Create a new local account. Returns an error string on validation failure. */
+  createUser: (input: CreateLocalUserInput) => { error: string } | null
+  /** Update the current profile. Returns an error string on validation failure. */
+  updateUser: (input: CreateLocalUserInput) => { error: string } | null
   logout: () => void
-  updateUser: (updates: Partial<UserProfile>) => void
 }
 
 const UserContext = createContext<UserContextValue>({
   user: null,
-  login: () => {},
+  ready: false,
+  createUser: () => null,
+  updateUser: () => null,
   logout: () => {},
-  updateUser: () => {},
 })
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     setUser(getStoredUser())
+    setReady(true)
   }, [])
 
-  function login(profile: UserProfile) {
-    saveUser(profile)
-    setUser(profile)
+  function createUser(input: CreateLocalUserInput): { error: string } | null {
+    const result = createLocalUser(input)
+    if ("error" in result) return result
+    saveStoredUser(result)
+    setUser(result)
+    return null
+  }
+
+  function updateUser(input: CreateLocalUserInput): { error: string } | null {
+    if (!user) return { error: "No profile to update." }
+    const result = createLocalUser(input)
+    if ("error" in result) return result
+    // Keep the original id + createdAt when editing.
+    const updated: UserProfile = {
+      ...result,
+      id: user.id,
+      createdAt: user.createdAt,
+    }
+    saveStoredUser(updated)
+    setUser(updated)
+    return null
   }
 
   function logout() {
-    clearUser()
+    clearStoredUser()
     setUser(null)
   }
 
-  function updateUser(updates: Partial<UserProfile>) {
-    if (!user) return
-    const updated = { ...user, ...updates }
-    saveUser(updated)
-    setUser(updated)
-  }
-
   return (
-    <UserContext.Provider value={{ user, login, logout, updateUser }}>
+    <UserContext.Provider
+      value={{ user, ready, createUser, updateUser, logout }}
+    >
       {children}
     </UserContext.Provider>
   )

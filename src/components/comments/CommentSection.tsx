@@ -1,188 +1,198 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import {
-  Comment,
-  getCommentsForEntity,
-  addComment,
-} from "@/lib/comments"
-import { useUser } from "@/components/auth/UserProvider"
+import { useCallback, useEffect, useState } from "react"
+import { useAuth } from "@/components/auth/AuthProvider"
 import { useTranslation } from "@/components/i18n/I18nProvider"
+import { AuthModal, type AuthModalMode } from "@/components/auth/AuthModal"
+import type { CommentWithProfile } from "@/types/supabase"
+import {
+  getCommentsForEntity,
+  createComment,
+  updateComment,
+  deleteComment,
+  toggleCommentLike,
+} from "@/lib/supabase/comments"
 import { CommentCard } from "./CommentCard"
-import { Card } from "@/components/ui/Card"
-
-const MAX_LENGTH = 500
+import { CommentForm } from "./CommentForm"
+import { LocalCommentSection } from "./LocalCommentSection"
 
 interface CommentSectionProps {
   entityType: string
   entityId: string
+  title?: string
 }
 
-export function CommentSection({ entityType, entityId }: CommentSectionProps) {
-  const { user } = useUser()
-  const { t } = useTranslation()
-  const [comments, setComments] = useState<Comment[]>([])
-  const [body, setBody] = useState("")
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyBody, setReplyBody] = useState("")
-  const [error, setError] = useState("")
-  const [replyError, setReplyError] = useState("")
+function countAll(comments: CommentWithProfile[]): number {
+  return comments.reduce((sum, c) => sum + 1 + countAll(c.replies), 0)
+}
 
-  const loadData = useCallback(() => {
-    setComments(getCommentsForEntity(entityType, entityId))
+export function CommentSection(props: CommentSectionProps) {
+  const { isConfigured } = useAuth()
+
+  // No Supabase env vars -> localStorage prototype fallback.
+  if (!isConfigured) {
+    return <LocalCommentSection {...props} />
+  }
+  return <SupabaseCommentSection {...props} />
+}
+
+function SupabaseCommentSection({
+  entityType,
+  entityId,
+  title = "Community Discussion",
+}: CommentSectionProps) {
+  const { user, profile } = useAuth()
+  const { t } = useTranslation()
+  const [comments, setComments] = useState<CommentWithProfile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [authMode, setAuthMode] = useState<AuthModalMode | null>(null)
+
+  const load = useCallback(async () => {
+    const { data, error } = await getCommentsForEntity(entityType, entityId)
+    setComments(data)
+    setLoadError(error)
+    setLoading(false)
   }, [entityType, entityId])
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    setLoading(true)
+    load()
+  }, [load])
 
-  function handleSubmit() {
-    if (!user) return
-    setError("")
-    const result = addComment({
-      entityType,
-      entityId,
-      authorDisplayName: user.displayName,
-      authorUsername: user.username,
-      body,
-    })
-    if ("error" in result) {
-      setError(result.error)
-      return
-    }
-    setBody("")
-    loadData()
-  }
+  const handleCreate = useCallback(
+    async (body: string, parentId?: string) => {
+      const { error } = await createComment({
+        entity_type: entityType,
+        entity_id: entityId,
+        body,
+        parent_id: parentId ?? null,
+      })
+      if (error) return { error }
+      await load()
+      return null
+    },
+    [entityType, entityId, load]
+  )
 
-  function handleReply(parentId: string) {
-    if (!user) return
-    setReplyError("")
-    const result = addComment({
-      entityType,
-      entityId,
-      authorDisplayName: user.displayName,
-      authorUsername: user.username,
-      body: replyBody,
-      parentId,
-    })
-    if ("error" in result) {
-      setReplyError(result.error)
-      return
-    }
-    setReplyBody("")
-    setReplyingTo(null)
-    loadData()
-  }
+  const handleReply = useCallback(
+    (parentId: string, body: string) => handleCreate(body, parentId),
+    [handleCreate]
+  )
 
-  function handleDeleted(id: string) {
-    setComments((prev) => prev.filter((c) => c.id !== id))
-  }
+  const handleEdit = useCallback(
+    async (id: string, body: string) => {
+      const { error } = await updateComment(id, body)
+      if (error) return { error }
+      await load()
+      return null
+    },
+    [load]
+  )
 
-  function handleLiked(updated: Comment) {
-    setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
-  }
+  const handleDelete = useCallback(
+    async (id: string) => {
+      const { error } = await deleteComment(id)
+      if (!error) await load()
+    },
+    [load]
+  )
 
-  const topLevel = comments.filter((c) => !c.parentId)
-  const replies = (parentId: string) => comments.filter((c) => c.parentId === parentId)
+  const handleToggleLike = useCallback(
+    async (id: string) => {
+      const { error } = await toggleCommentLike(id)
+      if (!error) await load()
+    },
+    [load]
+  )
+
+  const total = countAll(comments)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">{t("Community Discussion")}</h3>
-        <span className="text-sm text-muted-foreground">{comments.length} {t("Comments").toLowerCase()}</span>
+    <section className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <span className="text-sm text-muted-foreground">
+          {total} {t("Comments").toLowerCase()}
+        </span>
       </div>
 
       <p className="text-[11px] text-muted-foreground italic border border-border rounded-lg px-3 py-2 bg-muted/30">
-        Comments are stored locally in this prototype. No server or account required.
+        Comments are saved to the cloud.
       </p>
 
-      {user ? (
-        <Card className="p-4 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold uppercase">
-              {user.displayName.charAt(0)}
+      {user && profile ? (
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold uppercase shrink-0">
+              {(profile.display_name || profile.username || "M").charAt(0)}
             </span>
-            <span className="text-sm font-medium text-foreground">{user.displayName}</span>
-          </div>
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value.slice(0, MAX_LENGTH))}
-            placeholder="Share your thoughts..."
-            rows={3}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-          />
-          <div className="flex items-center justify-between">
-            <span className={`text-[11px] ${body.length >= MAX_LENGTH ? "text-destructive" : "text-muted-foreground"}`}>
-              {body.length}/{MAX_LENGTH}
+            <span className="text-sm font-medium text-foreground truncate">
+              {profile.display_name || profile.username}
             </span>
-            <div className="flex items-center gap-2">
-              {error && <span className="text-[12px] text-destructive">{error}</span>}
-              <button
-                onClick={handleSubmit}
-                disabled={!body.trim()}
-                className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
-              >
-                {t("Save")}
-              </button>
-            </div>
           </div>
-        </Card>
+          <CommentForm onSubmit={(body) => handleCreate(body)} />
+        </div>
       ) : (
-        <Card className="p-4 text-center text-sm text-muted-foreground">
-          Create a local profile to join the discussion.
-        </Card>
+        <div className="rounded-xl border border-border bg-card p-6 text-center">
+          <p className="text-sm text-foreground mb-3">
+            Create an account or log in to join the discussion.
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => setAuthMode("signup")}
+              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Create Account
+            </button>
+            <button
+              onClick={() => setAuthMode("login")}
+              className="px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              Log In
+            </button>
+          </div>
+        </div>
       )}
 
-      {topLevel.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground text-sm">
-          No comments yet. Be the first to share your thoughts.
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {topLevel.map((comment) => (
-            <div key={comment.id}>
-              <CommentCard
-                comment={comment}
-                replies={replies(comment.id)}
-                onDeleted={handleDeleted}
-                onLiked={handleLiked}
-                onReply={(parentId) => {
-                  setReplyingTo(replyingTo === parentId ? null : parentId)
-                  setReplyBody("")
-                  setReplyError("")
-                }}
-              />
-              {replyingTo === comment.id && user && (
-                <div className="ml-6 mt-3 border-l-2 border-border pl-4 space-y-2">
-                  <textarea
-                    value={replyBody}
-                    onChange={(e) => setReplyBody(e.target.value.slice(0, MAX_LENGTH))}
-                    placeholder={`Reply to ${comment.authorDisplayName}...`}
-                    rows={2}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-                  />
-                  {replyError && <p className="text-[12px] text-destructive">{replyError}</p>}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setReplyingTo(null)}
-                      className="px-3 py-1.5 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
-                    >
-                      {t("Cancel")}
-                    </button>
-                    <button
-                      onClick={() => handleReply(comment.id)}
-                      disabled={!replyBody.trim()}
-                      className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
-                    >
-                      {t("Reply")}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+      {loadError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 py-4 px-4 text-center text-destructive text-sm">
+          {loadError}
         </div>
       )}
-    </div>
+
+      {!loadError && loading ? (
+        <div className="rounded-xl border border-dashed border-border py-10 text-center text-muted-foreground text-sm">
+          Loading comments...
+        </div>
+      ) : !loadError && comments.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border py-10 text-center text-muted-foreground text-sm">
+          No comments yet. Start the discussion.
+        </div>
+      ) : (
+        !loadError && (
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <CommentCard
+                key={comment.id}
+                comment={comment}
+                currentUserId={user?.id ?? null}
+                onToggleLike={handleToggleLike}
+                onDelete={handleDelete}
+                onReply={handleReply}
+                onEdit={handleEdit}
+              />
+            ))}
+          </div>
+        )
+      )}
+
+      <AuthModal
+        open={authMode !== null}
+        mode={authMode ?? "signup"}
+        onClose={() => setAuthMode(null)}
+        onModeChange={(m) => setAuthMode(m)}
+      />
+    </section>
   )
 }

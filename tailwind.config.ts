@@ -15,6 +15,8 @@ const config: Config = {
         muted: "hsl(var(--muted))",
         mutedForeground: "hsl(var(--muted-foreground))",
         border: "hsl(var(--border))",
+        destructive: "hsl(var(--destructive))",
+        destructiveForeground: "hsl(var(--destructive-foreground))",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

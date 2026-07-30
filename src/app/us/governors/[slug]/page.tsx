@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGovernorBySlug } from "@/data/governorsByState";
 import { GovernorNewsBlock } from "@/components/news/GovernorNewsBlock";
+import { CommentSection } from "@/components/comments/CommentSection";
 
 export default async function GovernorPage({
   params,
@@ -40,6 +41,14 @@ export default async function GovernorPage({
       <p className="text-[#64748B] mb-8">State Governor</p>
 
       <GovernorNewsBlock slug={slug} />
+
+      <section className="mt-12">
+        <CommentSection
+          entityType="politician"
+          entityId={slug}
+          title="Community Discussion"
+        />
+      </section>
     </div>
   );
 }

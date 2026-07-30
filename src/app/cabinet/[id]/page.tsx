@@ -1,6 +1,7 @@
 import { getCabinetMemberById } from "@/lib/cabinetData"
 import Tweets from "@/components/Tweets"
 import CabinetNews from "@/components/CabinetNews"
+import { CommentSection } from "@/components/comments/CommentSection"
 
 export default function CabinetProfile({ params }:any){
   const member = getCabinetMemberById(params.id)
@@ -109,6 +110,14 @@ export default function CabinetProfile({ params }:any){
           ))}
         </ul>
       </div>
+
+      <section className="mt-12">
+        <CommentSection
+          entityType="politician"
+          entityId={params.id}
+          title="Community Discussion"
+        />
+      </section>
     </main>
   )
 }

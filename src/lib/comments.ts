@@ -1,92 +1,175 @@
+// Comment model + storage helpers for the localStorage prototype.
+//
+// Helpers are written so the storage layer can later be swapped for a real
+// backend (Supabase / Firebase / Auth.js) without touching component code.
+
 export interface Comment {
   id: string
   entityType: string
   entityId: string
+  authorId: string
   authorDisplayName: string
   authorUsername: string
   body: string
   createdAt: string
   parentId?: string
-  likes: number
-  likedBy: string[]
+  /** User ids that liked this comment. */
+  likes: string[]
+}
+
+export interface CreateCommentInput {
+  entityType: string
+  entityId: string
+  authorId: string
+  authorDisplayName: string
+  authorUsername: string
+  body: string
+  parentId?: string
 }
 
 export const COMMENTS_STORAGE_KEY = "poltracker-comments"
-const MAX_BODY_LENGTH = 500
+export const MAX_COMMENT_LENGTH = 500
 
-export function loadComments(): Comment[] {
+/** Returns every stored comment, normalizing any legacy-shaped records. */
+export function getComments(): Comment[] {
   if (typeof window === "undefined") return []
   try {
     const raw = window.localStorage.getItem(COMMENTS_STORAGE_KEY)
     if (!raw) return []
-    return JSON.parse(raw) as Comment[]
+    const parsed = JSON.parse(raw) as unknown[]
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(normalizeComment).filter((c): c is Comment => c !== null)
   } catch {
     return []
   }
 }
 
-export function saveComments(comments: Comment[]): void {
+function saveComments(comments: Comment[]): void {
   if (typeof window === "undefined") return
   window.localStorage.setItem(COMMENTS_STORAGE_KEY, JSON.stringify(comments))
 }
 
-export function getCommentsForEntity(entityType: string, entityId: string): Comment[] {
-  const all = loadComments()
-  return all.filter((c) => c.entityType === entityType && c.entityId === entityId)
+/** Persist a single comment (insert if new, replace if it already exists). */
+export function saveComment(comment: Comment): void {
+  const all = getComments()
+  const idx = all.findIndex((c) => c.id === comment.id)
+  if (idx === -1) {
+    all.push(comment)
+  } else {
+    all[idx] = comment
+  }
+  saveComments(all)
 }
 
-export function addComment(params: {
-  entityType: string
+/** Comments for one entity, sorted newest first. */
+export function getCommentsForEntity(
+  entityType: string,
   entityId: string
-  authorDisplayName: string
-  authorUsername: string
-  body: string
-  parentId?: string
-}): Comment | { error: string } {
-  const trimmed = params.body.trim()
-  if (!trimmed) return { error: "Comment cannot be empty." }
-  if (trimmed.length > MAX_BODY_LENGTH)
-    return { error: `Comment must be ${MAX_BODY_LENGTH} characters or fewer.` }
+): Comment[] {
+  return getComments()
+    .filter((c) => c.entityType === entityType && c.entityId === entityId)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+}
 
-  const all = loadComments()
+/**
+ * Validates input and persists a new comment.
+ * Returns `{ error }` on validation failure.
+ */
+export function createComment(
+  input: CreateCommentInput
+): Comment | { error: string } {
+  const body = input.body.trim()
+  if (!body) return { error: "Comment cannot be empty." }
+  if (body.length > MAX_COMMENT_LENGTH)
+    return { error: `Comment must be ${MAX_COMMENT_LENGTH} characters or fewer.` }
+
   const comment: Comment = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    entityType: params.entityType,
-    entityId: params.entityId,
-    authorDisplayName: params.authorDisplayName,
-    authorUsername: params.authorUsername,
-    body: trimmed,
+    id: `cmt_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    entityType: input.entityType,
+    entityId: input.entityId,
+    authorId: input.authorId,
+    authorDisplayName: input.authorDisplayName,
+    authorUsername: input.authorUsername,
+    body,
     createdAt: new Date().toISOString(),
-    parentId: params.parentId,
-    likes: 0,
-    likedBy: [],
+    parentId: input.parentId,
+    likes: [],
   }
-  all.push(comment)
-  saveComments(all)
+  saveComment(comment)
   return comment
 }
 
-export function deleteComment(id: string, username: string): boolean {
-  const all = loadComments()
-  const idx = all.findIndex((c) => c.id === id && c.authorUsername === username)
+/** Deletes a comment only when it belongs to the current user. */
+export function deleteComment(
+  commentId: string,
+  currentUserId: string
+): boolean {
+  const all = getComments()
+  const idx = all.findIndex(
+    (c) => c.id === commentId && c.authorId === currentUserId
+  )
   if (idx === -1) return false
-  all.splice(idx, 1)
-  saveComments(all)
+  // Remove the comment and any of its direct replies.
+  const next = all.filter(
+    (c) => c.id !== commentId && c.parentId !== commentId
+  )
+  saveComments(next)
   return true
 }
 
-export function toggleLike(id: string, username: string): Comment | null {
-  const all = loadComments()
-  const comment = all.find((c) => c.id === id)
+/** Toggles a like for the current user and returns the updated comment. */
+export function toggleLike(
+  commentId: string,
+  currentUserId: string
+): Comment | null {
+  const all = getComments()
+  const comment = all.find((c) => c.id === commentId)
   if (!comment) return null
-  const alreadyLiked = comment.likedBy.includes(username)
-  if (alreadyLiked) {
-    comment.likedBy = comment.likedBy.filter((u) => u !== username)
-    comment.likes = Math.max(0, comment.likes - 1)
+  if (comment.likes.includes(currentUserId)) {
+    comment.likes = comment.likes.filter((id) => id !== currentUserId)
   } else {
-    comment.likedBy.push(username)
-    comment.likes += 1
+    comment.likes = [...comment.likes, currentUserId]
   }
   saveComments(all)
   return comment
+}
+
+/** Coerces legacy records (likes:number + likedBy:string[], no authorId) into the current shape. */
+function normalizeComment(raw: unknown): Comment | null {
+  if (!raw || typeof raw !== "object") return null
+  const r = raw as Record<string, unknown>
+  if (typeof r.id !== "string" || typeof r.body !== "string") return null
+
+  let likes: string[] = []
+  if (Array.isArray(r.likes)) {
+    likes = r.likes.filter((x): x is string => typeof x === "string")
+  } else if (Array.isArray(r.likedBy)) {
+    likes = (r.likedBy as unknown[]).filter(
+      (x): x is string => typeof x === "string"
+    )
+  }
+
+  return {
+    id: r.id,
+    entityType: typeof r.entityType === "string" ? r.entityType : "",
+    entityId: typeof r.entityId === "string" ? r.entityId : "",
+    authorId:
+      typeof r.authorId === "string"
+        ? r.authorId
+        : typeof r.authorUsername === "string"
+        ? r.authorUsername
+        : "",
+    authorDisplayName:
+      typeof r.authorDisplayName === "string" ? r.authorDisplayName : "Anonymous",
+    authorUsername:
+      typeof r.authorUsername === "string" ? r.authorUsername : "anonymous",
+    body: r.body,
+    createdAt:
+      typeof r.createdAt === "string" ? r.createdAt : new Date().toISOString(),
+    parentId: typeof r.parentId === "string" ? r.parentId : undefined,
+    likes,
+  }
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MAYORS } from "@/data/mayors";
 import { getMayorImage } from "@/lib/getMayorImage";
 import { MayorNewsBlock } from "@/components/news/MayorNewsBlock";
+import { CommentSection } from "@/components/comments/CommentSection";
 
 export default async function MayorPage({
   params,
@@ -50,6 +51,14 @@ export default async function MayorPage({
       </div>
 
       <MayorNewsBlock slug={mayor.slug} />
+
+      <section className="mt-12">
+        <CommentSection
+          entityType="politician"
+          entityId={mayor.slug}
+          title="Community Discussion"
+        />
+      </section>
     </div>
   );
 }

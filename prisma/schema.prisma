@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Member {
+  bioguideId     String   @id @map("bioguide_id")
+  fecCandidateId String?  @map("fec_candidate_id")
+  firstName      String   @map("first_name")
+  lastName       String   @map("last_name")
+  chamber        Chamber
+  party          String?
+  state          String
+  district       Int? // null for senators
+  active         Boolean  @default(true)
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  ptrFilings        PtrFiling[]
+  annualDisclosures AnnualDisclosure[]
+  fecTotals         FecTotal[]
+  fecDonors         FecDonor[]
+
+  @@map("members")
+}
+
+enum Chamber {
+  senate
+  house
+}
+
+model PtrFiling {
+  id         String   @id @default(uuid())
+  bioguideId String   @map("bioguide_id")
+  member     Member   @relation(fields: [bioguideId], references: [bioguideId])
+  chamber    Chamber
+  filingDate DateTime @map("filing_date")
+  sourceUrl  String   @map("source_url")
+  rawFileRef String?  @map("raw_file_ref") // path/URL to stored PDF if applicable
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  transactions PtrTransaction[]
+
+  @@index([bioguideId])
+  @@map("ptr_filings")
+}
+
+model PtrTransaction {
+  id         String    @id @default(uuid())
+  filingId   String    @map("filing_id")
+  filing     PtrFiling @relation(fields: [filingId], references: [id])
+  ticker     String?
+  assetDesc  String    @map("asset_desc")
+  txType     String    @map("tx_type") // purchase | sale | exchange
+  amountLow  Int?      @map("amount_low")
+  amountHigh Int?      @map("amount_high")
+  txDate     DateTime  @map("tx_date")
+  owner      String? // self | spouse | dependent child
+
+  @@index([filingId])
+  @@map("ptr_transactions")
+}
+
+model AnnualDisclosure {
+  id         String   @id @default(uuid())
+  bioguideId String   @map("bioguide_id")
+  member     Member   @relation(fields: [bioguideId], references: [bioguideId])
+  year       Int
+  filingType String   @map("filing_type") // annual | annual_amendment | new_filer | termination
+  sourceUrl  String   @map("source_url")
+  rawFileRef String?  @map("raw_file_ref")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  assets AssetLine[]
+
+  @@index([bioguideId, year])
+  @@map("annual_disclosures")
+}
+
+model AssetLine {
+  id           String           @id @default(uuid())
+  disclosureId String           @map("disclosure_id")
+  disclosure   AnnualDisclosure @relation(fields: [disclosureId], references: [id])
+  description  String
+  valueLow     Int?             @map("value_low")
+  valueHigh    Int?             @map("value_high")
+  incomeType   String?          @map("income_type")
+
+  @@index([disclosureId])
+  @@map("asset_lines")
+}
+
+model FecTotal {
+  id            String @id @default(uuid())
+  bioguideId    String @map("bioguide_id")
+  member        Member @relation(fields: [bioguideId], references: [bioguideId])
+  cycle         Int
+  receipts      BigInt?
+  disbursements BigInt?
+  cashOnHand    BigInt? @map("cash_on_hand")
+
+  @@unique([bioguideId, cycle])
+  @@map("fec_totals")
+}
+
+model FecDonor {
+  id              String   @id @default(uuid())
+  bioguideId      String   @map("bioguide_id")
+  member          Member   @relation(fields: [bioguideId], references: [bioguideId])
+  cycle           Int
+  contributorName String   @map("contributor_name")
+  employer        String?
+  amount          Int
+  contributedAt   DateTime @map("contributed_at")
+
+  @@index([bioguideId, cycle])
+  @@map("fec_donors")
+}

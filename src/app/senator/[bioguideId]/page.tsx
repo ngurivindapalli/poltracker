@@ -15,6 +15,7 @@ import { getMemberByBioguide } from '@/lib/congressData'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
+import { CommentSection } from '@/components/comments/CommentSection'
 
 async function getJson(path: string) {
   try {
@@ -261,6 +262,15 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
 
         </div>
       </div>
+
+      {/* COMMUNITY DISCUSSION */}
+      <section className="mt-12">
+        <CommentSection
+          entityType="politician"
+          entityId={profile.bioguideId ?? bioguideId}
+          title="Community Discussion"
+        />
+      </section>
     </main>
   )
 }

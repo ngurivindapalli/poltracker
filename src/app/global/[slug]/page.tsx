@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { GLOBAL_LEADERS } from "@/data/globalLeaders";
 import { LeaderNewsFeed } from "@/components/news/LeaderNewsFeed";
+import { CommentSection } from "@/components/comments/CommentSection";
 
 type LeaderAssets = {
   name: string;
@@ -338,6 +339,15 @@ export default function GlobalLeaderPage({
           </div>
         )}
       </div>
+
+      {/* Community Discussion */}
+      <section className="mt-12">
+        <CommentSection
+          entityType="politician"
+          entityId={leader.slug}
+          title="Community Discussion"
+        />
+      </section>
     </main>
   );
 }
