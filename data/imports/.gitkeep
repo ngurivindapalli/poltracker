@@ -1,0 +1,4 @@
+# Imported datasets (Excel) — used by `python manage.py update-data`
+# Place:
+#   congress-trading-all.xlsx
+#   contracts-recent.xlsx

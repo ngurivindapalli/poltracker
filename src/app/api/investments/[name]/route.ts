@@ -24,6 +24,9 @@ export async function GET(
     console.log("Searching investments for:", name);
 
     const filePath = path.join(process.cwd(), "public", "data", "senateTrades.json");
+    if (!fs.existsSync(filePath)) {
+      return Response.json({ trades: [], count: 0 });
+    }
     const raw = fs.readFileSync(filePath, "utf8");
     const all = JSON.parse(raw) as any[];
 
@@ -31,7 +34,13 @@ export async function GET(
     // 1) senator full name contains requested name
     // 2) senator contains requested last name
     // 3) office begins with "Last, First" style match (if present)
+    // 4) bioguideId exact match when ?bioguide= is provided
+    const url = new URL(req.url);
+    const bioguide = (url.searchParams.get("bioguide") || "").toUpperCase();
+
     const trades = all.filter((t) => {
+      if (bioguide && (t.bioguideId || "").toUpperCase() === bioguide) return true;
+
       const senator = norm(t.senator || "");
       const office = norm(t.office || "");
 

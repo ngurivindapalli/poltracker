@@ -1,0 +1,6 @@
+# Python deps for Politeia Excel importers + nightly update (manage.py)
+sqlalchemy>=2.0,<3
+psycopg2-binary>=2.9
+pandas>=2.0
+openpyxl>=3.1
+python-dotenv>=1.0

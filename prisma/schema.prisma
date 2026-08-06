@@ -26,6 +26,7 @@ model Member {
   annualDisclosures AnnualDisclosure[]
   fecTotals         FecTotal[]
   fecDonors         FecDonor[]
+  portfolioSnapshots PortfolioSnapshot[]
 
   @@map("members")
 }
@@ -57,14 +58,59 @@ model PtrTransaction {
   filing     PtrFiling @relation(fields: [filingId], references: [id])
   ticker     String?
   assetDesc  String    @map("asset_desc")
-  txType     String    @map("tx_type") // purchase | sale | exchange
+  assetType  String?   @map("asset_type") // ST | Stock | OP | Bond | etc.
+  txType     String    @map("tx_type") // purchase | sale | exchange | sale (partial) | ...
+  buySell    String?   @map("buy_sell") // buy | sell | exchange
   amountLow  Int?      @map("amount_low")
   amountHigh Int?      @map("amount_high")
   txDate     DateTime  @map("tx_date")
-  owner      String? // self | spouse | dependent child
+  owner      String? // self | spouse | dependent child | subholding
+  comment    String?
+  source     String? // quiver | senate_ptr | house_ptr
+  fingerprint String?  @unique // dedupe key for upserts
 
   @@index([filingId])
+  @@index([ticker])
+  @@index([txDate])
   @@map("ptr_transactions")
+}
+
+/// Federal contract awards linked by company ticker (e.g. Quiver contracts feed).
+/// Politicians are resolved at query time via tickers they have traded.
+model GovernmentContract {
+  id          String    @id @default(uuid())
+  ticker      String
+  vendor      String // company symbol / vendor label
+  agency      String?
+  awardDate   DateTime? @map("award_date")
+  description String?
+  amount      Float? // contract value USD
+  status      String? // active | unknown | ...
+  source      String    @default("contracts-recent")
+  fingerprint String    @unique
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([ticker])
+  @@index([awardDate])
+  @@index([agency])
+  @@map("government_contracts")
+}
+
+/// Cached portfolio / net-worth style summaries per member (rebuilt by nightly job).
+model PortfolioSnapshot {
+  id                    String   @id @default(uuid())
+  bioguideId            String   @map("bioguide_id")
+  member                Member   @relation(fields: [bioguideId], references: [bioguideId])
+  estimatedPortfolioUsd Float?   @map("estimated_portfolio_usd")
+  tradeCount            Int      @default(0) @map("trade_count")
+  firstTradeDate        DateTime? @map("first_trade_date")
+  lastTradeDate         DateTime? @map("last_trade_date")
+  topHoldingsJson       String?  @map("top_holdings_json") // JSON array
+  computedAt            DateTime @default(now()) @map("computed_at")
+
+  @@unique([bioguideId])
+  @@map("portfolio_snapshots")
 }
 
 model AnnualDisclosure {

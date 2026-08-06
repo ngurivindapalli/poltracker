@@ -6,6 +6,11 @@ import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
 import InvestmentHistorySection from '@/components/senator/InvestmentHistorySection'
 import EstimatedNetWorthChart from '@/components/politicians/EstimatedNetWorthChart'
+import RecentTrades from '@/components/senator/RecentTrades'
+import LargestHoldings from '@/components/senator/LargestHoldings'
+import GovernmentContracts from '@/components/senator/GovernmentContracts'
+import RecentDisclosures from '@/components/senator/RecentDisclosures'
+import PortfolioContractHistory from '@/components/senator/PortfolioContractHistory'
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
@@ -167,14 +172,13 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         
         {/* LEFT COLUMN (70% - Data Heavy) */}
         <div className="lg:col-span-2 space-y-10">
-           
-           {/* INVESTMENT HISTORY & TRADING ACTIVITY */}
-           <section>
-             <InvestmentHistorySection senatorName={profile.name} />
-           </section>
+
+           <RecentTrades bioguideId={bioguideId} />
+
+           <LargestHoldings bioguideId={bioguideId} />
 
            {/* ESTIMATED NET WORTH */}
-           <div className="bg-white rounded-xl p-6 shadow mb-6">
+           <div className="bg-white rounded-xl p-6 shadow">
              <h2 className="text-xl font-semibold mb-2">Estimated Net Worth</h2>
              <p className="text-3xl font-bold text-green-600">
                {displayNetWorth}
@@ -190,6 +194,17 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
            {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
            <section>
              <EstimatedNetWorthChart bioguideId={bioguideId} />
+           </section>
+
+           <GovernmentContracts bioguideId={bioguideId} />
+
+           <RecentDisclosures bioguideId={bioguideId} />
+
+           <PortfolioContractHistory bioguideId={bioguideId} />
+
+           {/* INVESTMENT HISTORY & TRADING ACTIVITY (full STOCK Act table) */}
+           <section>
+             <InvestmentHistorySection senatorName={profile.name} />
            </section>
 
            {/* FAMILY TREE */}
