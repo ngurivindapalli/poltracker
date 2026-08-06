@@ -1,11 +1,10 @@
 /**
- * Server-side loaders for congressional trades, contracts, disclosures, portfolio.
- * Prefer Postgres (Prisma); fall back to generated JSON so profiles still render.
+ * Server-side loaders for trades, contracts, disclosures, portfolio.
+ * Reads static JSON datasets only (no Prisma / DB dependency at build or runtime).
  */
 
 import fs from "fs";
 import path from "path";
-import { prisma } from "@/lib/prisma";
 
 export type TradeRow = {
   id?: string;
@@ -50,19 +49,23 @@ export type DisclosureRow = {
   }>;
 };
 
-function isoDate(d: Date | string | null | undefined): string | null {
-  if (!d) return null;
-  if (typeof d === "string") return d.slice(0, 10);
-  return d.toISOString().slice(0, 10);
+function readJsonFile<T>(...parts: string[]): T | null {
+  try {
+    const filePath = path.join(process.cwd(), ...parts);
+    if (!fs.existsSync(filePath)) return null;
+    return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  } catch {
+    return null;
+  }
 }
 
-function amountLabel(low: number | null, high: number | null): string | null {
-  if (low == null && high == null) return null;
-  if (low != null && high != null) {
-    return `$${low.toLocaleString()} - $${high.toLocaleString()}`;
-  }
-  if (low != null && high == null) return `$${low.toLocaleString()}+`;
-  return high != null ? `$${high.toLocaleString()}` : null;
+function buySellFromType(tx: string | null | undefined): string | null {
+  if (!tx) return null;
+  const t = tx.toLowerCase();
+  if (t.includes("purchase") || t.includes("buy")) return "buy";
+  if (t.includes("sale") || t.includes("sell")) return "sell";
+  if (t.includes("exchange")) return "exchange";
+  return null;
 }
 
 export async function getTradesForMember(
@@ -71,75 +74,14 @@ export async function getTradesForMember(
 ): Promise<TradeRow[]> {
   const bid = bioguideId.toUpperCase();
 
-  try {
-    const rows = await prisma.ptrTransaction.findMany({
-      where: { filing: { bioguideId: bid } },
-      include: { filing: true },
-      orderBy: { txDate: "desc" },
-      take: limit,
-    });
-    if (rows.length > 0) {
-      return rows.map((t) => ({
-        id: t.id,
-        bioguideId: bid,
-        ticker: t.ticker,
-        asset: t.assetDesc,
-        assetType: t.assetType,
-        txType: t.txType,
-        buySell: t.buySell,
-        amountLow: t.amountLow,
-        amountHigh: t.amountHigh,
-        amountLabel: amountLabel(t.amountLow, t.amountHigh),
-        tradeDate: isoDate(t.txDate),
-        filingDate: isoDate(t.filing.filingDate),
-        owner: t.owner,
-        comment: t.comment,
-        source: t.source,
-      }));
-    }
-  } catch (e) {
-    console.warn("getTradesForMember DB fallback:", (e as Error).message);
-  }
-
-  // JSON fallback (written by services/import_trading.py)
-  try {
-    const filePath = path.join(process.cwd(), "src", "data", "congress-trading-all.json");
-    if (!fs.existsSync(filePath)) {
-      const alt = path.join(process.cwd(), "public", "data", "senateTrades.json");
-      if (!fs.existsSync(alt)) return [];
-      const all = JSON.parse(fs.readFileSync(alt, "utf8")) as any[];
-      return all
-        .filter(
-          (r) =>
-            (r.bioguideId || "").toUpperCase() === bid ||
-            false
-        )
-        .sort((a, b) =>
-          String(b.transactionDate || "").localeCompare(String(a.transactionDate || ""))
-        )
-        .slice(0, limit)
-        .map((r) => ({
-          bioguideId: bid,
-          ticker: r.ticker ?? null,
-          asset: r.asset || "",
-          assetType: r.assetType ?? null,
-          txType: r.type || "",
-          buySell: r.buySell ?? null,
-          amountLow: r.amountLow ?? null,
-          amountHigh: r.amountHigh ?? null,
-          amountLabel: r.amount ?? null,
-          tradeDate: r.transactionDate ?? null,
-          filingDate: r.reportDate ?? null,
-          owner: r.owner ?? null,
-          comment: r.comment ?? null,
-          source: r.source ?? null,
-        }));
-    }
-    const all = JSON.parse(fs.readFileSync(filePath, "utf8")) as any[];
-    return all
+  const congress = readJsonFile<any[]>("src", "data", "congress-trading-all.json");
+  if (Array.isArray(congress) && congress.length > 0) {
+    return congress
       .filter((r) => (r.BioGuideID || "").toUpperCase() === bid)
       .sort((a, b) =>
-        String(b.Traded || b.Filed || "").localeCompare(String(a.Traded || a.Filed || ""))
+        String(b.Traded || b.Filed || "").localeCompare(
+          String(a.Traded || a.Filed || "")
+        )
       )
       .slice(0, limit)
       .map((r) => ({
@@ -148,7 +90,7 @@ export async function getTradesForMember(
         asset: r.Company || "",
         assetType: r.TickerType ?? null,
         txType: r.Transaction || "",
-        buySell: null,
+        buySell: buySellFromType(r.Transaction),
         amountLow: null,
         amountHigh: null,
         amountLabel: r.Trade_Size_USD ?? null,
@@ -158,40 +100,56 @@ export async function getTradesForMember(
         comment: r.Comments ?? null,
         source: "quiver",
       }));
-  } catch {
-    return [];
   }
+
+  const senate = readJsonFile<any[]>("public", "data", "senateTrades.json");
+  if (!Array.isArray(senate)) return [];
+
+  return senate
+    .filter((r) => (r.bioguideId || "").toUpperCase() === bid)
+    .sort((a, b) =>
+      String(b.transactionDate || "").localeCompare(
+        String(a.transactionDate || "")
+      )
+    )
+    .slice(0, limit)
+    .map((r) => ({
+      bioguideId: bid,
+      ticker: r.ticker ?? null,
+      asset: r.asset || "",
+      assetType: r.assetType ?? null,
+      txType: r.type || "",
+      buySell: r.buySell ?? buySellFromType(r.type),
+      amountLow: r.amountLow ?? null,
+      amountHigh: r.amountHigh ?? null,
+      amountLabel: r.amount ?? null,
+      tradeDate: r.transactionDate ?? null,
+      filingDate: r.reportDate ?? null,
+      owner: r.owner ?? null,
+      comment: r.comment ?? null,
+      source: r.source ?? null,
+    }));
 }
 
 export async function getLargestHoldings(
   bioguideId: string,
   limit = 10
-): Promise<Array<{ ticker: string; tradeCount: number; lastTradeDate: string | null }>> {
-  const bid = bioguideId.toUpperCase();
-
-  try {
-    const snap = await prisma.portfolioSnapshot.findUnique({ where: { bioguideId: bid } });
-    if (snap?.topHoldingsJson) {
-      const parsed = JSON.parse(snap.topHoldingsJson) as Array<{
-        ticker: string;
-        tradeCount: number;
-      }>;
-      return parsed.slice(0, limit).map((h) => ({
-        ticker: h.ticker,
-        tradeCount: h.tradeCount,
-        lastTradeDate: null,
-      }));
-    }
-  } catch {
-    // fall through
-  }
-
+): Promise<
+  Array<{ ticker: string; tradeCount: number; lastTradeDate: string | null }>
+> {
   const trades = await getTradesForMember(bioguideId, 5000);
-  const counts = new Map<string, { tradeCount: number; lastTradeDate: string | null }>();
+  const counts = new Map<
+    string,
+    { tradeCount: number; lastTradeDate: string | null }
+  >();
+
   for (const t of trades) {
     if (!t.ticker) continue;
     const key = t.ticker.toUpperCase();
-    const prev = counts.get(key) || { tradeCount: 0, lastTradeDate: null };
+    const prev = counts.get(key) || {
+      tradeCount: 0,
+      lastTradeDate: null as string | null,
+    };
     prev.tradeCount += 1;
     if (
       t.tradeDate &&
@@ -201,6 +159,7 @@ export async function getLargestHoldings(
     }
     counts.set(key, prev);
   }
+
   return [...counts.entries()]
     .map(([ticker, v]) => ({ ticker, ...v }))
     .sort((a, b) => b.tradeCount - a.tradeCount)
@@ -211,8 +170,7 @@ export async function getContractsForMember(
   bioguideId: string,
   limit = 50
 ): Promise<ContractRow[]> {
-  const bid = bioguideId.toUpperCase();
-  const trades = await getTradesForMember(bid, 5000);
+  const trades = await getTradesForMember(bioguideId, 5000);
   const tickers = [
     ...new Set(
       trades.map((t) => (t.ticker || "").toUpperCase()).filter(Boolean)
@@ -220,53 +178,26 @@ export async function getContractsForMember(
   ];
   if (tickers.length === 0) return [];
 
-  try {
-    const rows = await prisma.governmentContract.findMany({
-      where: { ticker: { in: tickers } },
-      orderBy: [{ awardDate: "desc" }, { amount: "desc" }],
-      take: limit,
-    });
-    if (rows.length > 0) {
-      return rows.map((c) => ({
-        id: c.id,
-        ticker: c.ticker,
-        vendor: c.vendor,
-        agency: c.agency,
-        awardDate: isoDate(c.awardDate),
-        description: c.description,
-        amount: c.amount,
-        status: c.status,
-        source: c.source,
-      }));
-    }
-  } catch (e) {
-    console.warn("getContractsForMember DB fallback:", (e as Error).message);
-  }
+  const all = readJsonFile<any[]>("public", "data", "contracts-recent.json");
+  if (!Array.isArray(all)) return [];
 
-  try {
-    const filePath = path.join(process.cwd(), "public", "data", "contracts-recent.json");
-    if (!fs.existsSync(filePath)) return [];
-    const all = JSON.parse(fs.readFileSync(filePath, "utf8")) as any[];
-    const tickerSet = new Set(tickers);
-    return all
-      .filter((c) => tickerSet.has(String(c.ticker || "").toUpperCase()))
-      .sort((a, b) =>
-        String(b.awardDate || "").localeCompare(String(a.awardDate || ""))
-      )
-      .slice(0, limit)
-      .map((c) => ({
-        ticker: c.ticker,
-        vendor: c.vendor || c.ticker,
-        agency: c.agency ?? null,
-        awardDate: c.awardDate ?? null,
-        description: c.description ?? null,
-        amount: c.amount ?? null,
-        status: c.status ?? null,
-        source: c.source ?? null,
-      }));
-  } catch {
-    return [];
-  }
+  const tickerSet = new Set(tickers);
+  return all
+    .filter((c) => tickerSet.has(String(c.ticker || "").toUpperCase()))
+    .sort((a, b) =>
+      String(b.awardDate || "").localeCompare(String(a.awardDate || ""))
+    )
+    .slice(0, limit)
+    .map((c) => ({
+      ticker: c.ticker,
+      vendor: c.vendor || c.ticker,
+      agency: c.agency ?? null,
+      awardDate: c.awardDate ?? null,
+      description: c.description ?? null,
+      amount: c.amount ?? null,
+      status: c.status ?? null,
+      source: c.source ?? null,
+    }));
 }
 
 export async function getDisclosuresForMember(
@@ -274,51 +205,71 @@ export async function getDisclosuresForMember(
   limit = 10
 ): Promise<DisclosureRow[]> {
   const bid = bioguideId.toUpperCase();
-  try {
-    const rows = await prisma.annualDisclosure.findMany({
-      where: { bioguideId: bid },
-      include: { assets: true },
-      orderBy: { year: "desc" },
-      take: limit,
-    });
-    return rows.map((d) => ({
-      id: d.id,
-      year: d.year,
-      filingType: d.filingType,
-      sourceUrl: d.sourceUrl,
-      assets: d.assets.map((a) => ({
-        description: a.description,
-        valueLow: a.valueLow,
-        valueHigh: a.valueHigh,
-        incomeType: a.incomeType,
-      })),
-    }));
-  } catch (e) {
-    console.warn("getDisclosuresForMember error:", (e as Error).message);
-    return [];
-  }
+  const year = new Date().getFullYear();
+
+  // investments.json shapes: { US: { [bioguide]: holdings[] } } or { [bioguide]: holdings[] }
+  const data =
+    readJsonFile<any>("public", "data", "investments.json") ||
+    readJsonFile<any>("data", "investments.json");
+  if (!data) return [];
+
+  const byMember =
+    data.US && typeof data.US === "object" ? data.US : data;
+  const holdings = byMember?.[bid] ?? byMember?.[bioguideId];
+  if (!Array.isArray(holdings) || holdings.length === 0) return [];
+
+  const assets = holdings.map((h: any) => {
+    const range = h?.estimated_value_range;
+    return {
+      description: String(
+        h?.description || h?.asset || h?.name || "Holding"
+      ),
+      valueLow:
+        range?.min != null
+          ? Number(range.min)
+          : range?.low != null
+            ? Number(range.low)
+            : null,
+      valueHigh:
+        range?.max != null
+          ? Number(range.max)
+          : range?.high != null
+            ? Number(range.high)
+            : null,
+      incomeType: h?.income_type ?? h?.type ?? null,
+    };
+  });
+
+  return [
+    {
+      id: `local-${bid}-${year}`,
+      year,
+      filingType: "annual",
+      sourceUrl: `local://investments/${bid}`,
+      assets,
+    },
+  ].slice(0, limit);
 }
 
 export async function getPortfolioSnapshot(bioguideId: string) {
-  const bid = bioguideId.toUpperCase();
-  try {
-    const snap = await prisma.portfolioSnapshot.findUnique({
-      where: { bioguideId: bid },
-    });
-    if (snap) {
-      return {
-        estimatedPortfolioUsd: snap.estimatedPortfolioUsd,
-        tradeCount: snap.tradeCount,
-        firstTradeDate: isoDate(snap.firstTradeDate),
-        lastTradeDate: isoDate(snap.lastTradeDate),
-        topHoldings: snap.topHoldingsJson
-          ? JSON.parse(snap.topHoldingsJson)
-          : [],
-        computedAt: snap.computedAt,
-      };
-    }
-  } catch {
-    // ignore
-  }
-  return null;
+  const trades = await getTradesForMember(bioguideId, 5000);
+  if (trades.length === 0) return null;
+
+  const holdings = await getLargestHoldings(bioguideId, 10);
+  const dates = trades
+    .map((t) => t.tradeDate)
+    .filter(Boolean)
+    .sort() as string[];
+
+  return {
+    estimatedPortfolioUsd: null as number | null,
+    tradeCount: trades.length,
+    firstTradeDate: dates[0] ?? null,
+    lastTradeDate: dates[dates.length - 1] ?? null,
+    topHoldings: holdings.map((h) => ({
+      ticker: h.ticker,
+      tradeCount: h.tradeCount,
+    })),
+    computedAt: new Date().toISOString(),
+  };
 }

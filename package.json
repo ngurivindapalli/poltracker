@@ -17,9 +17,7 @@
     "ingest:fec-donors": "tsx scripts/ingest-fec-donors.ts",
     "ingest:senate-ptr": "tsx scripts/ingest-senate-ptr.ts",
     "ingest:house-ptr": "tsx scripts/ingest-house-ptr.ts",
-    "update-data": "python manage.py update-data",
-    "db:migrate": "prisma migrate deploy",
-    "db:generate": "prisma generate"
+    "update-data": "python manage.py update-data"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",
