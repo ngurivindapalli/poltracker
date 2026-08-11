@@ -1,5 +1,4 @@
 import "./globals.css"
-import Script from "next/script"
 import { Layout } from "@/components/Layout"
 import { AppProviders } from "@/components/providers/AppProviders";
 
@@ -18,14 +17,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8171139092209357"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-      </head>
       <body>
         <AppProviders>
           <Layout>

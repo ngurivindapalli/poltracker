@@ -8,6 +8,7 @@ interface DonorSectionProps {
 }
 
 function formatCurrency(value: number): string {
+  if (value == null || !Number.isFinite(value)) return "—"
   if (value >= 1000000) {
     return `$${(value / 1000000).toFixed(1)}M`
   }
@@ -30,8 +31,55 @@ export default function DonorSection({ bioguideId }: DonorSectionProps) {
         const response = await fetch(`/api/senator/${bioguideId}/donors`)
         if (!response.ok) throw new Error('Failed to fetch donor data')
         const data = await response.json()
-        setDonors(data.top_donors || [])
-        setIndustries(data.industry_breakdown || [])
+        // Normalize Quiver API shape ({ name, amount, ... }) to Donor UI shape
+        const rawDonors = Array.isArray(data.top_donors) ? data.top_donors : []
+        const mappedDonors: Donor[] = rawDonors
+          .map((d: Record<string, unknown>) => {
+            const organization = String(d.name ?? d.organization ?? d.org_name ?? "").trim()
+            const amountRaw = d.amount ?? d.total
+            const amount =
+              typeof amountRaw === "number" && Number.isFinite(amountRaw)
+                ? amountRaw
+                : Number(amountRaw)
+            if (!organization || !Number.isFinite(amount)) return null
+            return {
+              organization,
+              amount,
+              cycle: d.cycle != null ? String(d.cycle) : "",
+              industry: d.industry != null ? String(d.industry) : undefined,
+            } satisfies Donor
+          })
+          .filter((d: Donor | null): d is Donor => d != null)
+
+        const rawIndustries = Array.isArray(data.industry_breakdown)
+          ? data.industry_breakdown
+          : []
+        const mappedIndustries: IndustryExposure[] = rawIndustries
+          .map((row: Record<string, unknown>) => {
+            const industry = String(row.industry ?? "").trim()
+            const totalRaw = row.total_amount ?? row.total
+            const total_amount =
+              typeof totalRaw === "number" && Number.isFinite(totalRaw)
+                ? totalRaw
+                : Number(totalRaw)
+            const pctRaw = row.percent_of_total ?? row.percentage
+            const percent_of_total =
+              typeof pctRaw === "number" && Number.isFinite(pctRaw)
+                ? pctRaw
+                : Number(pctRaw) || 0
+            if (!industry || !Number.isFinite(total_amount)) return null
+            return {
+              industry,
+              total_amount,
+              percent_of_total,
+              donor_count:
+                typeof row.donor_count === "number" ? row.donor_count : 0,
+            } satisfies IndustryExposure
+          })
+          .filter((r: IndustryExposure | null): r is IndustryExposure => r != null)
+
+        setDonors(mappedDonors)
+        setIndustries(mappedIndustries)
       } catch (err) {
         console.error('Error fetching donors:', err)
         setError('Unable to load donor data')
