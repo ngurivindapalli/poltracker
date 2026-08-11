@@ -1,14 +1,17 @@
 /**
- * Quiver-backed financial loaders (PRIMARY SOURCE OF TRUTH).
- * Reads data/quiver/* JSON cache written by `npm run sync:quiver`.
- * Legacy Excel/scrape datasets are intentionally NOT used.
+ * Quiver-backed financial loaders.
+ * Prefers Postgres congress_trades when available; otherwise warehouse JSON.
+ * Frontend never calls Quiver directly.
  */
 
 import { buySellSide } from "@/lib/quiver/normalizers";
 import {
   getDatasetLastUpdated,
+  getDatasetMeta,
+  isCongressTradesSyncComplete,
   readQuiverJson,
 } from "@/lib/quiver/cache";
+import { getPrismaOptional } from "@/lib/quiver/prisma";
 import type {
   NormalizedCongressTrade,
   NormalizedContract,
@@ -110,21 +113,101 @@ function trumpAll(): NormalizedTrumpTrade[] {
 
 export function getQuiverSourceMeta() {
   const meta = readQuiverJson<QuiverMeta>("meta");
+  const trades = meta?.datasets?.congress_trades;
   return {
     source: "Quiver Quantitative" as const,
     meta,
     lastUpdated:
-      meta?.datasets?.congress_trades?.lastUpdated ||
+      trades?.lastUpdated ||
       meta?.datasets?.politician_net_worth?.lastUpdated ||
       null,
+    tradesSyncStatus: trades?.status ?? null,
+    tradesSyncComplete: isCongressTradesSyncComplete(),
+    tradesRecordCount: trades?.recordCount ?? null,
+    tradesCoverageStart: trades?.coverageStart ?? null,
+    tradesCoverageEnd: trades?.coverageEnd ?? null,
+  };
+}
+
+function mapNormalizedTrade(t: NormalizedCongressTrade): TradeRow {
+  return {
+    id: t.sourceHash,
+    bioguideId: t.bioguideId,
+    ticker: t.ticker,
+    asset: t.companyName || t.ticker || "",
+    assetType: t.tickerType,
+    txType: t.transaction,
+    buySell: buySellSide(t.transaction),
+    amountLow: null,
+    amountHigh: null,
+    amountLabel: t.amountRange || t.amount,
+    tradeDate: t.transactionDate,
+    filingDate: t.reportDate,
+    owner: t.owner,
+    comment: t.description,
+    source: "quiver",
+    party: t.party,
+    chamber: t.chamber,
+    excessReturn: t.excessReturn,
+    priceChange: t.priceChange,
+    spyChange: t.spyChange,
   };
 }
 
 export async function getTradesForMember(
   bioguideId: string,
-  limit = 50
+  limit = 100
 ): Promise<TradeRow[]> {
   const bid = bioguideId.toUpperCase();
+  const take = Math.max(1, Math.min(limit || 100, 5000));
+
+  try {
+    const prisma = await getPrismaOptional();
+    if (prisma) {
+      const rows = await prisma.congressTrade.findMany({
+        where: { bioguideId: bid, active: true },
+        orderBy: [{ transactionDate: "desc" }, { reportDate: "desc" }],
+        take,
+      });
+      if (rows.length > 0) {
+        return rows.map((r) => ({
+          id: r.sourceHash,
+          bioguideId: r.bioguideId,
+          ticker: r.ticker,
+          asset: r.companyName || r.ticker || "",
+          assetType: r.tickerType,
+          txType: r.transaction,
+          buySell: buySellSide(r.transaction),
+          amountLow: null,
+          amountHigh: null,
+          amountLabel: r.amountRange || r.amount,
+          tradeDate: r.transactionDate
+            ? new Date(r.transactionDate).toISOString().slice(0, 10)
+            : null,
+          filingDate: r.reportDate
+            ? new Date(r.reportDate).toISOString().slice(0, 10)
+            : null,
+          owner: r.owner,
+          comment: r.description,
+          source: r.source || "quiver",
+          party: r.party,
+          chamber: r.chamber,
+          excessReturn: r.excessReturn,
+          priceChange: r.priceChange,
+          spyChange: r.spyChange,
+        }));
+      }
+      // Only treat empty DB as definitive when warehouse is large.
+      const total = await prisma.congressTrade.count();
+      if (total >= 50_000) return [];
+    }
+  } catch (e) {
+    console.warn(
+      "[profileFinancials] DB trade read failed, JSON fallback:",
+      (e as Error).message
+    );
+  }
+
   return tradesAll()
     .filter((t) => (t.bioguideId || "").toUpperCase() === bid)
     .sort((a, b) =>
@@ -132,29 +215,8 @@ export async function getTradesForMember(
         String(a.transactionDate || "")
       )
     )
-    .slice(0, limit)
-    .map((t) => ({
-      id: t.sourceHash,
-      bioguideId: t.bioguideId,
-      ticker: t.ticker,
-      asset: t.companyName || t.ticker || "",
-      assetType: t.tickerType,
-      txType: t.transaction,
-      buySell: buySellSide(t.transaction),
-      amountLow: null,
-      amountHigh: null,
-      amountLabel: t.amountRange || t.amount,
-      tradeDate: t.transactionDate,
-      filingDate: t.reportDate,
-      owner: t.owner,
-      comment: t.description,
-      source: "quiver",
-      party: t.party,
-      chamber: t.chamber,
-      excessReturn: t.excessReturn,
-      priceChange: t.priceChange,
-      spyChange: t.spyChange,
-    }));
+    .slice(0, take)
+    .map(mapNormalizedTrade);
 }
 
 /**
@@ -381,5 +443,10 @@ export async function getFinancialOverview(bioguideId: string) {
     lastUpdated: source.lastUpdated,
     source: source.source,
     recentTradeCount: trades.length,
+    tradesSyncComplete: source.tradesSyncComplete,
+    tradesSyncStatus: source.tradesSyncStatus,
   };
 }
+
+export { getDatasetMeta, isCongressTradesSyncComplete };
+

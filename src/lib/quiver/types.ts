@@ -225,16 +225,31 @@ export type SyncResult = {
   errors: string[];
   startedAt: string;
   completedAt: string;
+  pagesFetched?: number;
+  coverageStart?: string | null;
+  coverageEnd?: string | null;
+  recordsMatched?: number;
+  recordsUnmatched?: number;
+  recordsInserted?: number;
+  recordsUpdated?: number;
+};
+
+export type DatasetMeta = {
+  lastUpdated: string | null;
+  recordCount: number;
+  status: string;
+  pagesFetched?: number;
+  rawFetched?: number;
+  coverageStart?: string | null;
+  coverageEnd?: string | null;
+  recordsMatched?: number;
+  recordsUnmatched?: number;
+  recordsInserted?: number;
+  recordsUpdated?: number;
+  message?: string;
 };
 
 export type QuiverMeta = {
   source: "Quiver Quantitative";
-  datasets: Record<
-    string,
-    {
-      lastUpdated: string | null;
-      recordCount: number;
-      status: string;
-    }
-  >;
+  datasets: Record<string, DatasetMeta>;
 };

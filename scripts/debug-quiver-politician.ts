@@ -1,6 +1,8 @@
 /**
- * Diagnose Quiver politician mapping by BioGuideID.
- * Usage: npm run debug:quiver:politician -- B001288
+ * Diagnose politician trade coverage after sync (BioGuideID).
+ * Usage: npm run debug:quiver:politician -- B001230
+ *
+ * Primary truth: Postgres when available; warehouse JSON otherwise.
  */
 import "dotenv/config";
 import { config } from "dotenv";
@@ -10,6 +12,8 @@ config();
 
 import {
   getDatasetLastUpdated,
+  getDatasetMeta,
+  isCongressTradesSyncComplete,
   readQuiverJson,
 } from "../src/lib/quiver/cache";
 import type {
@@ -17,6 +21,7 @@ import type {
   NormalizedNetWorth,
 } from "../src/lib/quiver/types";
 import { PoliticianIndex, coreNameKey } from "../src/lib/quiver/identity";
+import { getPrismaOptional } from "../src/lib/quiver/prisma";
 import {
   getNetWorthForMember,
   getTradesForMember,
@@ -25,92 +30,157 @@ import {
 async function main() {
   const bioguideId = (process.argv[2] || "").toUpperCase().trim();
   if (!bioguideId) {
-    console.error("Usage: npm run debug:quiver:politician -- B001288");
+    console.error("Usage: npm run debug:quiver:politician -- B001230");
     process.exit(1);
   }
 
   const politicians =
     readQuiverJson<NormalizedNetWorth[]>("politicianNetWorth") ?? [];
-  const trades = readQuiverJson<NormalizedCongressTrade[]>("congressTrades") ?? [];
+  const warehouseTrades =
+    readQuiverJson<NormalizedCongressTrade[]>("congressTrades") ?? [];
   const index = PoliticianIndex.fromNetWorth(politicians);
-  const pol = index.get(bioguideId) || politicians.find((p) => p.bioguideId === bioguideId);
+  const pol =
+    index.get(bioguideId) ||
+    politicians.find((p) => p.bioguideId === bioguideId);
+  const appNw = await getNetWorthForMember(bioguideId);
+  const politicianName = pol?.name || appNw?.name || "(unknown)";
 
-  const matchedTrades = trades.filter(
+  // Database
+  let dbCount = 0;
+  let dbEarliest: string | null = null;
+  let dbLatest: string | null = null;
+  try {
+    const prisma = await getPrismaOptional();
+    if (prisma) {
+      dbCount = await prisma.congressTrade.count({
+        where: { bioguideId, active: true },
+      });
+      if (dbCount > 0) {
+        const earliest = await prisma.congressTrade.findFirst({
+          where: { bioguideId, active: true, transactionDate: { not: null } },
+          orderBy: { transactionDate: "asc" },
+          select: { transactionDate: true },
+        });
+        const latest = await prisma.congressTrade.findFirst({
+          where: { bioguideId, active: true, transactionDate: { not: null } },
+          orderBy: { transactionDate: "desc" },
+          select: { transactionDate: true },
+        });
+        dbEarliest = earliest?.transactionDate
+          ? earliest.transactionDate.toISOString().slice(0, 10)
+          : null;
+        dbLatest = latest?.transactionDate
+          ? latest.transactionDate.toISOString().slice(0, 10)
+          : null;
+      }
+    }
+  } catch (e) {
+    console.warn("DB query failed:", (e as Error).message);
+  }
+
+  const jsonMatched = warehouseTrades.filter(
     (t) => (t.bioguideId || "").toUpperCase() === bioguideId
   );
-  const unmatchedForName = pol
-    ? trades.filter(
-        (t) =>
-          !t.bioguideId &&
-          coreNameKey(t.politicianName) === coreNameKey(pol.name)
-      )
-    : [];
+  const jsonDates = jsonMatched
+    .map((t) => t.transactionDate)
+    .filter((d): d is string => Boolean(d))
+    .sort();
 
-  // loader path (same as app)
+  const nameKeys = new Set(
+    [politicianName, pol?.name, appNw?.name]
+      .filter(Boolean)
+      .map((n) => coreNameKey(String(n)))
+  );
+  const rawMatchingNames = [
+    ...new Set(
+      warehouseTrades
+        .filter((t) => nameKeys.has(coreNameKey(t.politicianName)))
+        .map((t) => t.politicianName)
+    ),
+  ];
+
+  const unmatchedLog = readQuiverJson<{
+    count?: number;
+    samples?: Array<{ name: string }>;
+  }>("unmatchedTrades");
+  const unmatchedByName =
+    unmatchedLog?.samples?.filter((s) =>
+      nameKeys.has(coreNameKey(s.name || ""))
+    ).length ?? 0;
+
   const appTrades = await getTradesForMember(bioguideId, 5000);
-  const appNw = await getNetWorthForMember(bioguideId);
+  const tradesMeta = getDatasetMeta("congress_trades");
 
   console.log("\n========================================");
   console.log("Quiver Politician Debug");
   console.log("========================================");
-  console.log("Politician:");
-  console.log(pol?.name || appNw?.name || "(not found in cache)");
-  console.log("\nBioGuideID:");
+  console.log("BioGuideID:");
   console.log(bioguideId);
-  console.log("\nChamber:");
-  console.log(pol?.chamber || appNw?.chamber || "—");
-  console.log("\nState:");
-  console.log(pol?.state || appNw?.state || "—");
-  console.log("\nParty:");
-  console.log(pol?.party || appNw?.party || "—");
-  console.log("\nQuiver net worth:");
+  console.log("\nPolitician:");
+  console.log(politicianName);
+  console.log("\nChamber / State / Party:");
   console.log(
-    appNw?.netWorth != null
-      ? appNw.netWorth
-      : pol?.netWorth != null
-        ? pol.netWorth
-        : "(null / missing)"
+    [
+      pol?.chamber || appNw?.chamber || "—",
+      pol?.state || appNw?.state || "—",
+      pol?.party || appNw?.party || "—",
+    ].join(" / ")
   );
-  console.log("\nTrade count (politicians endpoint):");
-  console.log(appNw?.tradeCount ?? pol?.tradeCount ?? "—");
-  console.log("\nTrade volume (politicians endpoint):");
-  console.log(appNw?.tradeVolume ?? pol?.tradeVolume ?? "—");
-  console.log("\nMatched trades (cache by BioGuideID):");
-  console.log(matchedTrades.length);
-  console.log("\nMatched trades (app loader):");
+  console.log("\nDatabase trades:");
+  console.log(dbCount);
+  console.log("\nEarliest trade:");
+  console.log(dbEarliest || jsonDates[0] || "—");
+  console.log("\nLatest trade:");
+  console.log(dbLatest || jsonDates[jsonDates.length - 1] || "—");
+  console.log("\nQuiver records matched (warehouse by BioGuideID):");
+  console.log(jsonMatched.length);
+  console.log("\nApp loader trades:");
   console.log(appTrades.length);
-  console.log("\nUnmatched trades (same core name, null BioGuide):");
-  console.log(unmatchedForName.length);
-  console.log("\nCache last updated (trades / networth):");
+  console.log("\nUnmatched records (name samples for this politician):");
+  console.log(unmatchedByName);
+  console.log("\nRaw matching names:");
+  console.log(rawMatchingNames.length ? rawMatchingNames.join(", ") : "(none)");
+  console.log("\nPoliticians endpoint TradeCount / TradeVolume:");
   console.log(
-    getDatasetLastUpdated("congress_trades"),
-    "/",
-    getDatasetLastUpdated("politician_net_worth")
+    `${appNw?.tradeCount ?? pol?.tradeCount ?? "—"} / ${
+      appNw?.tradeVolume ?? pol?.tradeVolume ?? "—"
+    }`
+  );
+  console.log("\nNet worth:");
+  console.log(appNw?.netWorth ?? pol?.netWorth ?? "—");
+  console.log("\nSync meta (congress_trades):");
+  console.log(
+    JSON.stringify(
+      {
+        status: tradesMeta?.status ?? null,
+        complete: isCongressTradesSyncComplete(),
+        recordCount: tradesMeta?.recordCount ?? null,
+        lastUpdated: tradesMeta?.lastUpdated ?? getDatasetLastUpdated("congress_trades"),
+        coverageStart: tradesMeta?.coverageStart ?? null,
+        coverageEnd: tradesMeta?.coverageEnd ?? null,
+        warehouseRows: warehouseTrades.length,
+      },
+      null,
+      2
+    )
   );
 
-  if (matchedTrades.length) {
+  if (jsonMatched.length) {
     console.log("\nSample matched trades:");
-    for (const t of matchedTrades.slice(0, 10)) {
+    for (const t of jsonMatched.slice(0, 10)) {
       console.log(
         `  ${t.transactionDate || "?"}  ${t.ticker || "?"}  ${t.transaction}  ${
           t.amountRange || t.amount || ""
         }`
       );
     }
-  }
-
-  if (!pol && !appNw) {
+  } else if (isCongressTradesSyncComplete()) {
     console.log(
-      "\nNOTE: politician missing from cache. Run: npm run sync:quiver:networth"
+      "\nNote: full Quiver bulk history is synchronized; this BioGuideID has 0 trades in the Quiver dataset."
     );
-  }
-  if ((appNw?.tradeCount || 0) > 0 && appTrades.length === 0) {
+  } else {
     console.log(
-      "\nWARNING: politicians endpoint reports trades but cache has 0 for this BioGuideID."
-    );
-    console.log("Run a FULL history sync: npm run sync:quiver:trades");
-    console.log(
-      "(Older trades are deep in /bulk/congresstrading pagination.)"
+      "\nNote: trade sync is incomplete — empty result may not be definitive."
     );
   }
   console.log("========================================\n");

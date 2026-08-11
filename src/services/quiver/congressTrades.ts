@@ -24,29 +24,35 @@ import type {
 import { getPrismaOptional } from "@/lib/quiver/prisma";
 
 export type CongressTradeSyncStats = {
+  pagesFetched: number;
   fetched: number;
+  valid: number;
   matched: number;
+  unmatched: number;
+  ambiguous: number;
   inserted: number;
   updated: number;
   skipped: number;
-  unmatched: number;
-  ambiguous: number;
+  coverageStart: string | null;
+  coverageEnd: string | null;
   unmatchedNames: string[];
   ambiguousNames: string[];
+  complete: boolean;
 };
 
 /**
  * Sync congress trades from Quiver.
  *
- * Primary source: GET /beta/bulk/congresstrading (paginated full history).
- * Each row includes BioGuideID — that is the canonical match key.
- * Overlay: GET /beta/live/congresstrading for recent freshness.
+ * Documented endpoints used:
+ * - GET /beta/bulk/congresstrading  (paginated full history; includes BioGuideID)
+ * - GET /beta/live/congresstrading  (recent overlay)
  *
- * Historical /beta/historical/congresstrading/{ticker} is documented as
- * ticker-scoped and is inefficient for full politician backfill; bulk already
- * carries BioGuideID on every row and is preferred for full sync.
+ * Historical per-ticker `/beta/historical/congresstrading/{ticker}` is NOT used for
+ * full-member backfill (would require knowing every ticker first and is N× slower).
+ * Bulk already returns the complete allowed history with BioGuideID on each row.
  *
- * Does NOT invent holdings from trades. Never clears cache on empty/failed fetch.
+ * Flow: fetch ALL pages → normalize → map BioGuideID → warehouse (JSON) → DB upserts
+ * Filtering by politician happens AFTER sync at query time, never during fetch.
  */
 export async function syncCongressTrades(
   client?: QuiverClient
@@ -58,28 +64,37 @@ export async function syncCongressTrades(
   const byHash = new Map<string, NormalizedCongressTrade>();
   const unmatchedNameCounts = new Map<string, number>();
   const ambiguousNameCounts = new Map<string, number>();
+  const unmatchedSamples: Array<{ name: string; ticker: string | null; date: string | null }> =
+    [];
 
   let matched = 0;
   let unmatched = 0;
   let ambiguous = 0;
   let skipped = 0;
+  let pagesFetched = 0;
 
   try {
-    // Build identity index from politician roster (BioGuide map + safe name index)
+    console.log("\n========================================");
+    console.log("Quiver Congressional Trading Sync");
+    console.log("Starting...");
+    console.log("========================================\n");
+
     const index = await loadPoliticianIndex(c, errors);
 
-    // Full bulk pagination — Booker's older trades sit near the *end* of the feed
-    // (~115k rows ≈ 23 pages @ 5k). Defaults ensure full history; env can raise further.
+    // Full pagination: continue until a short/empty page. Safety cap is a hard ceiling only.
     const pageSize = envInt("QUIVER_TRADES_PAGE_SIZE", 5000);
-    const maxPages = envInt("QUIVER_TRADES_MAX_PAGES", 80);
-    const pageDelayMs = envInt("QUIVER_TRADES_PAGE_DELAY_MS", 300);
+    const safetyCap = Math.max(envInt("QUIVER_TRADES_MAX_PAGES", 100), 25);
+    const pageDelayMs = envInt("QUIVER_TRADES_PAGE_DELAY_MS", 350);
     console.log(
-      `[quiver trades] bulk sync pageSize=${pageSize} maxPages=${maxPages} pageDelayMs=${pageDelayMs}`
+      `[quiver trades] bulk pageSize=${pageSize} safetyCap=${safetyCap} delayMs=${pageDelayMs}`
     );
 
     let page = 1;
     let rawFetched = 0;
-    while (page <= maxPages) {
+    let lastPageShort = false;
+    let hitSafetyCap = false;
+
+    while (page <= safetyCap) {
       const batch = await c.getJson<QuiverBulkCongressTrade[]>(
         QUIVER_ENDPOINTS.bulkCongressTrading,
         {
@@ -88,9 +103,15 @@ export async function syncCongressTrades(
           cache: false,
         }
       );
-      if (!Array.isArray(batch) || batch.length === 0) break;
 
+      if (!Array.isArray(batch) || batch.length === 0) {
+        lastPageShort = true;
+        break;
+      }
+
+      pagesFetched += 1;
       rawFetched += batch.length;
+
       for (const row of batch) {
         const n = normalizeBulkCongressTrade(row, fetchedAt);
         if (!n) {
@@ -104,6 +125,13 @@ export async function syncCongressTrades(
           unmatched: (name) => {
             unmatched += 1;
             bump(unmatchedNameCounts, name);
+            if (unmatchedSamples.length < 200) {
+              unmatchedSamples.push({
+                name,
+                ticker: n.ticker,
+                date: n.transactionDate,
+              });
+            }
           },
           ambiguous: (name) => {
             ambiguous += 1;
@@ -114,20 +142,28 @@ export async function syncCongressTrades(
       }
 
       console.log(
-        `[quiver trades] bulk page ${page}: +${batch.length} (unique hashes ${byHash.size})`
+        `[quiver trades] bulk page ${page}: +${batch.length} (unique ${byHash.size})`
       );
 
-      if (batch.length < pageSize) break;
+      if (batch.length < pageSize) {
+        lastPageShort = true;
+        break;
+      }
       page += 1;
+      if (page > safetyCap) {
+        hitSafetyCap = true;
+        break;
+      }
       if (pageDelayMs > 0) await sleep(pageDelayMs);
     }
 
-    // Live overlay (same shape as historical-by-ticker rows)
+    // Live overlay
     try {
       const live = await c.getJson<QuiverLiveCongressTrade[]>(
         QUIVER_ENDPOINTS.liveCongressTrading,
         { expectArray: true, cache: false }
       );
+      pagesFetched += 1;
       for (const row of live) {
         const n = normalizeLiveCongressTrade(row, fetchedAt);
         if (!n) {
@@ -159,6 +195,24 @@ export async function syncCongressTrades(
       throw new Error("Quiver returned zero congress trades — refusing overwrite");
     }
 
+    // Completeness gates — fail (don't claim SUCCESS) if history looks truncated
+    const MIN_FULL_RECORDS = envInt("QUIVER_TRADES_MIN_RECORDS", 50_000);
+    const complete =
+      lastPageShort &&
+      !hitSafetyCap &&
+      rawFetched >= MIN_FULL_RECORDS &&
+      byHash.size >= Math.floor(MIN_FULL_RECORDS * 0.8);
+
+    if (!complete) {
+      const reason = hitSafetyCap
+        ? `hit safety cap (${safetyCap} pages) before API exhausted`
+        : !lastPageShort
+          ? "did not receive a terminal short/empty page"
+          : `rawFetched=${rawFetched} below min ${MIN_FULL_RECORDS}`;
+      errors.push(`incomplete pagination: ${reason}`);
+      console.error("[quiver trades] INCOMPLETE SYNC —", reason);
+    }
+
     const rows = [...byHash.values()].sort((a, b) =>
       String(b.transactionDate || "").localeCompare(String(a.transactionDate || ""))
     );
@@ -170,119 +224,169 @@ export async function syncCongressTrades(
       );
     }
 
+    // Only overwrite warehouse when we have a complete (or explicitly forced partial) dataset
+    const allowPartialWrite = process.env.QUIVER_ALLOW_PARTIAL_TRADE_WRITE === "1";
+    if (!complete && !allowPartialWrite) {
+      throw new Error(
+        `Refusing to overwrite trade warehouse with incomplete sync (${errors.join("; ")})`
+      );
+    }
+
+    // Date coverage
+    const dates = rows
+      .map((r) => r.transactionDate)
+      .filter((d): d is string => Boolean(d))
+      .sort();
+    const coverageStart = dates[0] ?? null;
+    const coverageEnd = dates[dates.length - 1] ?? null;
+
     writeQuiverJson("congressTrades", rows);
+    writeQuiverJson(
+      "unmatchedTrades",
+      {
+        generatedAt: fetchedAt,
+        count: unmatched,
+        samples: unmatchedSamples,
+        topNames: topKeys(unmatchedNameCounts, 100),
+      },
+      { allowEmpty: true }
+    );
     writeQuiverJsonCompatibleTrading(rows);
 
+    // Database warehouse upserts (no Member FK — bioguide stored as plain column)
     const prisma = await getPrismaOptional();
     let inserted = 0;
     let updated = 0;
     if (prisma) {
-      for (const r of rows) {
-        try {
-          const existing = await prisma.congressTrade.findUnique({
-            where: { sourceHash: r.sourceHash },
-            select: { id: true },
-          });
-          await prisma.congressTrade.upsert({
-            where: { sourceHash: r.sourceHash },
-            create: {
-              sourceHash: r.sourceHash,
-              bioguideId: r.bioguideId,
-              politicianName: r.politicianName,
-              chamber: r.chamber,
-              party: r.party,
-              ticker: r.ticker,
-              companyName: r.companyName,
-              transaction: r.transaction,
-              transactionDate: r.transactionDate
-                ? new Date(r.transactionDate)
-                : null,
-              reportDate: r.reportDate ? new Date(r.reportDate) : null,
-              amount: r.amount,
-              amountRange: r.amountRange,
-              tickerType: r.tickerType,
-              excessReturn: r.excessReturn,
-              priceChange: r.priceChange,
-              spyChange: r.spyChange,
-              description: r.description,
-              owner: r.owner,
-              district: r.district,
-              state: r.state,
-              source: "quiver",
-              fetchedAt: new Date(fetchedAt),
-              active: true,
-            },
-            update: {
-              bioguideId: r.bioguideId,
-              politicianName: r.politicianName,
-              chamber: r.chamber,
-              party: r.party,
-              ticker: r.ticker,
-              companyName: r.companyName,
-              transaction: r.transaction,
-              transactionDate: r.transactionDate
-                ? new Date(r.transactionDate)
-                : null,
-              reportDate: r.reportDate ? new Date(r.reportDate) : null,
-              amount: r.amount,
-              amountRange: r.amountRange,
-              excessReturn: r.excessReturn,
-              priceChange: r.priceChange,
-              spyChange: r.spyChange,
-              description: r.description,
-              owner: r.owner,
-              district: r.district,
-              state: r.state,
-              fetchedAt: new Date(fetchedAt),
-              active: true,
-            },
-          });
-          if (existing) updated += 1;
-          else inserted += 1;
-        } catch {
-          // Rows may reference missing Member FK; JSON cache still holds them
-          skipped += 1;
+      const batchSize = 250;
+      for (let i = 0; i < rows.length; i += batchSize) {
+        const chunk = rows.slice(i, i + batchSize);
+        for (const r of chunk) {
+          try {
+            const existing = await prisma.congressTrade.findUnique({
+              where: { sourceHash: r.sourceHash },
+              select: { id: true },
+            });
+            await prisma.congressTrade.upsert({
+              where: { sourceHash: r.sourceHash },
+              create: mapTradeToDb(r, fetchedAt),
+              update: mapTradeToDbUpdate(r, fetchedAt),
+            });
+            if (existing) updated += 1;
+            else inserted += 1;
+          } catch (e) {
+            skipped += 1;
+            if (skipped <= 5) {
+              errors.push(`db upsert: ${(e as Error).message}`);
+            }
+          }
         }
+        if (i > 0 && i % 5000 === 0) {
+          console.log(`[quiver trades] db upsert progress ${i}/${rows.length}`);
+        }
+      }
+
+      // Sync audit row
+      try {
+        await prisma.dataSyncLog.create({
+          data: {
+            dataset: "congress_trades",
+            status: complete && errors.length === 0 ? "success" : "partial",
+            startedAt: new Date(startedAt),
+            completedAt: new Date(),
+            recordsFetched: rawFetched,
+            recordsInserted: inserted,
+            recordsUpdated: updated,
+            recordsSkipped: skipped,
+            errors: errors.length ? JSON.stringify(errors.slice(0, 50)) : null,
+            meta: JSON.stringify({
+              pagesFetched,
+              valid: rows.length,
+              matched: withBio,
+              unmatched: rows.length - withBio,
+              coverageStart,
+              coverageEnd,
+              complete,
+            }),
+          },
+        });
+      } catch {
+        /* audit table optional if migrate not applied */
       }
     } else {
       inserted = rows.length;
     }
 
+    const status: SyncResult["status"] =
+      complete && errors.filter((e) => !e.startsWith("db upsert")).length === 0
+        ? "success"
+        : complete
+          ? "partial"
+          : "failed";
+
     updateMeta("congress_trades", {
       lastUpdated: fetchedAt,
       recordCount: rows.length,
-      status: errors.length ? "partial" : "success",
+      status,
+      pagesFetched,
+      rawFetched,
+      coverageStart,
+      coverageEnd,
+      recordsMatched: withBio,
+      recordsUnmatched: rows.length - withBio,
+      recordsInserted: prisma ? inserted : rows.length,
+      recordsUpdated: prisma ? updated : 0,
+      message: complete
+        ? "Full bulk history synchronized"
+        : "Incomplete pagination — warehouse not updated as success",
     });
 
     const unmatchedNames = topKeys(unmatchedNameCounts, 40);
     const ambiguousNames = topKeys(ambiguousNameCounts, 40);
 
     const stats: CongressTradeSyncStats = {
+      pagesFetched,
       fetched: rawFetched,
+      valid: rows.length,
       matched: withBio,
+      unmatched: rows.length - withBio,
+      ambiguous,
       inserted: prisma ? inserted : rows.length,
       updated: prisma ? updated : 0,
       skipped,
-      unmatched: rows.length - withBio,
-      ambiguous,
+      coverageStart,
+      coverageEnd,
       unmatchedNames,
       ambiguousNames,
+      complete,
     };
 
-    printTradeSyncReport(stats);
+    printTradeSyncReport(stats, status);
 
     const result: SyncResult & { stats: CongressTradeSyncStats } = {
       dataset: "congress_trades",
-      status: errors.length ? "partial" : "success",
+      status,
       recordsFetched: rawFetched,
       recordsWritten: rows.length,
       recordsSkipped: skipped,
       errors,
       startedAt,
       completedAt: new Date().toISOString(),
+      pagesFetched,
+      coverageStart,
+      coverageEnd,
+      recordsMatched: withBio,
+      recordsUnmatched: rows.length - withBio,
+      recordsInserted: stats.inserted,
+      recordsUpdated: stats.updated,
       stats,
     };
     appendSyncLog(result);
+
+    if (!complete) {
+      // Non-zero exit for CI
+      process.exitCode = 1;
+    }
     return result;
   } catch (e) {
     const result: SyncResult = {
@@ -294,11 +398,63 @@ export async function syncCongressTrades(
       errors: [String((e as Error).message)],
       startedAt,
       completedAt: new Date().toISOString(),
+      pagesFetched,
     };
     appendSyncLog(result);
+    updateMeta("congress_trades", {
+      lastUpdated: getDatasetMetaSafe()?.lastUpdated ?? null,
+      recordCount: getDatasetMetaSafe()?.recordCount ?? 0,
+      status: "failed",
+      message: String((e as Error).message),
+    });
     console.error("Quiver Congress Trading Sync FAILED:", (e as Error).message);
+    process.exitCode = 1;
     return result;
   }
+}
+
+function getDatasetMetaSafe() {
+  try {
+    return readQuiverJson<{ datasets?: { congress_trades?: { lastUpdated?: string; recordCount?: number } } }>(
+      "meta"
+    )?.datasets?.congress_trades;
+  } catch {
+    return null;
+  }
+}
+
+function mapTradeToDb(r: NormalizedCongressTrade, fetchedAt: string) {
+  return {
+    sourceHash: r.sourceHash,
+    bioguideId: r.bioguideId,
+    politicianName: r.politicianName,
+    chamber: r.chamber,
+    party: r.party,
+    ticker: r.ticker,
+    companyName: r.companyName,
+    transaction: r.transaction,
+    transactionDate: r.transactionDate ? new Date(r.transactionDate) : null,
+    reportDate: r.reportDate ? new Date(r.reportDate) : null,
+    amount: r.amount,
+    amountRange: r.amountRange,
+    tickerType: r.tickerType,
+    excessReturn: r.excessReturn,
+    priceChange: r.priceChange,
+    spyChange: r.spyChange,
+    description: r.description,
+    owner: r.owner,
+    district: r.district,
+    state: r.state,
+    source: "quiver",
+    fetchedAt: new Date(fetchedAt),
+    active: true,
+  };
+}
+
+function mapTradeToDbUpdate(r: NormalizedCongressTrade, fetchedAt: string) {
+  const base = mapTradeToDb(r, fetchedAt);
+  const { sourceHash: _s, ...rest } = base as typeof base & { sourceHash: string };
+  return rest;
 }
 
 function attachIdentity(
@@ -326,7 +482,6 @@ function attachIdentity(
 
   if (resolved.status === "ambiguous") {
     counters.ambiguous(trade.politicianName);
-    // leave bioguideId null — do not invent a match
     return;
   }
 
@@ -337,12 +492,9 @@ async function loadPoliticianIndex(
   c: QuiverClient,
   errors: string[]
 ): Promise<PoliticianIndex> {
-  // Prefer local net-worth cache when present (full roster from last networth sync).
   const cached = readQuiverJson<NormalizedNetWorth[]>("politicianNetWorth");
   if (cached && cached.length > 0) {
-    console.log(
-      `[quiver trades] politician index from cache: ${cached.length}`
-    );
+    console.log(`[quiver trades] politician index from warehouse: ${cached.length}`);
     return PoliticianIndex.fromNetWorth(cached);
   }
 
@@ -364,24 +516,33 @@ async function loadPoliticianIndex(
   return PoliticianIndex.fromNetWorth(rows);
 }
 
-function printTradeSyncReport(stats: CongressTradeSyncStats) {
+function printTradeSyncReport(
+  stats: CongressTradeSyncStats,
+  status: SyncResult["status"]
+) {
   console.log("\n========================================");
-  console.log("Quiver Congress Trading Sync");
+  console.log("Quiver Congressional Trading Sync");
   console.log("========================================");
-  console.log(`Fetched:   ${stats.fetched}`);
-  console.log(`Matched:   ${stats.matched} (with BioGuideID)`);
-  console.log(`Inserted:  ${stats.inserted}`);
-  console.log(`Updated:   ${stats.updated}`);
-  console.log(`Skipped:   ${stats.skipped}`);
-  console.log(`Unmatched: ${stats.unmatched}`);
-  console.log(`Ambiguous: ${stats.ambiguous}`);
+  console.log(`Pages fetched:        ${stats.pagesFetched}`);
+  console.log(`Raw records fetched:  ${stats.fetched.toLocaleString()}`);
+  console.log(`Valid records:        ${stats.valid.toLocaleString()}`);
+  console.log(`Matched politicians:  ${stats.matched.toLocaleString()}`);
+  console.log(`Unmatched:            ${stats.unmatched.toLocaleString()}`);
+  console.log(`Ambiguous:            ${stats.ambiguous.toLocaleString()}`);
+  console.log(`Inserted:             ${stats.inserted.toLocaleString()}`);
+  console.log(`Updated:              ${stats.updated.toLocaleString()}`);
+  console.log(`Skipped:              ${stats.skipped.toLocaleString()}`);
+  console.log("");
+  console.log("Coverage:");
+  console.log(
+    `  ${stats.coverageStart || "—"} → ${stats.coverageEnd || "—"}`
+  );
+  console.log("");
+  console.log(`Status: ${status.toUpperCase()}`);
+  console.log(`Complete history: ${stats.complete ? "yes" : "NO"}`);
   if (stats.unmatchedNames.length) {
-    console.log("Unmatched politicians (sample):");
-    for (const n of stats.unmatchedNames) console.log(`  - ${n}`);
-  }
-  if (stats.ambiguousNames.length) {
-    console.log("Ambiguous name matches (sample, not assigned):");
-    for (const n of stats.ambiguousNames) console.log(`  - ${n}`);
+    console.log("\nUnmatched politicians (sample):");
+    for (const n of stats.unmatchedNames.slice(0, 20)) console.log(`  - ${n}`);
   }
   console.log("========================================\n");
 }
@@ -402,8 +563,6 @@ function sleep(ms: number) {
 }
 
 function writeQuiverJsonCompatibleTrading(rows: NormalizedCongressTrade[]) {
-  // Keep src/data/congress-trading-all.json shape used by older estimate modules
-  // ONLY with quiver-sourced rows so legacy loaders also see Quiver SoT.
   const fs = require("fs") as typeof import("fs");
   const path = require("path") as typeof import("path");
   const out = rows

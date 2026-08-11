@@ -81,6 +81,11 @@ export async function GET(
       bioguideId,
       source: source.source,
       lastUpdated: source.lastUpdated,
+      tradesSyncComplete: source.tradesSyncComplete,
+      tradesSyncStatus: source.tradesSyncStatus,
+      tradesRecordCount: source.tradesRecordCount,
+      tradesCoverageStart: source.tradesCoverageStart,
+      tradesCoverageEnd: source.tradesCoverageEnd,
       financialOverview: overview,
       recentTrades,
       // Explicit: activity stats only — not disclosed holdings

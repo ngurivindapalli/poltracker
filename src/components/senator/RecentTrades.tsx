@@ -23,7 +23,7 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tradeCount, setTradeCount] = useState<number | null>(null);
+  const [tradesSyncComplete, setTradesSyncComplete] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,10 +41,11 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
         if (!cancelled) {
           setTrades(Array.isArray(json.recentTrades) ? json.recentTrades : []);
           setLastUpdated(json.lastUpdated || null);
-          setTradeCount(
-            json.financialOverview?.tradeCount ??
-              json.portfolioSnapshot?.tradeCount ??
-              null
+          setTradesSyncComplete(
+            Boolean(
+              json.tradesSyncComplete ??
+                json.financialOverview?.tradesSyncComplete
+            )
           );
         }
       } catch (e) {
@@ -73,23 +74,21 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
           <div className="p-6 text-sm text-[#64748B]">Loading trades…</div>
         ) : error ? (
           <div className="p-6 text-sm text-amber-800">
-            Could not load Quiver congressional trades: {error}
+            Could not load congressional trades: {error}
           </div>
         ) : trades.length === 0 ? (
           <div className="p-6 text-sm text-[#64748B] space-y-2">
-            <p>
-              No matching Quiver congressional trades for BioGuideID{" "}
-              <code className="text-xs">{bioguideId}</code> after checking the
-              local Quiver cache
-              {tradeCount != null && tradeCount > 0
-                ? ` (politician record reports TradeCount=${tradeCount} — run a full trade sync).`
-                : "."}
-            </p>
-            <p className="text-xs text-[#94A3B8]">
-              Refresh with{" "}
-              <code className="text-xs">npm run sync:quiver:trades</code>{" "}
-              (full bulk history required — older trades sit deep in the feed).
-            </p>
+            {tradesSyncComplete ? (
+              <p>
+                No congressional trades found in the synchronized Quiver
+                dataset.
+              </p>
+            ) : (
+              <p>
+                Congressional trade data is not ready yet. The synchronized
+                Quiver dataset has not completed a full history import.
+              </p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">

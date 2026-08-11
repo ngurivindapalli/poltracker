@@ -34,7 +34,6 @@ model Member {
   portfolioSnapshots PortfolioSnapshot[]
 
   // Quiver relations
-  congressTrades   CongressTrade[]
   netWorth         PoliticianNetWorth?
   corporateDonors  CorporateDonor[]
 
@@ -79,8 +78,9 @@ model Company {
 model CongressTrade {
   id              String    @id @default(uuid())
   sourceHash      String    @unique @map("source_hash")
+  /// Canonical politician id from Quiver BioGuideID when available.
+  /// Not a hard FK — politicians may not yet exist in members.
   bioguideId      String?   @map("bioguide_id")
-  member          Member?   @relation(fields: [bioguideId], references: [bioguideId])
   politicianName  String    @map("politician_name")
   chamber         String?
   party           String?

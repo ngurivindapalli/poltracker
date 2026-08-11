@@ -1,13 +1,11 @@
 /**
- * Quiver file cache — production read path (works without live DB).
- * Written by sync jobs; read by profileFinancials / APIs.
- *
- * Legacy financial JSON files are NOT used when these exist.
+ * Quiver file warehouse — used when Postgres is unavailable.
+ * Prefers a successful full sync snapshot, not partial ad-hoc filters.
  */
 
 import fs from "fs";
 import path from "path";
-import type { QuiverMeta, SyncResult } from "./types";
+import type { DatasetMeta, QuiverMeta, SyncResult } from "./types";
 
 export const QUIVER_CACHE_DIR = path.join(process.cwd(), "data", "quiver");
 
@@ -21,6 +19,7 @@ export const QUIVER_CACHE_FILES = {
   trumpTrades: "trump-trades.json",
   meta: "meta.json",
   syncLog: "sync-log.json",
+  unmatchedTrades: "unmatched-trades.json",
 } as const;
 
 export function ensureQuiverCacheDir() {
@@ -46,10 +45,6 @@ export function readQuiverJson<T>(name: keyof typeof QUIVER_CACHE_FILES): T | nu
   }
 }
 
-/**
- * Atomic write: never leave empty production data after a partial failure.
- * Caller must only call this after validating non-empty (or allowEmpty).
- */
 export function writeQuiverJson(
   name: keyof typeof QUIVER_CACHE_FILES,
   data: unknown,
@@ -75,10 +70,7 @@ export function writeQuiverJson(
   fs.renameSync(tmp, p);
 }
 
-export function updateMeta(
-  dataset: string,
-  info: { lastUpdated: string; recordCount: number; status: string }
-) {
+export function updateMeta(dataset: string, info: DatasetMeta) {
   ensureQuiverCacheDir();
   const existing = readQuiverJson<QuiverMeta>("meta") ?? {
     source: "Quiver Quantitative",
@@ -98,4 +90,18 @@ export function appendSyncLog(result: SyncResult) {
 export function getDatasetLastUpdated(dataset: string): string | null {
   const meta = readQuiverJson<QuiverMeta>("meta");
   return meta?.datasets?.[dataset]?.lastUpdated ?? null;
+}
+
+export function getDatasetMeta(dataset: string): DatasetMeta | null {
+  const meta = readQuiverJson<QuiverMeta>("meta");
+  return meta?.datasets?.[dataset] ?? null;
+}
+
+/** True when last trades sync finished with full history coverage. */
+export function isCongressTradesSyncComplete(): boolean {
+  const m = getDatasetMeta("congress_trades");
+  if (!m) return false;
+  if (m.status !== "success") return false;
+  if ((m.recordCount || 0) < 50_000) return false;
+  return true;
 }
