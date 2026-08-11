@@ -157,7 +157,12 @@ export async function getTradesForMember(
     }));
 }
 
-export async function getLargestHoldings(
+/**
+ * Frequently traded tickers from congressional trades (activity), NOT holdings.
+ * Quiver's Disclosed Holdings / Estimated Live Portfolio are separate products and
+ * are not available as Hobbyist array endpoints for holdings lines.
+ */
+export async function getMostTradedTickers(
   bioguideId: string,
   limit = 10
 ): Promise<
@@ -185,6 +190,30 @@ export async function getLargestHoldings(
     .map(([ticker, v]) => ({ ticker, ...v }))
     .sort((a, b) => b.tradeCount - a.tradeCount)
     .slice(0, limit);
+}
+
+/** @deprecated Alias kept for call sites; does not represent disclosed holdings. */
+export async function getLargestHoldings(
+  bioguideId: string,
+  limit = 10
+): Promise<
+  Array<{ ticker: string; tradeCount: number; lastTradeDate: string | null }>
+> {
+  return getMostTradedTickers(bioguideId, limit);
+}
+
+/**
+ * Quiver Hobbyist API does not expose annual FD disclosed holding lines or
+ * "Estimated Live Stock Portfolio" series. Return empty — UI must not fabricate.
+ */
+export async function getDisclosedHoldingsAvailability(_bioguideId: string) {
+  return {
+    available: false as const,
+    reason:
+      "Quiver Quantitative Hobbyist endpoints do not provide disclosed holdings line items or estimated live stock portfolio positions. Net worth and congressional trades are available via /bulk/congress/politicians and /bulk/congresstrading.",
+    disclosedHoldings: [] as [],
+    estimatedLivePortfolio: [] as [],
+  };
 }
 
 /**
@@ -306,33 +335,18 @@ export async function getNetWorthForMember(bioguideId: string) {
 }
 
 export async function getDisclosuresForMember(
-  bioguideId: string,
+  _bioguideId: string,
   _limit = 10
 ): Promise<DisclosureRow[]> {
-  // Quiver Hobbyist plan does not publish annual FD holdings lines.
-  // Surface top traded tickers as "activity disclosure" from trades instead.
-  const holdings = await getLargestHoldings(bioguideId, 15);
-  if (holdings.length === 0) return [];
-  return [
-    {
-      id: `quiver-activity-${bioguideId}`,
-      year: new Date().getFullYear(),
-      filingType: "trading_activity",
-      sourceUrl: "quiver://congress-trading",
-      assets: holdings.map((h) => ({
-        description: `${h.ticker} (${h.tradeCount} disclosed trades)`,
-        valueLow: null,
-        valueHigh: null,
-        incomeType: "trade_activity",
-      })),
-    },
-  ];
+  // Do not fabricate annual disclosure holdings from trades.
+  // Quiver Hobbyist SoT for portfolio position lines is not available.
+  return [];
 }
 
 export async function getPortfolioSnapshot(bioguideId: string) {
   const nw = await getNetWorthForMember(bioguideId);
   const trades = await getTradesForMember(bioguideId, 5000);
-  const holdings = await getLargestHoldings(bioguideId, 10);
+  const mostTraded = await getMostTradedTickers(bioguideId, 10);
   const dates = trades
     .map((t) => t.tradeDate)
     .filter(Boolean)
@@ -344,7 +358,10 @@ export async function getPortfolioSnapshot(bioguideId: string) {
     tradeVolume: nw?.tradeVolume ?? null,
     firstTradeDate: dates[0] ?? null,
     lastTradeDate: dates[dates.length - 1] ?? null,
-    topHoldings: holdings,
+    topHoldings: mostTraded, // activity summary only; not disclosed holdings
+    mostTradedTickers: mostTraded,
+    disclosedHoldingsAvailable: false,
+    estimatedLivePortfolioAvailable: false,
     computedAt: getDatasetLastUpdated("politician_net_worth") || new Date().toISOString(),
     source: "quiver" as const,
   };

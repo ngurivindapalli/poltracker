@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import {
   getContractsForMember,
+  getDisclosedHoldingsAvailability,
   getDisclosuresForMember,
   getDonorsForMember,
   getFinancialOverview,
-  getLargestHoldings,
   getLobbyingForTickers,
+  getMostTradedTickers,
   getOffExchangeForTickers,
   getPortfolioSnapshot,
   getQuiverSourceMeta,
@@ -24,20 +25,31 @@ export async function GET(
   }
 
   try {
-    const [recentTrades, largestHoldings, contracts, disclosures, snapshot, overview, donors] =
-      await Promise.all([
-        getTradesForMember(bioguideId, 25),
-        getLargestHoldings(bioguideId, 10),
-        getContractsForMember(bioguideId, 40),
-        getDisclosuresForMember(bioguideId, 8),
-        getPortfolioSnapshot(bioguideId),
-        getFinancialOverview(bioguideId),
-        getDonorsForMember(bioguideId, 25),
-      ]);
+    const [
+      recentTrades,
+      mostTradedTickers,
+      contracts,
+      disclosures,
+      snapshot,
+      overview,
+      donors,
+      holdingsAvailability,
+    ] = await Promise.all([
+      getTradesForMember(bioguideId, 50),
+      getMostTradedTickers(bioguideId, 10),
+      getContractsForMember(bioguideId, 40),
+      getDisclosuresForMember(bioguideId, 8),
+      getPortfolioSnapshot(bioguideId),
+      getFinancialOverview(bioguideId),
+      getDonorsForMember(bioguideId, 25),
+      getDisclosedHoldingsAvailability(bioguideId),
+    ]);
 
     const tickers = [
       ...new Set(
-        recentTrades
+        (
+          await getTradesForMember(bioguideId, 5000)
+        )
           .map((t) => t.ticker)
           .filter(Boolean)
           .map((t) => String(t).toUpperCase())
@@ -71,7 +83,12 @@ export async function GET(
       lastUpdated: source.lastUpdated,
       financialOverview: overview,
       recentTrades,
-      largestHoldings,
+      // Explicit: activity stats only — not disclosed holdings
+      mostTradedTickers,
+      largestHoldings: mostTradedTickers,
+      disclosedHoldings: holdingsAvailability.disclosedHoldings,
+      estimatedLivePortfolio: holdingsAvailability.estimatedLivePortfolio,
+      holdingsAvailability,
       governmentContracts: contracts,
       corporateDonors: donors,
       corporateLobbying: lobbying,
@@ -94,7 +111,10 @@ export async function GET(
         bioguideId,
         source: "Quiver Quantitative",
         recentTrades: [],
+        mostTradedTickers: [],
         largestHoldings: [],
+        disclosedHoldings: [],
+        estimatedLivePortfolio: [],
         governmentContracts: [],
         corporateDonors: [],
         corporateLobbying: [],

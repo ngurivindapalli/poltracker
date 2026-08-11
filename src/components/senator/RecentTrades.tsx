@@ -22,22 +22,36 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tradeCount, setTradeCount] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch(
-          `/api/member/${bioguideId}/financial-profile`
+          `/api/member/${encodeURIComponent(bioguideId)}/financial-profile`
         );
+        if (!res.ok) {
+          throw new Error(`Failed to load trades (${res.status})`);
+        }
         const json = await res.json();
         if (!cancelled) {
-          setTrades(json.recentTrades || []);
+          setTrades(Array.isArray(json.recentTrades) ? json.recentTrades : []);
           setLastUpdated(json.lastUpdated || null);
+          setTradeCount(
+            json.financialOverview?.tradeCount ??
+              json.portfolioSnapshot?.tradeCount ??
+              null
+          );
         }
-      } catch {
-        if (!cancelled) setTrades([]);
+      } catch (e) {
+        if (!cancelled) {
+          setTrades([]);
+          setError((e as Error).message || "Failed to load trades");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -57,11 +71,25 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
       <Card className="p-0 overflow-hidden">
         {loading ? (
           <div className="p-6 text-sm text-[#64748B]">Loading trades…</div>
+        ) : error ? (
+          <div className="p-6 text-sm text-amber-800">
+            Could not load Quiver congressional trades: {error}
+          </div>
         ) : trades.length === 0 ? (
-          <div className="p-6 text-sm text-[#64748B]">
-            No Quiver congressional trades found for this member. Run{" "}
-            <code className="text-xs">npm run sync:quiver:trades</code> to
-            refresh.
+          <div className="p-6 text-sm text-[#64748B] space-y-2">
+            <p>
+              No matching Quiver congressional trades for BioGuideID{" "}
+              <code className="text-xs">{bioguideId}</code> after checking the
+              local Quiver cache
+              {tradeCount != null && tradeCount > 0
+                ? ` (politician record reports TradeCount=${tradeCount} — run a full trade sync).`
+                : "."}
+            </p>
+            <p className="text-xs text-[#94A3B8]">
+              Refresh with{" "}
+              <code className="text-xs">npm run sync:quiver:trades</code>{" "}
+              (full bulk history required — older trades sit deep in the feed).
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -78,7 +106,7 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
                     Ticker
                   </th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[#64748B] uppercase">
-                    Buy/Sell
+                    Transaction
                   </th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[#64748B] uppercase">
                     Amount range
@@ -106,8 +134,8 @@ export default function RecentTrades({ bioguideId }: { bioguideId: string }) {
                         "—"
                       )}
                     </td>
-                    <td className="py-3 px-4 capitalize text-[#374151]">
-                      {t.buySell || t.txType || "—"}
+                    <td className="py-3 px-4 text-[#374151]">
+                      {t.txType || t.buySell || "—"}
                     </td>
                     <td className="py-3 px-4 text-[#374151]">
                       {t.amountLabel || "—"}

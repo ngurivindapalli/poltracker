@@ -68,7 +68,7 @@ export class QuiverClient {
       "https://api.quiverquant.com/beta";
     this.baseUrl = rawBase.replace(/\/$/, "");
     this.timeoutMs = opts.timeoutMs ?? 60_000;
-    this.maxRetries = opts.maxRetries ?? 4;
+    this.maxRetries = opts.maxRetries ?? 8;
     this.cacheTtlMs = opts.cacheTtlMs ?? 0;
     this.log = opts.logger ?? defaultLogger;
   }
@@ -127,10 +127,11 @@ export class QuiverClient {
           );
         }
         if (res.status === 429) {
-          const backoff = Math.min(30_000, 1000 * 2 ** attempt);
-          this.log?.("warn", "rate limited, backing off", { path, backoff });
+          const backoff = Math.min(60_000, 1500 * 2 ** attempt);
+          this.log?.("warn", "rate limited, backing off", { path, backoff, attempt });
           await sleep(backoff);
           lastError = new QuiverRateLimitError(undefined, path);
+          // Do not burn remaining attempts without delay — keep retrying until maxRetries
           continue;
         }
         if ([500, 502, 503, 504].includes(res.status)) {

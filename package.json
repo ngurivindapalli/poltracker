@@ -30,7 +30,8 @@
     "sync:quiver:offexchange": "tsx scripts/sync-quiver.ts offexchange",
     "sync:quiver:trump": "tsx scripts/sync-quiver.ts trump",
     "validate:quiver": "tsx scripts/validate-quiver.ts",
-    "test:quiver": "tsx scripts/test-quiver.ts"
+    "test:quiver": "tsx scripts/test-quiver.ts",
+    "debug:quiver:politician": "tsx scripts/debug-quiver-politician.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",

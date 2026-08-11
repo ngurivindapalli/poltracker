@@ -2,6 +2,7 @@ import { getQuiverClient, QuiverClient } from "@/lib/quiver/client";
 import { QUIVER_ENDPOINTS } from "@/lib/quiver/endpoints";
 import { appendSyncLog, updateMeta, writeQuiverJson } from "@/lib/quiver/cache";
 import { normalizePolitician } from "@/lib/quiver/normalizers";
+import { envInt } from "@/lib/quiver/env";
 import type {
   NormalizedNetWorth,
   QuiverPolitician,
@@ -23,9 +24,10 @@ export async function syncPoliticianNetWorth(
   const errors: string[] = [];
 
   try {
-    // Single full pagination (chamber filters still include candidates inconsistently).
-    // Cap pages to respect rate limits; default 15 (~7.5k rows).
-    const maxPages = Number(process.env.QUIVER_NETWORTH_MAX_PAGES || 15);
+    // Full roster pagination. Quiver currently has ~16k politicians (~33×500 pages).
+    // Default must cover total_pages so BioGuideIDs like B001288 are not truncated.
+    const maxPages = envInt("QUIVER_NETWORTH_MAX_PAGES", 50);
+    console.log(`[quiver networth] maxPages=${maxPages}`);
     try {
       const rows = await c.getPaginatedData<QuiverPolitician>(
         QUIVER_ENDPOINTS.bulkPoliticians,
@@ -60,6 +62,23 @@ export async function syncPoliticianNetWorth(
 
     const list = [...byBio.values()];
     writeQuiverJson("politicianNetWorth", list);
+
+    console.log("\n========================================");
+    console.log("Quiver Politician Net Worth Sync");
+    console.log("========================================");
+    console.log(`Fetched:  ${list.length}`);
+    console.log(
+      `With NetWorth: ${list.filter((p) => p.netWorth != null).length}`
+    );
+    const booker = list.find((p) => p.bioguideId === "B001288");
+    if (booker) {
+      console.log(
+        `B001288 Cory A. Booker: NetWorth=${booker.netWorth} TradeCount=${booker.tradeCount} TradeVolume=${booker.tradeVolume}`
+      );
+    } else {
+      console.warn("WARNING: B001288 (Cory A. Booker) missing from politician fetch");
+    }
+    console.log("========================================\n");
 
     // Also refresh networth.json display format
     const fs = await import("fs");

@@ -50,8 +50,18 @@ npm run test:quiver
 Optional page caps:
 
 ```bash
-QUIVER_TRADES_MAX_PAGES=40
+# Full bulk trades is ~115k rows (~23 pages @ 5k). Booker's older trades are near the end.
+QUIVER_TRADES_MAX_PAGES=80
+QUIVER_TRADES_PAGE_SIZE=5000
+QUIVER_TRADES_PAGE_DELAY_MS=300
+QUIVER_NETWORTH_MAX_PAGES=50
 QUIVER_DONORS_MAX_PAGES=50
+```
+
+Debug a politician (BioGuideID):
+
+```bash
+npm run debug:quiver:politician -- B001288
 ```
 
 ## Runtime architecture

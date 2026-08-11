@@ -1,5 +1,5 @@
 /**
- * Unit tests for Quiver normalizers + client error handling (mocked, no live API).
+ * Unit tests for Quiver normalizers + identity + client error handling (mocked, no live API).
  * Run: npx tsx scripts/test-quiver.ts
  */
 import assert from "assert";
@@ -13,6 +13,7 @@ import {
   normalizeTrumpTrade,
   sha256,
 } from "../src/lib/quiver/normalizers";
+import { PoliticianIndex, coreNameKey } from "../src/lib/quiver/identity";
 import { QuiverAuthError, QuiverRateLimitError } from "../src/lib/quiver/errors";
 
 function testHashesStable() {
@@ -25,7 +26,7 @@ function testLiveTrade() {
   const n = normalizeLiveCongressTrade(
     {
       Representative: "Jane Doe",
-      BioGuideID: "D000001",
+      BioGuideID: "D001288",
       Transaction: "Purchase",
       Ticker: "nvda",
       TransactionDate: "2026-01-02",
@@ -42,24 +43,25 @@ function testLiveTrade() {
   );
   assert.ok(n);
   assert.strictEqual(n!.ticker, "NVDA");
-  assert.strictEqual(n!.bioguideId, "D000001");
+  assert.strictEqual(n!.bioguideId, "D001288");
   assert.strictEqual(n!.amountRange, "$1,001 - $15,000");
   assert.ok(n!.sourceHash.length === 64);
 }
 
 function testBulkTradeDedupe() {
   const row = {
-    Name: "Jane Doe",
-    BioGuideID: "D000001",
+    Name: "Cory Booker",
+    BioGuideID: "B001288",
     Ticker: "AAPL",
     Transaction: "Sale",
-    Traded: "2026-02-01",
-    Filed: "2026-02-05",
-    Trade_Size_USD: "$15,001 - $50,000",
+    Traded: "2014-08-08",
+    Filed: "2014-09-07",
+    Trade_Size_USD: "1001.0",
   };
   const a = normalizeBulkCongressTrade(row, "t1");
   const b = normalizeBulkCongressTrade(row, "t2");
   assert.strictEqual(a!.sourceHash, b!.sourceHash);
+  assert.strictEqual(a!.bioguideId, "B001288");
 }
 
 function testPoliticianRequiresBio() {
@@ -70,16 +72,50 @@ function testPoliticianRequiresBio() {
   assert.strictEqual(bad, null);
   const good = normalizePolitician(
     {
-      BioGuideID: "S000001",
-      Name: "Sam Senator",
+      BioGuideID: "B001288",
+      Name: "Cory A. Booker",
       Chamber: "Senate",
       NetWorth: 1_000_000,
-      TradeCount: 12,
+      TradeCount: 13,
     },
     "t"
   );
   assert.ok(good);
+  assert.strictEqual(good!.bioguideId, "B001288");
   assert.strictEqual(good!.netWorth, 1_000_000);
+}
+
+function testBookerNameIdentity() {
+  const idx = PoliticianIndex.fromNetWorth([
+    {
+      bioguideId: "B001288",
+      name: "Cory A. Booker",
+      party: "Democratic",
+      chamber: "Senate",
+      state: "New Jersey",
+      imageUrl: null,
+      tradeCount: 13,
+      tradeVolume: 244506.5,
+      netWorth: 1131431,
+      source: "quiver",
+      fetchedAt: "t",
+    },
+  ]);
+
+  assert.strictEqual(coreNameKey("Cory A. Booker"), "cory booker");
+  assert.strictEqual(coreNameKey("Cory Booker"), "cory booker");
+  assert.strictEqual(coreNameKey("BOOKER, CORY A."), "cory booker");
+
+  const a = idx.resolve({ bioguideId: "B001288" });
+  assert.strictEqual(a.bioguideId, "B001288");
+  assert.strictEqual(a.status, "direct_bioguide");
+
+  const b = idx.resolve({
+    name: "Cory Booker",
+    chamber: "Senate",
+    party: "Democratic",
+  });
+  assert.strictEqual(b.bioguideId, "B001288");
 }
 
 function testDonor() {
@@ -165,7 +201,6 @@ function testErrorClasses() {
 }
 
 function testRefuseEmptyImpliedByWriteRule() {
-  // Documented behavior: sync refuses empty overwrite; simulated here.
   const empty: any[] = [];
   assert.strictEqual(empty.length === 0, true);
 }
@@ -175,6 +210,7 @@ const tests = [
   ["liveTrade", testLiveTrade],
   ["bulkTradeDedupe", testBulkTradeDedupe],
   ["politicianRequiresBio", testPoliticianRequiresBio],
+  ["bookerNameIdentity", testBookerNameIdentity],
   ["donor", testDonor],
   ["contract", testContractCompanyScoped],
   ["offExchange", testOffExchange],
