@@ -1,28 +1,34 @@
-import { calculateNetWorthFromHoldings, parseRange } from "@/lib/networth";
-import { getHoldingsForPolitician } from "@/lib/holdingsProvider";
-import { getTradesForPolitician } from "@/lib/congressNetWorth";
+import { NextResponse } from "next/server";
+import {
+  getNetWorthForMember,
+  getPortfolioSnapshot,
+  getQuiverSourceMeta,
+} from "@/lib/profileFinancials";
+
+export const runtime = "nodejs";
 
 export async function GET(
   _req: Request,
   { params }: { params: { bioguideId: string } }
 ) {
-  const { bioguideId } = params;
+  const bioguideId = params.bioguideId;
+  const [nw, snapshot, source] = await Promise.all([
+    getNetWorthForMember(bioguideId),
+    getPortfolioSnapshot(bioguideId),
+    Promise.resolve(getQuiverSourceMeta()),
+  ]);
 
-  const holdings = getHoldingsForPolitician(bioguideId);
-  const trades = getTradesForPolitician(bioguideId);
-
-  let netWorth = 0;
-  if (holdings && holdings.length > 0) {
-    netWorth = calculateNetWorthFromHoldings(holdings);
-  }
-  if (netWorth === 0 && trades?.length > 0) {
-    netWorth = Math.round(
-      trades.reduce((sum: number, t: any) => sum + parseRange(t.amount), 0) * 0.1
-    );
-  }
-
-  return Response.json({
-    totalNetWorth: netWorth,
-    numberOfTrades: trades?.length || 0,
+  return NextResponse.json({
+    bioguideId,
+    totalNetWorth: nw?.netWorth ?? snapshot.estimatedPortfolioUsd ?? 0,
+    tradeCount: nw?.tradeCount ?? snapshot.tradeCount,
+    tradeVolume: nw?.tradeVolume ?? null,
+    holdings: snapshot.topHoldings,
+    source: source.source,
+    lastUpdated:
+      source.meta?.datasets?.politician_net_worth?.lastUpdated ??
+      source.lastUpdated,
+    disclaimer:
+      "Estimated Net Worth from Quiver Quantitative — not an official government figure.",
   });
 }

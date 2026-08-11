@@ -7,6 +7,11 @@ import EstimatedNetWorthChart from '@/components/politicians/EstimatedNetWorthCh
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
+import FinancialOverview from '@/components/financials/FinancialOverview'
+import RecentTrades from '@/components/senator/RecentTrades'
+import LargestHoldings from '@/components/senator/LargestHoldings'
+import GovernmentContracts from '@/components/senator/GovernmentContracts'
+import CompanyMarketSignals from '@/components/financials/CompanyMarketSignals'
 import SenatorBillsSection from '@/components/senator/SenatorBillsSection'
 import MemberTweets from '@/components/MemberTweets'
 import { Button } from '@/components/ui/Button'
@@ -153,15 +158,26 @@ export default async function RepresentativePage({ params }: { params: { bioguid
         
         {/* LEFT COLUMN (70% - Data Heavy) */}
         <div className="lg:col-span-2 space-y-10">
-           
-           {/* STOCK Act investments intentionally disabled for House members */}
-           
-           {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
+
+           <FinancialOverview bioguideId={bioguideId} />
+           <RecentTrades bioguideId={bioguideId} />
+           <LargestHoldings bioguideId={bioguideId} />
+
            <section>
              <EstimatedNetWorthChart bioguideId={bioguideId} />
            </section>
 
-           {/* FAMILY TREE */}
+           <GovernmentContracts bioguideId={bioguideId} />
+
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Corporate Donors
+             </h2>
+             <LobbyingTable bioguideId={bioguideId} />
+           </section>
+
+           <CompanyMarketSignals bioguideId={bioguideId} />
+
            <section>
              <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
                Family Connections
@@ -169,20 +185,11 @@ export default async function RepresentativePage({ params }: { params: { bioguid
              <FamilyTree senatorName={profile.name} />
            </section>
 
-           {/* NETWORK GRAPH */}
            <section>
              <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
                Influence Network
              </h2>
              <ConnectionsPanel bioguideId={bioguideId} />
-           </section>
-
-           {/* LOBBYING TABLE (Added to main column for better table width) */}
-           <section>
-             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-               Donor Influence
-             </h2>
-             <LobbyingTable bioguideId={bioguideId} />
            </section>
 
         </div>

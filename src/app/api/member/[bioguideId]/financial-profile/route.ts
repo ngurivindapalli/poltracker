@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import {
   getContractsForMember,
   getDisclosuresForMember,
+  getDonorsForMember,
+  getFinancialOverview,
   getLargestHoldings,
+  getLobbyingForTickers,
+  getOffExchangeForTickers,
   getPortfolioSnapshot,
+  getQuiverSourceMeta,
   getTradesForMember,
 } from "@/lib/profileFinancials";
 
 export const runtime = "nodejs";
 
-/**
- * Comprehensive financial profile payload for a member.
- * Sections: recent trades, holdings, contracts, disclosures, net worth snapshot, portfolio/contract history.
- */
 export async function GET(
   _req: Request,
   { params }: { params: { bioguideId: string } }
@@ -23,23 +24,31 @@ export async function GET(
   }
 
   try {
-    const [recentTrades, largestHoldings, contracts, disclosures, snapshot] =
+    const [recentTrades, largestHoldings, contracts, disclosures, snapshot, overview, donors] =
       await Promise.all([
         getTradesForMember(bioguideId, 25),
         getLargestHoldings(bioguideId, 10),
         getContractsForMember(bioguideId, 40),
         getDisclosuresForMember(bioguideId, 8),
         getPortfolioSnapshot(bioguideId),
+        getFinancialOverview(bioguideId),
+        getDonorsForMember(bioguideId, 25),
       ]);
 
-    const contractHistory = contracts.map((c) => ({
-      date: c.awardDate,
-      amount: c.amount,
-      agency: c.agency,
-      ticker: c.ticker,
-    }));
+    const tickers = [
+      ...new Set(
+        recentTrades
+          .map((t) => t.ticker)
+          .filter(Boolean)
+          .map((t) => String(t).toUpperCase())
+      ),
+    ] as string[];
 
-    // Portfolio history: monthly trade counts from recent pool
+    const [lobbying, offExchange] = await Promise.all([
+      getLobbyingForTickers(tickers, 40),
+      getOffExchangeForTickers(tickers, 40),
+    ]);
+
     const portfolioHistoryMap = new Map<string, number>();
     const historyTrades = await getTradesForMember(bioguideId, 2000);
     for (const t of historyTrades) {
@@ -54,25 +63,42 @@ export async function GET(
         tradeCount,
       }));
 
+    const source = getQuiverSourceMeta();
+
     return NextResponse.json({
       bioguideId,
+      source: source.source,
+      lastUpdated: source.lastUpdated,
+      financialOverview: overview,
       recentTrades,
       largestHoldings,
       governmentContracts: contracts,
+      corporateDonors: donors,
+      corporateLobbying: lobbying,
+      offExchange,
       recentFinancialDisclosures: disclosures,
-      estimatedNetWorth: snapshot?.estimatedPortfolioUsd ?? null,
+      estimatedNetWorth: overview.estimatedNetWorth,
       portfolioSnapshot: snapshot,
       portfolioHistory,
-      contractHistory,
+      contractHistory: contracts.map((c) => ({
+        date: c.awardDate,
+        amount: c.amount,
+        agency: c.agency,
+        ticker: c.ticker,
+      })),
     });
   } catch (e) {
     console.error("financial-profile error", e);
     return NextResponse.json(
       {
         bioguideId,
+        source: "Quiver Quantitative",
         recentTrades: [],
         largestHoldings: [],
         governmentContracts: [],
+        corporateDonors: [],
+        corporateLobbying: [],
+        offExchange: [],
         recentFinancialDisclosures: [],
         estimatedNetWorth: null,
         portfolioSnapshot: null,

@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Politeia Prisma schema — politicians (Member) + Quiver financial source-of-truth tables.
+// Legacy PTR/FEC tables remain for rollback; runtime financial queries use quiver_* tables & JSON caches.
 
 generator client {
   provider = "prisma-client"
@@ -10,6 +10,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// ---------------------------------------------------------------------------
+// Core: politicians (existing Member = politician)
+// ---------------------------------------------------------------------------
+
 model Member {
   bioguideId     String   @id @map("bioguide_id")
   fecCandidateId String?  @map("fec_candidate_id")
@@ -18,15 +22,21 @@ model Member {
   chamber        Chamber
   party          String?
   state          String
-  district       Int? // null for senators
+  district       Int?
   active         Boolean  @default(true)
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  ptrFilings        PtrFiling[]
-  annualDisclosures AnnualDisclosure[]
-  fecTotals         FecTotal[]
-  fecDonors         FecDonor[]
+  // Legacy relations (read-only after Quiver cutover; kept for rollback)
+  ptrFilings         PtrFiling[]
+  annualDisclosures  AnnualDisclosure[]
+  fecTotals          FecTotal[]
+  fecDonors          FecDonor[]
   portfolioSnapshots PortfolioSnapshot[]
+
+  // Quiver relations
+  congressTrades   CongressTrade[]
+  netWorth         PoliticianNetWorth?
+  corporateDonors  CorporateDonor[]
 
   @@map("members")
 }
@@ -36,6 +46,256 @@ enum Chamber {
   house
 }
 
+enum DataSyncStatus {
+  running
+  success
+  failed
+  partial
+}
+
+// ---------------------------------------------------------------------------
+// Company (ticker-centered; contracts / lobbying / off-exchange attach here)
+// ---------------------------------------------------------------------------
+
+model Company {
+  id        String   @id @default(uuid())
+  ticker    String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  contracts    GovernmentContract[]
+  lobbying     CorporateLobbying[]
+  offExchange  OffExchangeTrade[]
+  congressTrades CongressTrade[]
+
+  @@map("companies")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Congress Trading
+// ---------------------------------------------------------------------------
+
+model CongressTrade {
+  id              String    @id @default(uuid())
+  sourceHash      String    @unique @map("source_hash")
+  bioguideId      String?   @map("bioguide_id")
+  member          Member?   @relation(fields: [bioguideId], references: [bioguideId])
+  politicianName  String    @map("politician_name")
+  chamber         String?
+  party           String?
+  ticker          String?
+  companyId       String?   @map("company_id")
+  company         Company?  @relation(fields: [companyId], references: [id])
+  companyName     String?   @map("company_name")
+  transaction     String
+  transactionDate DateTime? @map("transaction_date")
+  reportDate      DateTime? @map("report_date")
+  amount          String? // Quiver raw amount field (not exact midpoints)
+  amountRange     String?   @map("amount_range") // Range / Trade_Size_USD as reported
+  tickerType      String?   @map("ticker_type")
+  excessReturn    Float?    @map("excess_return")
+  priceChange     Float?    @map("price_change")
+  spyChange       Float?    @map("spy_change")
+  description     String?
+  owner           String?
+  district        String?
+  state           String?
+  source          String    @default("quiver")
+  fetchedAt       DateTime  @map("fetched_at")
+  rawJson         String?   @map("raw_json") // preserve original payload when needed
+  active          Boolean   @default(true)
+
+  @@index([bioguideId])
+  @@index([ticker])
+  @@index([transactionDate])
+  @@index([reportDate])
+  @@map("congress_trades")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Politician Net Worth
+// ---------------------------------------------------------------------------
+
+model PoliticianNetWorth {
+  id           String   @id @default(uuid())
+  bioguideId   String   @unique @map("bioguide_id")
+  member       Member?  @relation(fields: [bioguideId], references: [bioguideId])
+  name         String
+  party        String?
+  chamber      String?
+  state        String?
+  imageUrl     String?  @map("image_url")
+  tradeCount   Int?     @map("trade_count")
+  tradeVolume  Float?   @map("trade_volume")
+  netWorth     Float?   @map("net_worth")
+  source       String   @default("quiver")
+  fetchedAt    DateTime @map("fetched_at")
+  active       Boolean  @default(true)
+
+  @@index([bioguideId])
+  @@index([chamber])
+  @@map("politician_net_worth")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Corporate Donors
+// ---------------------------------------------------------------------------
+
+model CorporateDonor {
+  id                   String    @id @default(uuid())
+  sourceHash           String    @unique @map("source_hash")
+  bioguideId           String?   @map("bioguide_id")
+  member               Member?   @relation(fields: [bioguideId], references: [bioguideId])
+  candidateName        String    @map("candidate_name")
+  companyCommitteeName String?   @map("company_committee_name")
+  transactionDate      DateTime? @map("transaction_date")
+  transactionAmount    Float?    @map("transaction_amount")
+  ticker               String?
+  committeeName        String?   @map("committee_name")
+  cycle                Int?
+  transactionType      String?   @map("transaction_type")
+  companyCommitteeId   String?   @map("company_committee_id")
+  source               String    @default("quiver")
+  fetchedAt            DateTime  @map("fetched_at")
+  active               Boolean   @default(true)
+
+  @@index([bioguideId])
+  @@index([ticker])
+  @@index([cycle])
+  @@map("corporate_donors")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Government Contracts (ticker / company — NOT politician-linked)
+// ---------------------------------------------------------------------------
+
+model GovernmentContract {
+  id          String    @id @default(uuid())
+  sourceHash  String    @unique @map("source_hash")
+  ticker      String
+  companyId   String?   @map("company_id")
+  company     Company?  @relation(fields: [companyId], references: [id])
+  vendor      String?
+  agency      String?
+  awardDate   DateTime? @map("award_date")
+  actionDate  DateTime? @map("action_date")
+  description String?
+  amount      Float?
+  status      String?
+  source      String    @default("quiver")
+  fingerprint String? // legacy Excel importer field (nullable after migration)
+  fetchedAt   DateTime  @map("fetched_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  active      Boolean   @default(true)
+
+  @@index([ticker])
+  @@index([awardDate])
+  @@index([actionDate])
+  @@index([agency])
+  @@map("government_contracts")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Corporate Lobbying (company/ticker)
+// ---------------------------------------------------------------------------
+
+model CorporateLobbying {
+  id            String    @id @default(uuid())
+  sourceHash    String    @unique @map("source_hash")
+  ticker        String?
+  companyId     String?   @map("company_id")
+  company       Company?  @relation(fields: [companyId], references: [id])
+  date          DateTime?
+  amount        Float?
+  client        String?
+  issue         String?
+  specificIssue String?   @map("specific_issue")
+  registrant    String?
+  source        String    @default("quiver")
+  fetchedAt     DateTime  @map("fetched_at")
+  active        Boolean   @default(true)
+
+  @@index([ticker])
+  @@index([date])
+  @@map("corporate_lobbying")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Off-Exchange Trading (company/ticker)
+// ---------------------------------------------------------------------------
+
+model OffExchangeTrade {
+  id         String    @id @default(uuid())
+  sourceHash String    @unique @map("source_hash")
+  ticker     String
+  companyId  String?   @map("company_id")
+  company    Company?  @relation(fields: [companyId], references: [id])
+  date       DateTime?
+  otcShort   Float?    @map("otc_short")
+  otcTotal   Float?    @map("otc_total")
+  dpi        Float?
+  source     String    @default("quiver")
+  fetchedAt  DateTime  @map("fetched_at")
+  active     Boolean   @default(true)
+
+  @@index([ticker])
+  @@index([date])
+  @@map("off_exchange_trades")
+}
+
+// ---------------------------------------------------------------------------
+// Quiver: Donald Trump Stock Trades
+// Endpoint: GET /beta/bulk/trumpstocktrades
+// ---------------------------------------------------------------------------
+
+model TrumpTrade {
+  id              String    @id @default(uuid())
+  sourceHash      String    @unique @map("source_hash")
+  ticker          String?
+  company         String?
+  transaction     String?
+  transactionDate DateTime? @map("transaction_date")
+  reportDate      DateTime? @map("report_date")
+  amount          String?
+  amountRange     String?   @map("amount_range")
+  excessReturn    Float?    @map("excess_return")
+  source          String    @default("quiver")
+  fetchedAt       DateTime  @map("fetched_at")
+  active          Boolean   @default(true)
+
+  @@index([ticker])
+  @@index([transactionDate])
+  @@map("trump_trades")
+}
+
+// ---------------------------------------------------------------------------
+// Sync audit log
+// ---------------------------------------------------------------------------
+
+model DataSyncLog {
+  id              String         @id @default(uuid())
+  dataset         String
+  status          DataSyncStatus
+  startedAt       DateTime       @map("started_at")
+  completedAt     DateTime?      @map("completed_at")
+  recordsFetched  Int            @default(0) @map("records_fetched")
+  recordsInserted Int            @default(0) @map("records_inserted")
+  recordsUpdated  Int            @default(0) @map("records_updated")
+  recordsSkipped  Int            @default(0) @map("records_skipped")
+  errors          String?
+  meta            String? // JSON
+
+  @@index([dataset])
+  @@index([startedAt])
+  @@map("data_sync_logs")
+}
+
+// ---------------------------------------------------------------------------
+// LEGACY — kept for rollback only (deactivated in app queries)
+// ---------------------------------------------------------------------------
+
 model PtrFiling {
   id         String   @id @default(uuid())
   bioguideId String   @map("bioguide_id")
@@ -43,7 +303,7 @@ model PtrFiling {
   chamber    Chamber
   filingDate DateTime @map("filing_date")
   sourceUrl  String   @map("source_url")
-  rawFileRef String?  @map("raw_file_ref") // path/URL to stored PDF if applicable
+  rawFileRef String?  @map("raw_file_ref")
   createdAt  DateTime @default(now()) @map("created_at")
 
   transactions PtrTransaction[]
@@ -53,21 +313,21 @@ model PtrFiling {
 }
 
 model PtrTransaction {
-  id         String    @id @default(uuid())
-  filingId   String    @map("filing_id")
-  filing     PtrFiling @relation(fields: [filingId], references: [id])
-  ticker     String?
-  assetDesc  String    @map("asset_desc")
-  assetType  String?   @map("asset_type") // ST | Stock | OP | Bond | etc.
-  txType     String    @map("tx_type") // purchase | sale | exchange | sale (partial) | ...
-  buySell    String?   @map("buy_sell") // buy | sell | exchange
-  amountLow  Int?      @map("amount_low")
-  amountHigh Int?      @map("amount_high")
-  txDate     DateTime  @map("tx_date")
-  owner      String? // self | spouse | dependent child | subholding
-  comment    String?
-  source     String? // quiver | senate_ptr | house_ptr
-  fingerprint String?  @unique // dedupe key for upserts
+  id          String    @id @default(uuid())
+  filingId    String    @map("filing_id")
+  filing      PtrFiling @relation(fields: [filingId], references: [id])
+  ticker      String?
+  assetDesc   String    @map("asset_desc")
+  assetType   String?   @map("asset_type")
+  txType      String    @map("tx_type")
+  buySell     String?   @map("buy_sell")
+  amountLow   Int?      @map("amount_low")
+  amountHigh  Int?      @map("amount_high")
+  txDate      DateTime  @map("tx_date")
+  owner       String?
+  comment     String?
+  source      String?
+  fingerprint String?   @unique
 
   @@index([filingId])
   @@index([ticker])
@@ -75,39 +335,16 @@ model PtrTransaction {
   @@map("ptr_transactions")
 }
 
-/// Federal contract awards linked by company ticker (e.g. Quiver contracts feed).
-/// Politicians are resolved at query time via tickers they have traded.
-model GovernmentContract {
-  id          String    @id @default(uuid())
-  ticker      String
-  vendor      String // company symbol / vendor label
-  agency      String?
-  awardDate   DateTime? @map("award_date")
-  description String?
-  amount      Float? // contract value USD
-  status      String? // active | unknown | ...
-  source      String    @default("contracts-recent")
-  fingerprint String    @unique
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  @@index([ticker])
-  @@index([awardDate])
-  @@index([agency])
-  @@map("government_contracts")
-}
-
-/// Cached portfolio / net-worth style summaries per member (rebuilt by nightly job).
 model PortfolioSnapshot {
-  id                    String   @id @default(uuid())
-  bioguideId            String   @map("bioguide_id")
-  member                Member   @relation(fields: [bioguideId], references: [bioguideId])
-  estimatedPortfolioUsd Float?   @map("estimated_portfolio_usd")
-  tradeCount            Int      @default(0) @map("trade_count")
+  id                    String    @id @default(uuid())
+  bioguideId            String    @map("bioguide_id")
+  member                Member    @relation(fields: [bioguideId], references: [bioguideId])
+  estimatedPortfolioUsd Float?    @map("estimated_portfolio_usd")
+  tradeCount            Int       @default(0) @map("trade_count")
   firstTradeDate        DateTime? @map("first_trade_date")
   lastTradeDate         DateTime? @map("last_trade_date")
-  topHoldingsJson       String?  @map("top_holdings_json") // JSON array
-  computedAt            DateTime @default(now()) @map("computed_at")
+  topHoldingsJson       String?   @map("top_holdings_json")
+  computedAt            DateTime  @default(now()) @map("computed_at")
 
   @@unique([bioguideId])
   @@map("portfolio_snapshots")
@@ -118,7 +355,7 @@ model AnnualDisclosure {
   bioguideId String   @map("bioguide_id")
   member     Member   @relation(fields: [bioguideId], references: [bioguideId])
   year       Int
-  filingType String   @map("filing_type") // annual | annual_amendment | new_filer | termination
+  filingType String   @map("filing_type")
   sourceUrl  String   @map("source_url")
   rawFileRef String?  @map("raw_file_ref")
   createdAt  DateTime @default(now()) @map("created_at")
@@ -143,9 +380,9 @@ model AssetLine {
 }
 
 model FecTotal {
-  id            String @id @default(uuid())
-  bioguideId    String @map("bioguide_id")
-  member        Member @relation(fields: [bioguideId], references: [bioguideId])
+  id            String  @id @default(uuid())
+  bioguideId    String  @map("bioguide_id")
+  member        Member  @relation(fields: [bioguideId], references: [bioguideId])
   cycle         Int
   receipts      BigInt?
   disbursements BigInt?

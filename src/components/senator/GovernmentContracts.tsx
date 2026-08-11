@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 
 type Contract = {
   ticker: string;
@@ -31,15 +32,19 @@ export default function GovernmentContracts({
 }) {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/member/${bioguideId}/contracts?limit=20`);
+        const res = await fetch(`/api/member/${bioguideId}/financial-profile`);
         const json = await res.json();
-        if (!cancelled) setContracts(json.contracts || []);
+        if (!cancelled) {
+          setContracts(json.governmentContracts || []);
+          setLastUpdated(json.lastUpdated || null);
+        }
       } catch {
         if (!cancelled) setContracts([]);
       } finally {
@@ -55,6 +60,10 @@ export default function GovernmentContracts({
     <section>
       <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">{title}</h2>
       <Card className="p-0 overflow-hidden">
+        <p className="px-4 pt-4 text-xs text-[#94A3B8]">
+          Company/agency awards for tickers this member has traded (contracts are
+          company-scoped, not politician awards).
+        </p>
         {loading ? (
           <div className="p-6 text-sm text-[#64748B]">Loading contracts…</div>
         ) : contracts.length === 0 ? (
@@ -110,6 +119,9 @@ export default function GovernmentContracts({
             </table>
           </div>
         )}
+        <div className="px-4 py-3 border-t border-[#F1F5F9]">
+          <QuiverSourceLabel lastUpdated={lastUpdated} />
+        </div>
       </Card>
     </section>
   );

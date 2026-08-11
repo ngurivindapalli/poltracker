@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "clean-install": "rm -rf node_modules package-lock.json && npm install",
@@ -17,7 +17,20 @@
     "ingest:fec-donors": "tsx scripts/ingest-fec-donors.ts",
     "ingest:senate-ptr": "tsx scripts/ingest-senate-ptr.ts",
     "ingest:house-ptr": "tsx scripts/ingest-house-ptr.ts",
-    "update-data": "python manage.py update-data"
+    "update-data": "python manage.py update-data",
+    "postinstall": "prisma generate || echo prisma generate skipped",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "sync:quiver": "tsx scripts/sync-quiver.ts",
+    "sync:quiver:trades": "tsx scripts/sync-quiver.ts trades",
+    "sync:quiver:networth": "tsx scripts/sync-quiver.ts networth",
+    "sync:quiver:donors": "tsx scripts/sync-quiver.ts donors",
+    "sync:quiver:contracts": "tsx scripts/sync-quiver.ts contracts",
+    "sync:quiver:lobbying": "tsx scripts/sync-quiver.ts lobbying",
+    "sync:quiver:offexchange": "tsx scripts/sync-quiver.ts offexchange",
+    "sync:quiver:trump": "tsx scripts/sync-quiver.ts trump",
+    "validate:quiver": "tsx scripts/validate-quiver.ts",
+    "test:quiver": "tsx scripts/test-quiver.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",

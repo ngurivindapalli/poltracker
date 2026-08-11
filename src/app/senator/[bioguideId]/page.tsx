@@ -11,6 +11,8 @@ import LargestHoldings from '@/components/senator/LargestHoldings'
 import GovernmentContracts from '@/components/senator/GovernmentContracts'
 import RecentDisclosures from '@/components/senator/RecentDisclosures'
 import PortfolioContractHistory from '@/components/senator/PortfolioContractHistory'
+import FinancialOverview from '@/components/financials/FinancialOverview'
+import CompanyMarketSignals from '@/components/financials/CompanyMarketSignals'
 import FamilyTree from '@/components/FamilyTree'
 import LobbyingTable from '@/components/senator/LobbyingTable'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
@@ -173,36 +175,45 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
         {/* LEFT COLUMN (70% - Data Heavy) */}
         <div className="lg:col-span-2 space-y-10">
 
+           <FinancialOverview bioguideId={bioguideId} />
+
            <RecentTrades bioguideId={bioguideId} />
 
            <LargestHoldings bioguideId={bioguideId} />
 
-           {/* ESTIMATED NET WORTH */}
+           {/* ESTIMATED NET WORTH (display string from Quiver networth dataset) */}
            <div className="bg-white rounded-xl p-6 shadow">
              <h2 className="text-xl font-semibold mb-2">Estimated Net Worth</h2>
              <p className="text-3xl font-bold text-green-600">
                {displayNetWorth}
              </p>
              <p className="text-sm text-gray-500 mt-1">
-               Based on financial disclosures (holdings + trades estimate)
+               Quiver Quantitative estimate — not an official government figure
              </p>
              <p className="text-xs text-gray-400 mt-2 italic">
-               Data source: Quiver Quantitative estimates
+               Source: Quiver Quantitative
              </p>
            </div>
 
-           {/* ESTIMATED DISCLOSED PORTFOLIO VALUE */}
            <section>
              <EstimatedNetWorthChart bioguideId={bioguideId} />
            </section>
 
            <GovernmentContracts bioguideId={bioguideId} />
 
+           <section>
+             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
+               Corporate Donors
+             </h2>
+             <LobbyingTable bioguideId={bioguideId} />
+           </section>
+
+           <CompanyMarketSignals bioguideId={bioguideId} />
+
            <RecentDisclosures bioguideId={bioguideId} />
 
            <PortfolioContractHistory bioguideId={bioguideId} />
 
-           {/* INVESTMENT HISTORY & TRADING ACTIVITY (full STOCK Act table) */}
            <section>
              <InvestmentHistorySection senatorName={profile.name} />
            </section>
@@ -221,14 +232,6 @@ export default async function SenatorPage({ params }: { params: { bioguideId: st
                Influence Network
              </h2>
              <ConnectionsPanel bioguideId={bioguideId} />
-           </section>
-
-           {/* LOBBYING TABLE (Added to main column for better table width) */}
-           <section>
-             <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-               Donor Influence
-             </h2>
-             <LobbyingTable bioguideId={bioguideId} />
            </section>
 
         </div>

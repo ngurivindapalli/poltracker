@@ -1,0 +1,52 @@
+name: Quiver data sync
+
+on:
+  schedule:
+    - cron: "30 7 * * *"
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: "all | trades | networth | donors | contracts | lobbying | offexchange | trump"
+        required: false
+        default: "all"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Prisma generate
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Apply migrations (optional)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Sync Quiver
+        env:
+          QUIVER_API_KEY: ${{ secrets.QUIVER_API_KEY }}
+          QUIVER_BASE_URL: https://api.quiverquant.com/beta
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          QUIVER_TRADES_MAX_PAGES: "20"
+          QUIVER_DONORS_MAX_PAGES: "30"
+        run: |
+          if [ "${{ github.event.inputs.dataset }}" = "" ] || [ "${{ github.event.inputs.dataset }}" = "all" ]; then
+            npm run sync:quiver
+          else
+            npm run sync:quiver:${{ github.event.inputs.dataset }}
+          fi
+      - name: Validate cache
+        run: npm run validate:quiver
+      - name: Upload cache artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quiver-cache
+          path: data/quiver/
+          if-no-files-found: warn
