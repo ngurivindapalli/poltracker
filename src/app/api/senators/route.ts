@@ -1,51 +1,37 @@
-import { NextResponse } from 'next/server'
-import { fetchAllCurrentMembers } from '@/lib/congress'
-import { senatorImageUrl } from '@/lib/images'
+/**
+ * GET /api/senators — one payload for the entire Senators listing.
+ * Reads precomputed SenatorSummary (Postgres or warehouse JSON).
+ * Never calls Quiver or Congress.gov.
+ */
+import { NextResponse } from "next/server";
+import { getSenatorSummaries } from "@/lib/senators/summaries";
 
-export const runtime = 'nodejs'
-
-function toSenateOnly(m: any): boolean {
-  // The Congress.gov member payload includes terms with chamber info.
-  // We consider a member a senator if any current term is in the Senate.
-  const terms = (m?.terms?.item ?? m?.terms ?? []) as any[]
-  for (const t of terms) {
-    const chamber = (t?.chamber ?? t?.chamberName ?? t?.memberType ?? '').toString().toLowerCase()
-    const isSenate = chamber.includes('senate')
-    const endYear = t?.endYear ?? t?.endDate
-    const isCurrent = endYear ? false : true
-    if (isSenate && isCurrent) return true
-  }
-
-  // Fallback: sometimes the data includes a current chamber / bio line
-  const chamber2 = (m?.chamber ?? m?.currentChamber ?? '').toString().toLowerCase()
-  return chamber2.includes('senate')
-}
+export const runtime = "nodejs";
+/** Revalidate listing every 10 minutes; sync rebuilds warehouse between. */
+export const revalidate = 600;
 
 export async function GET() {
   try {
-    const members = await fetchAllCurrentMembers()
-    const senators = members
-      .filter(toSenateOnly)
-      .map((m) => {
-        const bioguideId = m?.bioguideId ?? m?.bioguide_id ?? m?.id
-        const name = m?.name ?? `${m?.firstName ?? ''} ${m?.lastName ?? ''}`.trim()
-        const party = m?.partyName ?? m?.party
-        const state = m?.state
-        return {
-          bioguideId,
-          name,
-          party,
-          state,
-          imageUrl: senatorImageUrl(bioguideId)
-        }
-      })
-      .filter((s) => s.bioguideId && s.name)
-      .sort((a, b) => a.name.localeCompare(b.name))
-
-    console.log('Loaded Senators:', senators.length)
-    return NextResponse.json({ senators })
-  } catch (err: any) {
-    console.error('Failed loading senators dataset:', err?.message ?? String(err))
-    return NextResponse.json({ senators: [] })
+    const payload = await getSenatorSummaries();
+    return NextResponse.json(payload, {
+      headers: {
+        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+      },
+    });
+  } catch (err: unknown) {
+    console.error(
+      "Failed loading senator summaries:",
+      err instanceof Error ? err.message : String(err)
+    );
+    return NextResponse.json(
+      {
+        senators: [],
+        dataUpdatedAt: null,
+        source: "SenatorSummary",
+        count: 0,
+        error: "Failed to load senator summaries",
+      },
+      { status: 200 }
+    );
   }
 }

@@ -22,13 +22,21 @@ function money(n: number | null) {
 
 export default function FinancialOverview({
   bioguideId,
+  initialData,
 }: {
   bioguideId: string;
+  /** Server-provided summary — avoids a client fetch when present. */
+  initialData?: Overview | null;
 }) {
-  const [data, setData] = useState<Overview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Overview | null>(initialData ?? null);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -36,7 +44,9 @@ export default function FinancialOverview({
         const json = await res.json();
         if (!cancelled) {
           setData({
-            estimatedNetWorth: json.financialOverview?.estimatedNetWorth ?? json.estimatedNetWorth,
+            estimatedNetWorth:
+              json.financialOverview?.estimatedNetWorth ??
+              json.estimatedNetWorth,
             tradeCount: json.financialOverview?.tradeCount ?? null,
             tradeVolume: json.financialOverview?.tradeVolume ?? null,
             lastUpdated: json.lastUpdated ?? null,
@@ -51,7 +61,7 @@ export default function FinancialOverview({
     return () => {
       cancelled = true;
     };
-  }, [bioguideId]);
+  }, [bioguideId, initialData]);
 
   return (
     <section>

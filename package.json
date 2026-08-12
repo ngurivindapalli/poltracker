@@ -29,6 +29,7 @@
     "sync:quiver:lobbying": "tsx scripts/sync-quiver.ts lobbying",
     "sync:quiver:offexchange": "tsx scripts/sync-quiver.ts offexchange",
     "sync:quiver:trump": "tsx scripts/sync-quiver.ts trump",
+    "sync:quiver:summaries": "tsx scripts/sync-quiver.ts summaries",
     "validate:quiver": "tsx scripts/validate-quiver.ts",
     "test:quiver": "tsx scripts/test-quiver.ts",
     "debug:quiver:politician": "tsx scripts/debug-quiver-politician.ts"

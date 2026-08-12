@@ -139,6 +139,32 @@ model PoliticianNetWorth {
 }
 
 // ---------------------------------------------------------------------------
+// Precomputed Senator listing summary (DB-first; rebuilt after Quiver sync)
+// ---------------------------------------------------------------------------
+
+model SenatorSummary {
+  bioguideId             String    @id @map("bioguide_id")
+  name                   String
+  firstName              String?   @map("first_name")
+  lastName               String?   @map("last_name")
+  party                  String?
+  state                  String?
+  imageUrl               String?   @map("image_url")
+  chamber                String    @default("senate")
+  estimatedNetWorth      Float?    @map("estimated_net_worth")
+  tradeCount             Int?      @map("trade_count")
+  tradeVolume            Float?    @map("trade_volume")
+  latestTradeDate        DateTime? @map("latest_trade_date")
+  latestFinancialUpdate  DateTime? @map("latest_financial_update")
+  dataUpdatedAt          DateTime  @map("data_updated_at")
+
+  @@index([state])
+  @@index([party])
+  @@index([chamber])
+  @@map("senator_summaries")
+}
+
+// ---------------------------------------------------------------------------
 // Quiver: Corporate Donors
 // ---------------------------------------------------------------------------
 

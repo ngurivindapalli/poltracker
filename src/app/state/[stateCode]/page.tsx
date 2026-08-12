@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/getBaseUrl'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import StateElectionsSection from '@/components/state/StateElectionsSection'
@@ -14,32 +13,31 @@ import SenatorsList from '@/components/SenatorsList'
 import { MAYORS } from "@/data/mayors"
 import { GOVERNOR_BY_STATE } from "@/data/governorsByState"
 import { getMayorImage } from "@/lib/getMayorImage"
+import { getSenatorSummaries } from '@/lib/senators/summaries'
+import { getBaseUrl } from '@/lib/getBaseUrl'
 
-export const revalidate = 3600 // ISR: regenerate page every hour
+export const revalidate = 600
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const state = params.stateCode.toUpperCase()
   const base = getBaseUrl()
   
-  // Parallel fetch with caching
-  const [senatorsRes, repsRes, stateDataRes] = await Promise.all([
-    fetch(`${base}/api/senators`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    }),
+  const [{ senators: allSenators }, repsRes, stateDataRes] = await Promise.all([
+    getSenatorSummaries(),
     fetch(`${base}/api/representatives`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }
     }),
     fetch(`${base}/api/state/${state}`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }
     })
   ])
 
-  const senatorsData = senatorsRes.ok ? await senatorsRes.json() : { senators: [] }
   const repsData = repsRes.ok ? await repsRes.json() : { representatives: [] }
   const stateData = stateDataRes.ok ? await stateDataRes.json() : null
 
-  // Filter by state
-  const stateSenators = (senatorsData.senators || []).filter((s: any) => s.state === state)
+  const stateSenators = allSenators.filter(
+    (s) => (s.state || "").toUpperCase() === state
+  )
   const stateReps = (repsData.representatives || [])
     .filter((r: any) => r.state === state)
     .sort((a: any, b: any) => {

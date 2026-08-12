@@ -17,6 +17,7 @@ export const QUIVER_CACHE_FILES = {
   corporateLobbying: "corporate-lobbying.json",
   offExchange: "off-exchange.json",
   trumpTrades: "trump-trades.json",
+  senatorSummaries: "senator-summaries.json",
   meta: "meta.json",
   syncLog: "sync-log.json",
   unmatchedTrades: "unmatched-trades.json",

@@ -13,17 +13,18 @@ const map: Record<string, string> = {
   lobbying: "lobbying",
   offexchange: "offexchange",
   trump: "trump",
+  summaries: "summaries",
 };
 
 async function main() {
-  if (!process.env.QUIVER_API_KEY) {
+  const only = arg && map[arg] ? [map[arg] as never] : undefined;
+  if (arg !== "summaries" && !process.env.QUIVER_API_KEY) {
     console.error(
       "Missing QUIVER_API_KEY. Set it in .env or .env.local (see .env.example)."
     );
     process.exit(1);
   }
 
-  const only = arg && map[arg] ? [map[arg] as never] : undefined;
   console.log(
     only ? `Syncing dataset: ${arg}` : "Syncing ALL Quiver Hobbyist datasets..."
   );
