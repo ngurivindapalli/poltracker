@@ -4,33 +4,25 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Leader } from "@/data/globalLeaders";
 
-interface LeaderCardProps {
-  leader: Leader;
-}
-
-export default function LeaderCard({ leader }: LeaderCardProps) {
+export default function LeaderCard({ leader }: { leader: Leader }) {
   const [imgSrc, setImgSrc] = useState(leader.image);
 
   return (
-    <Link href={`/global/${leader.slug}`}>
-      <div className="card text-center hover:shadow-elevated transition">
-        <div className="w-24 h-24 mb-4 mx-auto rounded-full overflow-hidden border-2 border-border flex items-center justify-center bg-card">
-          <img
-            src={imgSrc || "/images/placeholder-avatar.svg"}
-            alt={leader.name}
-            onError={() => setImgSrc("/images/placeholder-avatar.svg")}
-            className="w-full h-full object-cover object-center"
-          />
-        </div>
-
-        <h3 className="text-lg font-semibold text-foreground">{leader.name}</h3>
-
-        <p className="text-sm text-muted-foreground">{leader.title}</p>
-
-        <span className="mt-2 inline-block px-3 py-1 text-xs rounded-full bg-muted text-muted-foreground">
-          {leader.country}
-        </span>
+    <Link href={`/global/${leader.slug}`} className="interactive-card block p-5 text-center">
+      <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imgSrc || "/images/placeholder-avatar.svg"}
+          alt=""
+          onError={() => setImgSrc("/images/placeholder-avatar.svg")}
+          className="h-full w-full object-cover"
+        />
       </div>
+      <h3 className="text-[15px] font-semibold text-foreground">{leader.name}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{leader.title}</p>
+      <span className="mt-2 inline-block text-xs text-muted-foreground">
+        {leader.country}
+      </span>
     </Link>
   );
 }

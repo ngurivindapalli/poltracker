@@ -104,7 +104,7 @@ export default function CandidatesPage() {
           Candidate Posts
         </h1>
         <p className="text-[16px] text-[#64748B] mb-6">
-          A platform for candidates running for office to share updates and connect with voters.
+          Updates from candidates running for office.
         </p>
         <Button
           onClick={() => setShowForm(!showForm)}
@@ -236,7 +236,7 @@ export default function CandidatesPage() {
                       </h3>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[14px] text-[#64748B]">
-                          Running for: {post.office} — {post.state}
+                          Running for {post.office} in {post.state}
                         </span>
                         <span className="text-[#E2E8F0]">•</span>
                         <Badge

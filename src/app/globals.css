@@ -1,118 +1,175 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  --background: 40 20% 98%;
+  --foreground: 222 28% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  --muted: 210 16% 93%;
-  --muted-foreground: 215 16% 47%;
-  --border: 214 32% 91%;
-  --destructive: 0 72% 51%;
+  --card-foreground: 222 28% 12%;
+  --primary: 222 28% 14%;
+  --primary-foreground: 40 20% 98%;
+  --muted: 210 16% 94%;
+  --muted-foreground: 215 14% 42%;
+  --border: 214 18% 88%;
+  --ring: 222 28% 14%;
+  --destructive: 0 72% 46%;
   --destructive-foreground: 210 40% 98%;
+  --success: 152 48% 32%;
+  --warning: 38 78% 42%;
+  --party-d: 217 72% 42%;
+  --party-r: 0 68% 46%;
+  --party-i: 32 70% 40%;
+  --radius: 10px;
+  --shadow-subtle: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
+  --shadow-elevated: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 180ms;
+  --duration: 280ms;
 }
 
 .dark {
-  --background: 222 47% 6%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 10%;
-  --card-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --muted: 222 47% 14%;
-  --muted-foreground: 215 20% 70%;
-  --border: 222 47% 18%;
+  --background: 222 24% 7%;
+  --foreground: 40 16% 96%;
+  --card: 222 22% 10%;
+  --card-foreground: 40 16% 96%;
+  --primary: 40 16% 96%;
+  --primary-foreground: 222 24% 10%;
+  --muted: 222 16% 14%;
+  --muted-foreground: 215 12% 68%;
+  --border: 222 14% 18%;
+  --ring: 40 16% 90%;
   --destructive: 0 72% 58%;
   --destructive-foreground: 210 40% 98%;
+  --success: 152 42% 52%;
+  --warning: 38 78% 56%;
+  --party-d: 213 78% 68%;
+  --party-r: 0 72% 68%;
+  --party-i: 38 78% 62%;
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.36);
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    font-family: Inter, system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4 {
+    color: hsl(var(--foreground));
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    color: hsl(var(--muted-foreground));
   }
 }
 
 @layer components {
+  .container-page {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-page {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
   .card {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  }
-
-  .section {
-    max-width: 72rem;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-subtle);
   }
 
   .panel {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    border-radius: calc(var(--radius) + 2px);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .section {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 3rem 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .section {
+      padding: 4rem 1.5rem;
+    }
+  }
+
+  .stat-num {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: hsl(var(--foreground));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .label-caps {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .interactive-card {
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--card));
+    box-shadow: var(--shadow-subtle);
+    border-radius: var(--radius);
+    transition: transform var(--duration) var(--ease-out),
+      box-shadow var(--duration) var(--ease-out),
+      border-color var(--duration) var(--ease-out);
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+    border-color: hsl(var(--foreground) / 0.18);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .interactive-card:hover {
+      transform: none;
+    }
   }
 }
 
-/* Fix washed-out text in dark mode */
-.dark {
-  color-scheme: dark;
-}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-.dark body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
-/* Stronger text hierarchy */
-h1, h2, h3, h4 {
-  color: hsl(var(--foreground));
-  font-weight: 600;
-}
-
-p {
-  color: hsl(var(--muted-foreground));
-}
-
-/* Fix cards being too light */
-.card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-}
-
-/* Fix sections like your Financial Interests panel */
-.section-card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-}
-
-/* Fix faint text issue */
-.dark .text-muted-foreground {
-  color: hsl(var(--muted-foreground));
-  opacity: 0.9;
-}
-
-.section + .section {
-  margin-top: 2rem;
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

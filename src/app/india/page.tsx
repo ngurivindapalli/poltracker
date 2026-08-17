@@ -37,7 +37,7 @@ export default function IndiaPage() {
 
       <PageHeader
         title="India"
-        subtitle="Republic of India — Explore Indian politics by state and territory"
+        subtitle="Indian politics by state and territory"
       />
 
       {/* Prime Minister Section */}
@@ -62,7 +62,7 @@ export default function IndiaPage() {
 
       {/* Map Section */}
       <Section
-        title="Explore By State"
+        title="Browse by state"
         subtitle="Click on any state to view regional political information."
       >
         <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-4 overflow-hidden shadow-sm">

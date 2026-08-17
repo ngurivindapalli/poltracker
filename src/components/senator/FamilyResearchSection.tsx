@@ -59,7 +59,7 @@ export default function FamilyResearchSection({ bioguideId, country = 'US' }: Fa
     return (
       <section style={{ marginTop: '3rem' }}>
         <h2 style={{ fontSize: '1.6rem', marginBottom: '1rem', fontWeight: 600 }}>
-          Family & Close Associates — Professional Overview
+          Family and close associates
         </h2>
         <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
           Loading family research data...
@@ -72,7 +72,7 @@ export default function FamilyResearchSection({ bioguideId, country = 'US' }: Fa
     return (
       <section style={{ marginTop: '3rem' }}>
         <h2 style={{ fontSize: '1.6rem', marginBottom: '1rem', fontWeight: 600 }}>
-          Family & Close Associates — Professional Overview
+          Family and close associates
         </h2>
         <div
           style={{
@@ -93,7 +93,7 @@ export default function FamilyResearchSection({ bioguideId, country = 'US' }: Fa
   return (
     <section style={{ marginTop: '3rem' }}>
       <h2 style={{ fontSize: '1.6rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-        Family & Close Associates — Professional Overview
+        Family and close associates
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -160,7 +160,7 @@ export default function FamilyResearchSection({ bioguideId, country = 'US' }: Fa
                           }}
                         >
                           <span style={{ fontSize: '0.875rem', color: '#111827', flex: 1 }}>
-                            <strong>{org.name}</strong> — {org.role}
+                            <strong>{org.name}</strong> · {org.role}
                           </span>
                           <span
                             className={`text-xs font-medium px-2 py-1 rounded ${badge.className}`}

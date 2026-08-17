@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
-/**
- * Defer mounting children until near viewport — keeps secondary financial
- * sections from firing fetch() on initial page open.
- */
 export default function LazySection({
   children,
   fallback,
@@ -47,8 +44,9 @@ export default function LazySection({
       {visible
         ? children
         : fallback ?? (
-            <div className="text-sm text-[#94A3B8] py-8 text-center">
-              Scroll to load…
+            <div className="space-y-2 py-4" aria-busy="true">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-24 w-full" />
             </div>
           )}
     </div>

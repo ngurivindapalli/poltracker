@@ -64,7 +64,7 @@ export default function AIPage() {
       padding: 20
     }}>
       <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem", fontWeight: 700 }}>
-        PolTracker AI
+        Ask Politeia
       </h1>
 
       <p style={{ color: "#6B7280", marginBottom: 30 }}>

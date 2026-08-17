@@ -164,7 +164,7 @@ function RelationshipGraphInner({ bioguideId }: RelationshipGraphProps) {
                 // Empty state card when no prominent family members
                 <div className="rounded-2xl border bg-white shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">
-                    Family & Close Associates — Professional Overview
+                    Family and close associates
                   </h3>
 
                   <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -179,7 +179,7 @@ function RelationshipGraphInner({ bioguideId }: RelationshipGraphProps) {
                           State Colleague:
                         </p>
                         <p className="text-sm text-gray-600">
-                          {colleagueInfo.name} — U.S. Senator {colleagueInfo.state && `(${colleagueInfo.state})`}
+                          {colleagueInfo.name}, U.S. Senator {colleagueInfo.state && `(${colleagueInfo.state})`}
                         </p>
                       </div>
                     )}

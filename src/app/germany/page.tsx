@@ -44,7 +44,7 @@ export default function Germany() {
 
       <PageHeader
         title="Germany"
-        subtitle="Federal Republic of Germany — Political landscape and state-level governance"
+        subtitle="Federal politics and state-level government"
       />
 
       {/* Chancellor Section */}
@@ -69,7 +69,7 @@ export default function Germany() {
 
       {/* Map Section */}
       <Section
-        title="Explore By State"
+        title="Browse by state"
         subtitle="Click on any state to view regional political information."
       >
         <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-4 overflow-hidden shadow-sm">

@@ -98,6 +98,13 @@ export type QuiverOffExchange = {
   DPI?: number | null;
 };
 
+/** Confirmed shape of GET /beta/live/congressholdings */
+export type QuiverCongressHolding = {
+  Politician?: string | null;
+  Holdings?: string | Record<string, number> | null;
+  Type?: string | null;
+};
+
 /** Confirmed shape of GET /beta/bulk/trumpstocktrades */
 export type QuiverTrumpTrade = {
   Ticker?: string | null;
@@ -198,6 +205,21 @@ export type NormalizedOffExchange = {
   otcShort: number | null;
   otcTotal: number | null;
   dpi: number | null;
+  source: "quiver";
+  fetchedAt: string;
+};
+
+export type NormalizedHoldingPosition = {
+  ticker: string;
+  value: number;
+};
+
+export type NormalizedCongressHolding = {
+  sourceHash: string;
+  politicianName: string;
+  bioguideId: string | null;
+  chamber: string | null;
+  positions: NormalizedHoldingPosition[];
   source: "quiver";
   fetchedAt: string;
 };

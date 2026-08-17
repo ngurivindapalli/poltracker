@@ -65,36 +65,28 @@ export default function FinancialOverview({
 
   return (
     <section>
-      <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-        Financial Overview
-      </h2>
+      <h2 className="mb-4 text-xl font-semibold">Financial overview</h2>
       <Card className="p-6">
         {loading ? (
-          <div className="text-sm text-[#64748B]">Loading…</div>
+          <div className="text-sm text-muted-foreground">Loading overview…</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-4">
+            <div className="mb-4 grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#64748B] font-semibold">
-                  Estimated Net Worth
-                </div>
-                <div className="text-2xl font-bold text-green-700 mt-1">
+                <div className="label-caps">Estimated net worth</div>
+                <div className="stat-num mt-1 text-2xl">
                   {money(data?.estimatedNetWorth ?? null)}
                 </div>
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#64748B] font-semibold">
-                  Trade Count
-                </div>
-                <div className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                <div className="label-caps">Trade count</div>
+                <div className="stat-num mt-1 text-2xl">
                   {data?.tradeCount ?? "—"}
                 </div>
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#64748B] font-semibold">
-                  Trade Volume
-                </div>
-                <div className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                <div className="label-caps">Trade volume</div>
+                <div className="stat-num mt-1 text-2xl">
                   {money(data?.tradeVolume ?? null)}
                 </div>
               </div>

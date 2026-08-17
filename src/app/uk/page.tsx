@@ -55,7 +55,7 @@ export default function UKPage() {
 
       <PageHeader
         title="United Kingdom"
-        subtitle="Track major UK political developments, Parliament news, and government updates."
+        subtitle="Parliament, government, and current political news."
       />
 
       {/* Prime Minister Section */}

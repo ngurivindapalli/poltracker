@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Table, TableRow, TableCell } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
+import { SkeletonTable } from "@/components/ui/Skeleton";
+import { EmptyState, ErrorState } from "@/components/ui/EmptyState";
+import Link from "next/link";
 
 interface ScheduleItem {
   time: string;
@@ -15,53 +18,57 @@ interface ScheduleItem {
 export default function CspanSchedule() {
   const [shows, setShows] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/cspan")
       .then((r) => r.json())
       .then((data) => {
-        setShows(data);
+        setShows(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
   }, []);
 
   return (
     <Card className="mt-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-[24px] font-semibold text-[#1E3A5F]">
-            C-SPAN Schedule
-          </h2>
-          <p className="text-[14px] text-[#64748B]">
-            Live government coverage and legislative events
+          <h2 className="text-2xl font-semibold tracking-tight">Live government coverage</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Public C-SPAN programming. Not produced by Politeia.
           </p>
         </div>
-        <Badge variant="success">LIVE UPDATES</Badge>
+        <Link href="/cspan" className="text-sm font-medium hover:underline">
+          Full schedule
+        </Link>
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-[#64748B]">Loading schedule...</div>
+        <SkeletonTable rows={5} />
+      ) : error ? (
+        <ErrorState title="C-SPAN schedule is temporarily unavailable." />
       ) : shows.length === 0 ? (
-        <div className="p-8 text-center text-[#64748B]">
-          No scheduled programs available at this time.
-        </div>
+        <EmptyState title="No scheduled programs available at this time." />
       ) : (
         <Table headers={["Time", "Event", "Channel"]}>
-          {shows.map((s, i) => (
+          {shows.slice(0, 8).map((s, i) => (
             <TableRow key={i}>
-              <TableCell className="font-semibold text-[#1E3A5F] w-32">
+              <TableCell className="w-32 font-medium tabular-nums">
                 {s.time}
               </TableCell>
               <TableCell>
-                <div className="font-medium text-[#0F172A]">{s.title}</div>
+                <div className="font-medium text-foreground">{s.title}</div>
                 {s.type && (
-                  <span className="text-xs text-[#64748B] mt-1 block">
+                  <span className="mt-1 block text-xs text-muted-foreground">
                     {s.type}
                   </span>
                 )}
               </TableCell>
-              <TableCell className="text-[#64748B] w-32">
+              <TableCell className="w-32">
                 <Badge variant="neutral">{s.channel}</Badge>
               </TableCell>
             </TableRow>

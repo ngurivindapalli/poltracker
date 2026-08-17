@@ -2,13 +2,11 @@ export default function Hero() {
   return (
     <div className="hero">
       <div className="heroTitle">
-        Everything you need —
-        in one place
+        Public data on politics and money
       </div>
 
       <div className="heroSubtitle">
-        Track politicians, legislation,
-        and political news worldwide.
+        Profiles, financial disclosures, legislation, and news.
       </div>
 
       <div className="flags">

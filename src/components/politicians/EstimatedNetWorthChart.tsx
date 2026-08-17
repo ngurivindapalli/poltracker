@@ -271,7 +271,7 @@ export default function EstimatedNetWorthChart({
                 Starting holdings before the first disclosed trade are unknown and not reflected.
               </li>
               <li>
-                This is not an audited net worth calculation—it is a disclosure-based estimate only.
+                This is not an audited net worth calculation. It is a disclosure-based estimate only.
               </li>
             </ul>
           </div>

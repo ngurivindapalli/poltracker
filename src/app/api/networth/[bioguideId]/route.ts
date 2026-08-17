@@ -29,6 +29,6 @@ export async function GET(
       source.meta?.datasets?.politician_net_worth?.lastUpdated ??
       source.lastUpdated,
     disclaimer:
-      "Estimated Net Worth from Quiver Quantitative — not an official government figure.",
+      "Estimated Net Worth from Quiver Quantitative. Not an official government figure.",
   });
 }

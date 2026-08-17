@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       dataset:
-        description: "all | trades | networth | donors | contracts | lobbying | offexchange | trump"
+        description: "all | trades | networth | donors | contracts | lobbying | offexchange | trump | holdings"
         required: false
         default: "all"
 

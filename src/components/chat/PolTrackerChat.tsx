@@ -94,7 +94,7 @@ export default function PolTrackerChat({ bioguideId, state }: PolTrackerChatProp
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 w-14 h-14 bg-[#2563EB] text-white rounded-full shadow-lg hover:shadow-xl hover:bg-[#1D4ED8] transition-all duration-200 flex items-center justify-center z-50"
-        aria-label="Ask PolTracker"
+        aria-label="Ask Politeia"
       >
         <svg
           className="w-6 h-6"
@@ -126,10 +126,10 @@ export default function PolTrackerChat({ bioguideId, state }: PolTrackerChatProp
             <div className="flex items-center justify-between p-4 border-b border-[#E2E8F0]">
               <div>
                 <h3 className="text-[16px] font-semibold text-[#1E3A5F]">
-                  Ask PolTracker
+                  Ask Politeia
                 </h3>
                 <p className="text-[12px] text-[#64748B]">
-                  Ask about bills, officials, and more
+                  Ask about politicians, legislation, and policy
                 </p>
               </div>
               <button

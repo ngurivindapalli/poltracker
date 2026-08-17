@@ -39,6 +39,9 @@ export const QUIVER_ENDPOINTS = {
 
   // 7. Donald Trump stock trades (verified live 2026-08-11)
   bulkTrumpStockTrades: "/bulk/trumpstocktrades",
+
+  // 8. Congress stock holdings (verified live 2026-08-17)
+  liveCongressHoldings: "/live/congressholdings",
 } as const;
 
 export type QuiverDatasetKey =
@@ -48,4 +51,5 @@ export type QuiverDatasetKey =
   | "government_contracts"
   | "corporate_lobbying"
   | "off_exchange"
-  | "trump_trades";
+  | "trump_trades"
+  | "congress_holdings";

@@ -4,7 +4,7 @@ import { CommentSection } from "@/components/comments/CommentSection"
 
 export const metadata = {
   title: "Europe Politics | Politeia",
-  description: "Political intelligence covering European Union, NATO, and European governments.",
+  description: "EU institutions, member states, and European governments.",
 }
 
 export default function EuropePage() {
@@ -13,7 +13,7 @@ export default function EuropePage() {
       <div className="space-y-2 pb-6 border-b border-border">
         <h1 className="text-3xl font-bold text-foreground">Europe Politics</h1>
         <p className="text-muted-foreground text-base">
-          Political intelligence for EU member states, NATO allies, and European governments.
+          EU member states, NATO allies, and European governments.
         </p>
       </div>
 

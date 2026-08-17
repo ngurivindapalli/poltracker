@@ -39,7 +39,7 @@ export default async function RepresentativesPage() {
 
       <PageHeader 
         title="U.S. House of Representatives" 
-        subtitle="Complete directory of current United States Representatives with financial disclosures, voting records, and donor networks."
+        subtitle="Current members of the U.S. House."
       />
 
       <Section>

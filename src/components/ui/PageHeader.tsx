@@ -1,21 +1,35 @@
 import React from "react";
+import { cn } from "@/lib/cn";
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   className?: string;
   action?: React.ReactNode;
+  kicker?: string;
 }
 
-export function PageHeader({ title, subtitle, className = "", action }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  className = "",
+  action,
+  kicker,
+}: PageHeaderProps) {
   return (
-    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#E2E8F0] ${className}`}>
+    <div
+      className={cn(
+        "mb-8 flex flex-col justify-between gap-4 border-b border-border pb-6 md:flex-row md:items-end",
+        className
+      )}
+    >
       <div>
-        <h1 className="text-[32px] font-bold text-[#1E3A5F] leading-tight">
+        {kicker ? <p className="label-caps mb-2">{kicker}</p> : null}
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-2 text-[18px] text-[#64748B] max-w-3xl">
+          <p className="mt-2 max-w-3xl text-base text-muted-foreground sm:text-lg">
             {subtitle}
           </p>
         )}

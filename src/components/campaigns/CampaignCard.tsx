@@ -33,7 +33,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             {campaign.candidateName}
           </h3>
           <p className="text-[13px] text-muted-foreground mt-0.5">
-            {campaign.office} — {campaign.region}, {campaign.country}
+            {campaign.office} · {campaign.region}, {campaign.country}
           </p>
         </div>
         <Badge variant={statusVariant(campaign.campaignStatus)} className="shrink-0">

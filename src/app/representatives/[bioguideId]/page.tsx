@@ -3,9 +3,9 @@ import { getBaseUrl } from '@/lib/getBaseUrl'
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
-import EstimatedNetWorthChart from '@/components/politicians/EstimatedNetWorthChart'
 import FamilyTree from '@/components/FamilyTree'
-import LobbyingTable from '@/components/senator/LobbyingTable'
+import CorporateDonorsTable from '@/components/senator/CorporateDonorsTable'
+import CongressHoldings from '@/components/senator/CongressHoldings'
 import AffiliationsGrid from '@/components/senator/AffiliationsGrid'
 import FinancialOverview from '@/components/financials/FinancialOverview'
 import RecentTrades from '@/components/senator/RecentTrades'
@@ -161,11 +161,8 @@ export default async function RepresentativePage({ params }: { params: { bioguid
 
            <FinancialOverview bioguideId={bioguideId} />
            <RecentTrades bioguideId={bioguideId} />
+           <CongressHoldings bioguideId={bioguideId} />
            <LargestHoldings bioguideId={bioguideId} />
-
-           <section>
-             <EstimatedNetWorthChart bioguideId={bioguideId} />
-           </section>
 
            <GovernmentContracts bioguideId={bioguideId} />
 
@@ -173,7 +170,7 @@ export default async function RepresentativePage({ params }: { params: { bioguid
              <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
                Corporate Donors
              </h2>
-             <LobbyingTable bioguideId={bioguideId} />
+             <CorporateDonorsTable bioguideId={bioguideId} />
            </section>
 
            <CompanyMarketSignals bioguideId={bioguideId} />

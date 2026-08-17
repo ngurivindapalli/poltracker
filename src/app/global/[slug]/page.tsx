@@ -6,6 +6,7 @@ import Image from "next/image";
 import { GLOBAL_LEADERS } from "@/data/globalLeaders";
 import { LeaderNewsFeed } from "@/components/news/LeaderNewsFeed";
 import { CommentSection } from "@/components/comments/CommentSection";
+import TrumpTradesPanel from "@/components/financials/TrumpTradesPanel";
 
 type LeaderAssets = {
   name: string;
@@ -291,6 +292,21 @@ export default function GlobalLeaderPage({
           )}
         </div>
       </section>
+
+      {leader.slug === "donald-trump" ? (
+        <section className="mt-10" id="trading">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold">Stock trading</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Reported stock trades from synchronized Quiver data. This is
+                not a live portfolio or current-holdings view.
+              </p>
+            </div>
+          </div>
+          <TrumpTradesPanel compact limit={50} />
+        </section>
+      ) : null}
 
       {/* Recent News */}
       <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">

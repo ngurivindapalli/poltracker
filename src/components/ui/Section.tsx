@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/cn";
 
 interface SectionProps {
   title?: string;
@@ -8,18 +9,20 @@ interface SectionProps {
   id?: string;
 }
 
-export function Section({ title, subtitle, children, className = "", id }: SectionProps) {
+export function Section({
+  title,
+  subtitle,
+  children,
+  className = "",
+  id,
+}: SectionProps) {
   return (
-    <section id={id} className={`section ${className}`}>
+    <section id={id} className={cn("section", className)}>
       {(title || subtitle) && (
-        <div className="mb-6">
-          {title && (
-            <h2 className="text-[24px] font-semibold text-foreground mb-2">
-              {title}
-            </h2>
-          )}
+        <div className="mb-8 max-w-3xl">
+          {title && <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>}
           {subtitle && (
-            <p className="text-[16px] text-muted-foreground">{subtitle}</p>
+            <p className="mt-2 text-base text-muted-foreground">{subtitle}</p>
           )}
         </div>
       )}

@@ -11,18 +11,18 @@ export function Table({ headers, children, className = "" }: TableProps) {
     <div className={`w-full overflow-x-auto ${className}`}>
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+          <tr className="border-b border-border bg-muted/40">
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="py-3 px-4 text-[14px] font-bold text-[#1E3A5F] uppercase tracking-wider"
+                className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
               >
                 {header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#E2E8F0]">{children}</tbody>
+        <tbody className="divide-y divide-border">{children}</tbody>
       </table>
     </div>
   );
@@ -38,7 +38,7 @@ export function TableRow({ children, className = "", onClick }: TableRowProps) {
   return (
     <tr
       onClick={onClick}
-      className={`hover:bg-[#F1F5F9] transition-colors duration-150 ${
+      className={`hover:bg-muted/50 transition-colors duration-150 ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
     >
@@ -54,7 +54,7 @@ interface TableCellProps {
 
 export function TableCell({ children, className = "" }: TableCellProps) {
   return (
-    <td className={`py-3 px-4 text-[16px] text-[#334155] ${className}`}>
+    <td className={`px-4 py-3 text-sm text-foreground ${className}`}>
       {children}
     </td>
   );

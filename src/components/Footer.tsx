@@ -1,66 +1,103 @@
 import React from "react";
 import Link from "next/link";
-import { SupportLinks } from "@/components/SupportLinks";
+import { SupportPoliteia } from "@/components/support/SupportPoliteia";
+
+const EXPLORE = [
+  { href: "/senators", label: "Senators" },
+  { href: "/representatives", label: "Representatives" },
+  { href: "/cabinet", label: "Cabinet" },
+  { href: "/us/mayors", label: "Mayors" },
+  { href: "/candidates", label: "Candidates" },
+];
+
+const GLOBAL = [
+  { href: "/uk", label: "United Kingdom" },
+  { href: "/germany", label: "Germany" },
+  { href: "/india", label: "India" },
+  { href: "/europe", label: "Europe" },
+  { href: "/canada", label: "Canada" },
+  { href: "/latin-america", label: "Latin America" },
+];
+
+const INTELLIGENCE = [
+  { href: "/investments", label: "Investments" },
+  { href: "/bills", label: "Legislation" },
+  { href: "/campaigns", label: "Campaigns" },
+  { href: "/cspan", label: "C-SPAN" },
+  { href: "/chat", label: "Ask Politeia" },
+];
+
+const RESOURCES = [
+  { href: "/about", label: "About" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background py-12 mt-auto">
-      <div className="max-w-[1300px] mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-xs">
+    <footer className="mt-auto border-t border-border bg-background">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-8 px-4 py-12 sm:px-6 md:grid-cols-3 lg:grid-cols-5">
+        <div className="col-span-2 md:col-span-3 lg:col-span-1">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-[10px] font-semibold text-primary-foreground">
               P
             </div>
-            <span className="text-[18px] font-bold text-foreground">
-              Politeia
-            </span>
+            <span className="text-base font-semibold text-foreground">Politeia</span>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Professional political intelligence and transparency platform. 
-            Tracking investments, legislation, and influence networks.
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Public data on politicians, legislation, and financial activity.
           </p>
         </div>
-        
-        <div>
-          <h4 className="text-foreground font-bold mb-4">Regions</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link href="/" className="hover:text-primary">United States</Link></li>
-            <li><Link href="/uk" className="hover:text-primary">United Kingdom</Link></li>
-            <li><Link href="/germany" className="hover:text-primary">Germany</Link></li>
-            <li><Link href="/india" className="hover:text-primary">India</Link></li>
-          </ul>
-        </div>
 
+        <FooterCol title="Explore" items={EXPLORE} />
+        <FooterCol title="Global" items={GLOBAL} />
+        <FooterCol title="Intelligence" items={INTELLIGENCE} />
         <div>
-          <h4 className="text-foreground font-bold mb-4">Data</h4>
+          <h4 className="mb-3 text-sm font-semibold text-foreground">Resources</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link href="/senators" className="hover:text-primary">Senators</Link></li>
-            <li><Link href="/representatives" className="hover:text-primary">Representatives</Link></li>
-            <li><Link href="/investments" className="hover:text-primary">Investments</Link></li>
-            <li><Link href="/cspan" className="hover:text-primary">C-SPAN Schedule</Link></li>
-            <li><Link href="/bills" className="hover:text-primary">Legislation</Link></li>
+            {RESOURCES.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="hover:text-foreground">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
-        </div>
-
-        <div>
-          <h4 className="text-foreground font-bold mb-4">Legal</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link href="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-            <li><Link href="/terms" className="hover:text-primary">Terms of Service</Link></li>
-            <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-foreground font-bold mb-4">Support Politeia</h4>
-          <SupportLinks variant="footer" />
+          <div className="mt-6">
+            <SupportPoliteia variant="footer" />
+          </div>
         </div>
       </div>
-      <div className="max-w-[1300px] mx-auto px-6 mt-12 pt-8 border-t border-border text-center">
-        <p className="text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Politeia. All rights reserved. Data sourced from official government APIs.
+      <div className="border-t border-border">
+        <p className="mx-auto max-w-[1200px] px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
+          © {new Date().getFullYear()} Politeia. Data sourced from official
+          government APIs and public disclosures. Estimates are labeled as such
+          and are not official government figures.
         </p>
       </div>
     </footer>
+  );
+}
+
+function FooterCol({
+  title,
+  items,
+}: {
+  title: string;
+  items: { href: string; label: string }[];
+}) {
+  return (
+    <div>
+      <h4 className="mb-3 text-sm font-semibold text-foreground">{title}</h4>
+      <ul className="space-y-2 text-sm text-muted-foreground">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link href={item.href} className="hover:text-foreground">
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

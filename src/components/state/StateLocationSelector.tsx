@@ -68,7 +68,7 @@ export default function StateLocationSelector({ stateCode, stateName, onLocation
                 : "bg-white text-[#1E3A5F] cursor-pointer"
             }`}
           >
-            <option value="">— Select Location —</option>
+            <option value="">Select a location</option>
             {scope === "county" && locations.counties?.map((county: string, index: number) => (
               <option key={index} value={county}>{county}</option>
             ))}

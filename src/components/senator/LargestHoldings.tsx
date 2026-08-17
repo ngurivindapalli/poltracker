@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 
-/**
- * Disclosed Holdings + Estimated Live Portfolio are Quiver web product concepts.
- * Hobbyist API does not expose those position series. We show an explicit unavailable
- * state rather than inventing holdings from congressional trades.
- */
+type TickerRow = {
+  ticker: string;
+  tradeCount: number;
+  lastTradeDate: string | null;
+};
+
 export default function LargestHoldings({ bioguideId }: { bioguideId: string }) {
-  const [tradeCount, setTradeCount] = useState<number | null>(null);
+  const [rows, setRows] = useState<TickerRow[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,18 +20,18 @@ export default function LargestHoldings({ bioguideId }: { bioguideId: string }) 
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/member/${encodeURIComponent(bioguideId)}/financial-profile`);
+        const res = await fetch(
+          `/api/member/${encodeURIComponent(bioguideId)}/financial-profile`
+        );
         const json = await res.json();
         if (!cancelled) {
-          setTradeCount(
-            json.financialOverview?.tradeCount ??
-              json.portfolioSnapshot?.tradeCount ??
-              (Array.isArray(json.recentTrades) ? json.recentTrades.length : null)
+          setRows(
+            Array.isArray(json.mostTradedTickers) ? json.mostTradedTickers : []
           );
           setLastUpdated(json.lastUpdated || null);
         }
       } catch {
-        if (!cancelled) setTradeCount(null);
+        if (!cancelled) setRows([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -41,54 +42,39 @@ export default function LargestHoldings({ bioguideId }: { bioguideId: string }) 
   }, [bioguideId]);
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-          Estimated Live Stock Portfolio
-        </h2>
-        <Card className="p-6">
-          {loading ? (
-            <div className="text-sm text-[#64748B]">Loading…</div>
-          ) : (
-            <>
-              <p className="text-sm text-[#64748B] leading-relaxed">
-                Quiver Quantitative publishes an estimated live stock portfolio on
-                their website. The Hobbyist API plan used by Politeia does{" "}
-                <span className="font-medium text-[#475569]">not</span> expose
-                position-level portfolio holdings, so Politeia does not invent
-                holdings from trade activity.
-              </p>
-              <p className="text-sm text-[#64748B] mt-3">
-                Use <span className="font-medium">Estimated Net Worth</span> (from{" "}
-                <code className="text-xs">/bulk/congress/politicians</code>) and{" "}
-                <span className="font-medium">Congressional Trading</span> for
-                available Quiver data
-                {tradeCount != null ? ` (${tradeCount} trades reported).` : "."}
-              </p>
-              <div className="mt-4">
-                <QuiverSourceLabel lastUpdated={lastUpdated} />
-              </div>
-            </>
-          )}
-        </Card>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
-          Disclosed Holdings
-        </h2>
-        <Card className="p-6">
-          <p className="text-sm text-[#64748B] leading-relaxed">
-            Disclosed holdings come from annual financial disclosure filings.
-            That holdings line-item dataset is not available through the Quiver
-            Hobbyist endpoints currently wired into Politeia. Politeia will not
-            derive fake holding amounts from buy/sell ranges.
+    <section>
+      <h2 className="mb-4 text-xl font-semibold">Most traded tickers</h2>
+      <Card className="p-6">
+        <p className="mb-4 text-sm text-muted-foreground">
+          Tickers with the most disclosed congressional trades for this member.
+          This is activity, not a holdings list.
+        </p>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No disclosed trades in the synchronized dataset.
           </p>
-          <div className="mt-4">
-            <QuiverSourceLabel lastUpdated={lastUpdated} />
-          </div>
-        </Card>
-      </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {rows.map((r) => (
+              <li
+                key={r.ticker}
+                className="flex items-center justify-between py-2.5 text-sm"
+              >
+                <span className="font-medium">{r.ticker}</span>
+                <span className="text-muted-foreground">
+                  {r.tradeCount} trades
+                  {r.lastTradeDate ? ` · last ${r.lastTradeDate}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-4">
+          <QuiverSourceLabel lastUpdated={lastUpdated} />
+        </div>
+      </Card>
     </section>
   );
 }

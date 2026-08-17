@@ -174,7 +174,7 @@ function CountySelectorInner({
           disabled={countiesLoading}
         >
           <option value="">
-            {countiesLoading ? "Loading counties..." : "— Select a County —"}
+            {countiesLoading ? "Loading counties..." : "Select a county"}
           </option>
           {counties.map((county) => (
             <option key={county} value={county}>

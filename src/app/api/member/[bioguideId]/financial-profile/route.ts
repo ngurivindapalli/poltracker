@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import {
   getContractsForMember,
+  getContractsForTickers,
   getDisclosedHoldingsAvailability,
   getDisclosuresForMember,
   getDonorsForMember,
   getFinancialOverview,
+  getHoldingsForMember,
   getLobbyingForTickers,
-  getMostTradedTickers,
   getOffExchangeForTickers,
   getPortfolioSnapshot,
   getQuiverSourceMeta,
   getTradesForMember,
+  mostTradedFromTrades,
 } from "@/lib/profileFinancials";
 
 export const runtime = "nodejs";
@@ -27,42 +29,46 @@ export async function GET(
   try {
     const [
       recentTrades,
-      mostTradedTickers,
+      historyTrades,
       contracts,
       disclosures,
       snapshot,
       overview,
       donors,
       holdingsAvailability,
+      congressHoldingsRow,
     ] = await Promise.all([
       getTradesForMember(bioguideId, 50),
-      getMostTradedTickers(bioguideId, 10),
+      getTradesForMember(bioguideId, 2000),
       getContractsForMember(bioguideId, 40),
       getDisclosuresForMember(bioguideId, 8),
       getPortfolioSnapshot(bioguideId),
       getFinancialOverview(bioguideId),
       getDonorsForMember(bioguideId, 25),
       getDisclosedHoldingsAvailability(bioguideId),
+      getHoldingsForMember(bioguideId),
     ]);
 
+    const mostTradedTickers = mostTradedFromTrades(historyTrades, 10);
     const tickers = [
       ...new Set(
-        (
-          await getTradesForMember(bioguideId, 5000)
-        )
+        historyTrades
           .map((t) => t.ticker)
           .filter(Boolean)
           .map((t) => String(t).toUpperCase())
       ),
     ] as string[];
 
-    const [lobbying, offExchange] = await Promise.all([
+    const [lobbying, offExchange, contractsByTicker] = await Promise.all([
       getLobbyingForTickers(tickers, 40),
       getOffExchangeForTickers(tickers, 40),
+      getContractsForTickers(tickers, 40),
     ]);
 
+    const governmentContracts =
+      contracts.length > 0 ? contracts : contractsByTicker;
+
     const portfolioHistoryMap = new Map<string, number>();
-    const historyTrades = await getTradesForMember(bioguideId, 2000);
     for (const t of historyTrades) {
       if (!t.tradeDate) continue;
       const month = t.tradeDate.slice(0, 7);
@@ -76,6 +82,7 @@ export async function GET(
       }));
 
     const source = getQuiverSourceMeta();
+    const holdingsMeta = source.meta?.datasets?.congress_holdings;
 
     return NextResponse.json({
       bioguideId,
@@ -88,13 +95,19 @@ export async function GET(
       tradesCoverageEnd: source.tradesCoverageEnd,
       financialOverview: overview,
       recentTrades,
-      // Explicit: activity stats only — not disclosed holdings
       mostTradedTickers,
       largestHoldings: mostTradedTickers,
       disclosedHoldings: holdingsAvailability.disclosedHoldings,
       estimatedLivePortfolio: holdingsAvailability.estimatedLivePortfolio,
       holdingsAvailability,
-      governmentContracts: contracts,
+      congressHoldings: congressHoldingsRow
+        ? {
+            politicianName: congressHoldingsRow.politicianName,
+            positions: congressHoldingsRow.positions,
+            lastUpdated: holdingsMeta?.lastUpdated ?? congressHoldingsRow.fetchedAt,
+          }
+        : null,
+      governmentContracts,
       corporateDonors: donors,
       corporateLobbying: lobbying,
       offExchange,
@@ -102,7 +115,7 @@ export async function GET(
       estimatedNetWorth: overview.estimatedNetWorth,
       portfolioSnapshot: snapshot,
       portfolioHistory,
-      contractHistory: contracts.map((c) => ({
+      contractHistory: governmentContracts.map((c) => ({
         date: c.awardDate,
         amount: c.amount,
         agency: c.agency,
@@ -120,6 +133,7 @@ export async function GET(
         largestHoldings: [],
         disclosedHoldings: [],
         estimatedLivePortfolio: [],
+        congressHoldings: null,
         governmentContracts: [],
         corporateDonors: [],
         corporateLobbying: [],

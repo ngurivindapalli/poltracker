@@ -13,6 +13,7 @@ import {
 } from "@/lib/quiver/cache";
 import { getPrismaOptional } from "@/lib/quiver/prisma";
 import type {
+  NormalizedCongressHolding,
   NormalizedCongressTrade,
   NormalizedContract,
   NormalizedDonor,
@@ -109,6 +110,10 @@ function offExchangeAll(): NormalizedOffExchange[] {
 
 function trumpAll(): NormalizedTrumpTrade[] {
   return readQuiverJson<NormalizedTrumpTrade[]>("trumpTrades") ?? [];
+}
+
+function holdingsAll(): NormalizedCongressHolding[] {
+  return readQuiverJson<NormalizedCongressHolding[]>("congressHoldings") ?? [];
 }
 
 export function getQuiverSourceMeta() {
@@ -220,9 +225,7 @@ export async function getTradesForMember(
 }
 
 /**
- * Frequently traded tickers from congressional trades (activity), NOT holdings.
- * Quiver's Disclosed Holdings / Estimated Live Portfolio are separate products and
- * are not available as Hobbyist array endpoints for holdings lines.
+ * Frequently traded tickers from congressional trades (activity), not holdings.
  */
 export async function getMostTradedTickers(
   bioguideId: string,
@@ -231,14 +234,21 @@ export async function getMostTradedTickers(
   Array<{ ticker: string; tradeCount: number; lastTradeDate: string | null }>
 > {
   const trades = await getTradesForMember(bioguideId, 5000);
+  return mostTradedFromTrades(trades, limit);
+}
+
+export function mostTradedFromTrades(
+  trades: TradeRow[],
+  limit = 10
+): Array<{ ticker: string; tradeCount: number; lastTradeDate: string | null }> {
   const counts = new Map<
     string,
     { tradeCount: number; lastTradeDate: string | null }
   >();
   for (const t of trades) {
-    if (!t.ticker) continue;
-    const key = t.ticker.toUpperCase();
-    const prev = counts.get(key) || { tradeCount: 0, lastTradeDate: null };
+    const ticker = (t.ticker || "").toUpperCase();
+    if (!ticker) continue;
+    const prev = counts.get(ticker) || { tradeCount: 0, lastTradeDate: null };
     prev.tradeCount += 1;
     if (
       t.tradeDate &&
@@ -246,7 +256,7 @@ export async function getMostTradedTickers(
     ) {
       prev.lastTradeDate = t.tradeDate;
     }
-    counts.set(key, prev);
+    counts.set(ticker, prev);
   }
   return [...counts.entries()]
     .map(([ticker, v]) => ({ ticker, ...v }))
@@ -265,14 +275,14 @@ export async function getLargestHoldings(
 }
 
 /**
- * Quiver Hobbyist API does not expose annual FD disclosed holding lines or
- * "Estimated Live Stock Portfolio" series. Return empty — UI must not fabricate.
+ * Quiver Hobbyist `/live/congressholdings` is a name-keyed snapshot of estimated
+ * ticker values. Annual FD line items are still not available.
  */
 export async function getDisclosedHoldingsAvailability(_bioguideId: string) {
   return {
     available: false as const,
     reason:
-      "Quiver Quantitative Hobbyist endpoints do not provide disclosed holdings line items or estimated live stock portfolio positions. Net worth and congressional trades are available via /bulk/congress/politicians and /bulk/congresstrading.",
+      "Official annual financial-disclosure holding lines are not in the Hobbyist API. Quiver does publish a separate estimated holdings snapshot via /live/congressholdings.",
     disclosedHoldings: [] as [],
     estimatedLivePortfolio: [] as [],
   };
@@ -385,8 +395,71 @@ export async function getOffExchangeForTickers(
     .slice(0, limit);
 }
 
+export async function getContractsForTickers(
+  tickers: string[],
+  limit = 50
+): Promise<ContractRow[]> {
+  const set = new Set(tickers.map((t) => t.toUpperCase()).filter(Boolean));
+  if (!set.size) return [];
+  return contractsAll()
+    .filter((c) => set.has((c.ticker || "").toUpperCase()))
+    .sort((a, b) =>
+      String(b.awardDate || "").localeCompare(String(a.awardDate || ""))
+    )
+    .slice(0, limit)
+    .map((c) => ({
+      id: c.sourceHash,
+      ticker: c.ticker,
+      vendor: c.vendor || c.ticker,
+      agency: c.agency,
+      awardDate: c.awardDate,
+      actionDate: c.actionDate,
+      description: c.description,
+      amount: c.amount,
+      status: c.status,
+      source: "quiver",
+    }));
+}
+
+export async function getHoldingsForMember(bioguideId: string) {
+  const bid = bioguideId.toUpperCase();
+  const rows = holdingsAll();
+  const direct = rows.find((h) => (h.bioguideId || "").toUpperCase() === bid);
+  if (direct) return direct;
+  const nw = await getNetWorthForMember(bid);
+  if (!nw?.name) return null;
+  const name = nw.name.toLowerCase();
+  return (
+    rows.find((h) => h.politicianName.toLowerCase().trim() === name) ?? null
+  );
+}
+
 export async function getTrumpTrades(limit = 100): Promise<NormalizedTrumpTrade[]> {
   return trumpAll().slice(0, limit);
+}
+
+export function getTrumpTradeStats() {
+  const all = trumpAll();
+  let purchases = 0;
+  let sales = 0;
+  const tickers = new Map<string, number>();
+  for (const t of all) {
+    const side = buySellSide(t.transaction);
+    if (side === "buy") purchases += 1;
+    else if (side === "sell") sales += 1;
+    const ticker = (t.ticker || "").toUpperCase();
+    if (ticker) tickers.set(ticker, (tickers.get(ticker) || 0) + 1);
+  }
+  const mostTraded = [...tickers.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([ticker, count]) => ({ ticker, count }));
+  return {
+    total: all.length,
+    purchases,
+    sales,
+    mostTraded,
+  };
 }
 
 export async function getNetWorthForMember(bioguideId: string) {

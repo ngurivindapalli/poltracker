@@ -9,13 +9,12 @@ export default function LandingHero() {
       <div className="landingInner">
         <div className="landingLeft">
           <h1 className="landingTitle">
-            Everything you need — <br />
-            in one place.
+            Public data on politics and money
           </h1>
 
           <p className="landingSubtitle">
-            Track politicians, legislation, and political news worldwide — with clean profiles,
-            searchable coverage, and reliable summaries.
+            Profiles, financial disclosures, legislation, and news. From official
+            sources, labeled when estimated.
           </p>
 
           <div className="ctaRow">

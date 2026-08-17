@@ -4,7 +4,7 @@ import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 export const metadata = {
   title: "Donald Trump Stock Trades | Politeia",
   description:
-    "Donald Trump stock trades dataset from Quiver Quantitative (Hobbyist API).",
+    "Reported Donald Trump stock trades from Quiver Quantitative.",
 };
 
 export default function TrumpTradesPage() {
@@ -15,10 +15,8 @@ export default function TrumpTradesPage() {
           Donald Trump Stock Trades
         </h1>
         <p className="text-[#64748B] max-w-2xl">
-          Normalized disclosures from Quiver Quantitative’s Trump stock trades
-          dataset (
-          <code className="text-sm">GET /beta/bulk/trumpstocktrades</code>).
-          Amount values are reported ranges, not exact fill prices.
+          Reported disclosures from Quiver Quantitative. Amounts are disclosed
+          ranges, not exact fill prices.
         </p>
         <div className="mt-3">
           <QuiverSourceLabel />

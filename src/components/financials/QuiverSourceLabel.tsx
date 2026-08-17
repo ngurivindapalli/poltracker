@@ -25,7 +25,7 @@ export function QuiverSourceLabel({
       </div>
       {estimateDisclaimer ? (
         <div className="italic">
-          Estimated Net Worth is a Quiver estimate — not an official government
+          Estimated Net Worth is a Quiver estimate, not an official government
           figure.
         </div>
       ) : null}

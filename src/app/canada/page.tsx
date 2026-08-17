@@ -4,7 +4,7 @@ import { CommentSection } from "@/components/comments/CommentSection"
 
 export const metadata = {
   title: "Canada Politics | Politeia",
-  description: "Canadian federal and provincial political intelligence, leaders, parties, and news.",
+  description: "Canadian federal and provincial politics: leaders, parties, and news.",
 }
 
 export default function CanadaPage() {
@@ -15,7 +15,7 @@ export default function CanadaPage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Canada</h1>
           <p className="text-muted-foreground mt-1">
-            Federal and provincial political intelligence — parties, leaders, Parliament, and elections.
+            Federal and provincial politics: parties, leaders, Parliament, and elections.
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { CommentSection } from "@/components/comments/CommentSection"
 
 export const metadata = {
   title: "Campaign Tracker | Politeia",
-  description: "Track candidates, campaign messaging, issues, and public updates across the globe.",
+  description: "Candidates, campaign messaging, issues, and public updates.",
 }
 
 export default function CampaignsPage() {
@@ -12,7 +12,7 @@ export default function CampaignsPage() {
       <div className="space-y-2 pb-6 border-b border-border">
         <h1 className="text-3xl font-bold text-foreground">Campaign Tracker</h1>
         <p className="text-muted-foreground text-base">
-          Track candidates, campaign messaging, issues, and public updates from US, Canada, Europe, and Latin America.
+          Candidates, messaging, issues, and public updates from the US, Canada, Europe, and Latin America.
         </p>
       </div>
 

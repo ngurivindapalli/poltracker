@@ -12,6 +12,7 @@ import { syncCorporateLobbying } from "./corporateLobbying";
 import { syncOffExchange } from "./offExchange";
 import { syncTrumpTrades } from "./trumpTrades";
 import { rebuildSenatorSummaries } from "./senatorSummaries";
+import { syncCongressHoldings } from "./congressHoldings";
 
 export type SyncAllOptions = {
   only?: Array<
@@ -22,6 +23,7 @@ export type SyncAllOptions = {
     | "lobbying"
     | "offexchange"
     | "trump"
+    | "holdings"
     | "summaries"
   >;
 };
@@ -39,7 +41,8 @@ export async function syncQuiverData(
     run("contracts") ||
     run("lobbying") ||
     run("offexchange") ||
-    run("trump");
+    run("trump") ||
+    run("holdings");
 
   const client = needsClient ? getQuiverClient() : null;
   const results: Record<string, SyncResult> = {};
@@ -69,8 +72,12 @@ export async function syncQuiverData(
     results.off_exchange = await syncOffExchange(client);
   }
   if (run("trump") && client) {
-    console.log("=== 7/8 Trump Stock Trades ===");
+    console.log("=== 7/9 Trump Stock Trades ===");
     results.trump_trades = await syncTrumpTrades(client);
+  }
+  if (run("holdings") && client) {
+    console.log("=== 8/9 Congress Stock Holdings ===");
+    results.congress_holdings = await syncCongressHoldings(client);
   }
 
   // Always refresh listing summaries after financial datasets (or when requested alone)
@@ -80,7 +87,7 @@ export async function syncQuiverData(
     run("trades") ||
     run("networth");
   if (needSummaries) {
-    console.log("=== 8/8 Senator summaries (precompute) ===");
+    console.log("=== 9/9 Senator summaries (precompute) ===");
     results.senator_summaries = await rebuildSenatorSummaries();
   }
 

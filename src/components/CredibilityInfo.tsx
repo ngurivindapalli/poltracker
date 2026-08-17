@@ -40,7 +40,7 @@ export default function CredibilityInfo() {
               
               <div className="space-y-2 text-xs text-muted leading-relaxed">
                 <p>
-                  PolTracker ranks news sources based on reporting reliability — not political viewpoint.
+                  Politeia ranks news sources by reporting reliability, not political viewpoint.
                 </p>
                 <p>
                   Credibility is determined by factors such as primary reporting, editorial standards, source transparency, and historical accuracy.

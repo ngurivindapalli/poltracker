@@ -18,7 +18,10 @@ import type {
   QuiverLobbying,
   QuiverOffExchange,
   QuiverPolitician,
+  QuiverCongressHolding,
   QuiverTrumpTrade,
+  NormalizedCongressHolding,
+  NormalizedHoldingPosition,
 } from "./types";
 
 export function sha256(...parts: Array<string | number | null | undefined>): string {
@@ -303,6 +306,54 @@ export function normalizeOffExchange(
     otcShort: cleanNum(row.OTC_Short),
     otcTotal: cleanNum(row.OTC_Total),
     dpi: cleanNum(row.DPI),
+    source: "quiver",
+    fetchedAt,
+  };
+}
+
+export function parseHoldingsMap(raw: unknown): NormalizedHoldingPosition[] {
+  let obj: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return [];
+  const out: NormalizedHoldingPosition[] = [];
+  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+    const ticker = cleanStr(key)?.toUpperCase();
+    const value = cleanNum(val);
+    if (!ticker || value == null || value === 0) continue;
+    out.push({ ticker, value });
+  }
+  return out.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+}
+
+export function holdingChamber(type: string | null | undefined): string | null {
+  const t = (type || "").toLowerCase();
+  if (t.includes("sen")) return "senate";
+  if (t.includes("rep") || t.includes("house")) return "house";
+  return cleanStr(type);
+}
+
+export function normalizeCongressHolding(
+  row: QuiverCongressHolding,
+  fetchedAt: string,
+  bioguideId: string | null
+): NormalizedCongressHolding | null {
+  const politicianName = cleanStr(row.Politician);
+  if (!politicianName) return null;
+  const positions = parseHoldingsMap(row.Holdings);
+  if (!positions.length) return null;
+  const chamber = holdingChamber(row.Type);
+  return {
+    sourceHash: sha256(politicianName, chamber, positions.map((p) => p.ticker).join(",")),
+    politicianName,
+    bioguideId,
+    chamber,
+    positions,
     source: "quiver",
     fetchedAt,
   };

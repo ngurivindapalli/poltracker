@@ -13,6 +13,7 @@ const map: Record<string, string> = {
   lobbying: "lobbying",
   offexchange: "offexchange",
   trump: "trump",
+  holdings: "holdings",
   summaries: "summaries",
 };
 

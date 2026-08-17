@@ -15,7 +15,7 @@ export default function CspanPage() {
 
       <PageHeader 
         title="C-SPAN Schedule" 
-        subtitle="Live government coverage, congressional sessions, and committee hearings."
+        subtitle="Congressional sessions, hearings, and public affairs programming."
       />
 
       <Section>

@@ -109,13 +109,13 @@ export default function ChatInterface() {
       <Card className="flex-1 overflow-y-auto p-6 mb-4 border border-[#E2E8F0]">
         {messages.length === 0 && (
           <div className="text-center text-[#64748B] text-[16px] py-12">
-            <p className="mb-4 font-semibold text-[#1E3A5F]">Welcome to PolTracker AI</p>
-            <p className="mb-6">Ask me anything about:</p>
+            <p className="mb-4">Ask about politicians, legislation, and policy.</p>
+            <p className="mb-4 text-sm">Try a question:</p>
             <ul className="text-left inline-block space-y-2 max-w-md">
-              <li>• Latest bills from senators or representatives</li>
-              <li>• Legislative activity and voting records</li>
-              <li>• Official profiles and backgrounds</li>
-              <li>• Policy questions and political analysis</li>
+              <li>• Which senators have disclosed trades this year?</li>
+              <li>• Show bills recently updated in Congress</li>
+              <li>• Who represents Massachusetts in the Senate?</li>
+              <li>• What’s happening on C-SPAN?</li>
             </ul>
           </div>
         )}
@@ -189,7 +189,7 @@ export default function ChatInterface() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask about legislation, senators, representatives, or policy..."
+          placeholder="Ask about politicians, legislation, and policy"
           className="flex-1 px-4 py-3 border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
           disabled={loading}
         />
