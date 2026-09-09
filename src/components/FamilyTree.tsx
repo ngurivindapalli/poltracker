@@ -2,28 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import type { FamilyMember } from "@/lib/types/senatorExtended";
 
 interface FamilyTreeProps {
-  senatorName: string;
-}
-
-interface FamilyMember {
-  name: string;
-  office?: string;
-}
-
-interface FamilyData {
-  name: string;
-  image?: string | null;
-  wikipedia?: string | null;
-  family: {
-    spouses: FamilyMember[];
-    children: FamilyMember[];
-    parents: FamilyMember[];
-    siblings: FamilyMember[];
-  };
-  government_connections?: boolean;
-  office?: string;
+  bioguideId: string;
+  memberName: string;
 }
 
 interface TreeNodeProps {
@@ -78,42 +61,92 @@ function HConnector() {
   );
 }
 
-export default function FamilyTree({ senatorName }: FamilyTreeProps) {
-  const [family, setFamily] = useState<FamilyData | null>(null);
+export default function FamilyTree({ bioguideId, memberName }: FamilyTreeProps) {
+  const [members, setMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/family/${encodeURIComponent(senatorName)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setFamily(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [senatorName]);
+    let cancelled = false;
 
-  const parents = useMemo(() => family?.family?.parents ?? [], [family]);
-  const siblings = useMemo(() => family?.family?.siblings ?? [], [family]);
-  const spouseList = useMemo(() => family?.family?.spouses ?? [], [family]);
-  const children = useMemo(() => family?.family?.children ?? [], [family]);
+    async function load() {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/senator/${encodeURIComponent(bioguideId)}/family`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          if (!cancelled) setMembers([]);
+          return;
+        }
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          if (!cancelled) setMembers([]);
+          return;
+        }
+        const data = await response.json();
+        const list = Array.isArray(data?.family) ? data.family : [];
+        if (!cancelled) setMembers(list);
+      } catch {
+        if (!cancelled) setMembers([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
 
-  if (loading) return (
-      <Card className="p-8 text-center text-[#64748B]">Loading family connections...</Card>
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [bioguideId]);
+
+  const parents = useMemo(
+    () => members.filter((m) => m.relation === "parent"),
+    [members]
   );
-  
-  if (!family) return null;
+  const siblings = useMemo(
+    () => members.filter((m) => m.relation === "sibling"),
+    [members]
+  );
+  const spouses = useMemo(
+    () => members.filter((m) => m.relation === "spouse"),
+    [members]
+  );
+  const children = useMemo(
+    () => members.filter((m) => m.relation === "child"),
+    [members]
+  );
 
-  const spouse = spouseList.length ? spouseList[0] : null;
+  if (loading) {
+    return (
+      <Card className="p-8 text-center text-[#64748B]">
+        Loading family connections...
+      </Card>
+    );
+  }
+
+  if (members.length === 0) {
+    return (
+      <Card className="p-6 text-center text-sm text-muted-foreground">
+        Family connection data is not currently available for this member.
+      </Card>
+    );
+  }
+
+  const spouse = spouses[0] ?? null;
 
   return (
     <Card className="bg-[#F8FAFC] border border-[#E2E8F0] p-8 py-12 overflow-x-auto">
       <div className="relative min-w-[600px] flex flex-col items-center">
-        {/* Parents */}
         <div className="mb-4 w-full flex justify-center">
           {parents.length ? (
             <Row>
               {parents.map((p, i) => (
-                <TreeNode key={`parent-${i}`} title={p.name} subtitle="Parent" office={p.office} />
+                <TreeNode
+                  key={`parent-${i}`}
+                  title={p.name}
+                  subtitle="Parent"
+                  office={p.occupation}
+                />
               ))}
             </Row>
           ) : (
@@ -123,28 +156,33 @@ export default function FamilyTree({ senatorName }: FamilyTreeProps) {
 
         <VLine />
 
-        {/* Middle Generation */}
         <div className="flex gap-16 items-center justify-center w-full my-6">
-          {/* Siblings */}
           <div className="flex flex-col gap-4">
             {siblings.length ? (
-                siblings.map((s, i) => (
-                  <TreeNode key={`sib-${i}`} title={s.name} subtitle="Sibling" office={s.office} />
-                ))
+              siblings.map((s, i) => (
+                <TreeNode
+                  key={`sib-${i}`}
+                  title={s.name}
+                  subtitle="Sibling"
+                  office={s.occupation}
+                />
+              ))
             ) : (
               <SectionEmpty label="Siblings" />
             )}
           </div>
 
-          {/* Senator */}
           <div className="scale-110 z-20 shadow-md rounded-[12px]">
-            <TreeNode title={family.name} subtitle="U.S. Senator" office={family.office} />
+            <TreeNode title={memberName} subtitle="Member" />
           </div>
 
-          {/* Spouse */}
           <div>
             {spouse ? (
-              <TreeNode title={spouse.name} subtitle="Spouse" office={spouse.office} />
+              <TreeNode
+                title={spouse.name}
+                subtitle="Spouse"
+                office={spouse.occupation}
+              />
             ) : (
               <SectionEmpty label="Spouse" />
             )}
@@ -152,18 +190,22 @@ export default function FamilyTree({ senatorName }: FamilyTreeProps) {
         </div>
 
         {children.length > 0 && (
-            <>
-                <VLine />
-                <HConnector />
-                {/* Children */}
-                <div className="mt-4 w-full flex justify-center">
-                    <Row>
-                    {children.map((c, i) => (
-                        <TreeNode key={`child-${i}`} title={c.name} subtitle="Child" office={c.office} />
-                    ))}
-                    </Row>
-                </div>
-            </>
+          <>
+            <VLine />
+            <HConnector />
+            <div className="mt-4 w-full flex justify-center">
+              <Row>
+                {children.map((c, i) => (
+                  <TreeNode
+                    key={`child-${i}`}
+                    title={c.name}
+                    subtitle="Child"
+                    office={c.occupation}
+                  />
+                ))}
+              </Row>
+            </div>
+          </>
         )}
       </div>
     </Card>

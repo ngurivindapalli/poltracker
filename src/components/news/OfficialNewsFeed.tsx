@@ -59,11 +59,18 @@ function OfficialNewsFeedContent({
         })
 
         if (!response.ok) {
-          throw new Error("Failed to fetch news")
+          setArticles([])
+          return
+        }
+
+        const contentType = response.headers.get("content-type") || ""
+        if (!contentType.includes("application/json")) {
+          setArticles([])
+          return
         }
 
         const data = await response.json()
-        let list: Article[] = data.articles || []
+        let list: Article[] = Array.isArray(data?.articles) ? data.articles : []
         if (!isDefaultNewsSourceSelection(effectiveIds)) {
           const wrapped = list.map((a) => ({
             title: a.title,
@@ -90,9 +97,7 @@ function OfficialNewsFeedContent({
           }))
         }
         setArticles(list)
-      } catch (err) {
-        console.error("Error fetching official news:", err)
-        setError("Unable to load news. Please try again.")
+      } catch {
         setArticles([])
       } finally {
         setLoading(false)

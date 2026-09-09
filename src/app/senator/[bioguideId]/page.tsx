@@ -21,7 +21,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getMemberByBioguide } from "@/lib/congressData";
 import { getSenatorSummary } from "@/lib/senators/summaries";
-import { senatorImageUrl } from "@/lib/images";
+import { safeMemberImageUrl } from "@/lib/images";
 import { formatUsdCompact } from "@/lib/format";
 import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 import { CommentSection } from "@/components/comments/CommentSection";
@@ -59,7 +59,7 @@ export default async function SenatorPage({
   const name = summary?.name || memberLocal?.name || bioguideId;
   const party = summary?.party || memberLocal?.party || null;
   const state = summary?.state || memberLocal?.state || null;
-  const imageUrl = summary?.imageUrl || senatorImageUrl(bid, "450x550");
+  const imageUrl = safeMemberImageUrl(bid, summary?.imageUrl, "450x550");
   const twitterHandle = memberLocal?.twitter || "";
   const website = memberLocal?.website || null;
 
@@ -218,7 +218,7 @@ export default async function SenatorPage({
             <LazySection minHeight={200}>
               <section>
                 <h2 className="mb-4 text-xl font-semibold">Family connections</h2>
-                <FamilyTree senatorName={name} />
+                <FamilyTree bioguideId={bid} memberName={name} />
               </section>
             </LazySection>
             <LazySection minHeight={240}>

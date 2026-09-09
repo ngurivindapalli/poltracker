@@ -13,25 +13,37 @@ import {
   filterArticlesBySourceIds
 } from '@/lib/newsSources'
 
+function emptyPayload(ideology: Ideology, mode: string, domains: string[]) {
+  return {
+    ideology,
+    mode,
+    domains,
+    articles: [] as unknown[]
+  }
+}
+
 export async function GET(req: Request) {
+  let ideology: Ideology = 'center'
+  let mode: 'aligned' | 'balanced' | 'opposing' = 'aligned'
+  let domains: string[] = []
+
   try {
     const url = new URL(req.url)
     const bioguideId = url.searchParams.get('bioguideId')
     const state = url.searchParams.get('state')
     const q = url.searchParams.get('q')
-    const mode = (url.searchParams.get('mode') || 'aligned') as 'aligned' | 'balanced' | 'opposing'
+    const requestedMode = url.searchParams.get('mode')
+    if (requestedMode === 'balanced' || requestedMode === 'opposing' || requestedMode === 'aligned') {
+      mode = requestedMode
+    }
     const party = url.searchParams.get('party')
     const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
 
-    // Determine ideology
-    let ideology: Ideology = 'center'
-
+    let member: any = null
     if (bioguideId) {
       try {
         const memberData = await fetchMember(bioguideId)
-        const member = memberData?.member ?? memberData
-
-        // Extract party from member data
+        member = memberData?.member ?? memberData
         let memberParty = member?.partyName ?? member?.party
         if (!memberParty) {
           const terms = (member?.terms?.item ?? member?.terms ?? []) as any[]
@@ -41,66 +53,36 @@ export async function GET(req: Request) {
           })
           memberParty = currentTerm?.partyName ?? currentTerm?.party
         }
-
         ideology = ideologyFromParty(memberParty)
-      } catch (err) {
-        console.error('Error fetching member for ideology:', err)
-        // Fall back to party param or center
+      } catch {
         ideology = party ? ideologyFromParty(party) : 'center'
       }
     } else if (party) {
       ideology = ideologyFromParty(party)
     }
 
-    // Get domains for the selected mode (used only when not requesting explicit sources)
-    const domains = domainsForMode(ideology, mode)
+    domains = domainsForMode(ideology, mode)
 
-    // Build query terms
-    let queryTerms = ''
-
-    if (bioguideId) {
-      try {
-        const memberData = await fetchMember(bioguideId)
-        const member = memberData?.member ?? memberData
-        const fullName = member?.directOrderName ?? member?.name ?? member?.fullName
-        const memberState = member?.state ?? state
-
-        if (fullName) {
-          queryTerms = `"${fullName}" ${memberState || state || ''}`
-        } else if (state) {
-          queryTerms = `${state} politics`
-        } else if (q) {
-          queryTerms = q
-        } else {
-          queryTerms = 'US politics'
-        }
-      } catch (err) {
-        console.error('Error building query from member:', err)
-        if (state) {
-          queryTerms = `${state} politics`
-        } else if (q) {
-          queryTerms = q
-        } else {
-          queryTerms = 'US politics'
-        }
+    let queryTerms = 'US politics'
+    if (member) {
+      const fullName = member?.directOrderName ?? member?.name ?? member?.fullName
+      const memberState = member?.state ?? state
+      if (fullName) {
+        queryTerms = `"${fullName}" ${memberState || state || ''}`.trim()
+      } else if (state) {
+        queryTerms = `${state} politics`
+      } else if (q) {
+        queryTerms = q
       }
     } else if (state) {
       queryTerms = `${state} politics`
     } else if (q) {
       queryTerms = q
-    } else {
-      queryTerms = 'US politics'
     }
 
-    // Check for NewsAPI key
     const apiKey = process.env.NEWS_API_KEY
     if (!apiKey) {
-      return NextResponse.json({
-        ideology,
-        mode,
-        domains,
-        articles: []
-      })
+      return NextResponse.json(emptyPayload(ideology, mode, domains))
     }
 
     const encodedQuery = encodeURIComponent(queryTerms.trim())
@@ -119,43 +101,44 @@ export async function GET(req: Request) {
 
     const response = await fetch(newsApiUrl, {
       headers: {
-        'User-Agent': 'PolTracker/1.0'
+        'User-Agent': 'Politeia/1.0'
       },
-      next: { revalidate: 300 } // Cache for 5 minutes
+      cache: 'no-store',
+      signal: AbortSignal.timeout(8000)
     })
 
     if (!response.ok) {
-      console.error('NewsAPI error:', response.status)
-      return NextResponse.json({
-        ideology,
-        mode,
-        domains,
-        articles: []
-      })
+      return NextResponse.json(emptyPayload(ideology, mode, domains))
     }
 
-    const data = await response.json()
-    let rawArticles = data.articles || []
+    const rawText = await response.text()
+    let data: any = {}
+    try {
+      data = rawText ? JSON.parse(rawText) : {}
+    } catch {
+      return NextResponse.json(emptyPayload(ideology, mode, domains))
+    }
+
+    let rawArticles = Array.isArray(data.articles) ? data.articles : []
 
     if (useExplicitSources) {
       rawArticles = filterArticlesBySourceIds(rawArticles, sourceIds)
     }
 
-    // Process articles
     const articles = rawArticles
       .filter((article: any) => {
-        if (!article.title || !article.title.trim()) return false
-        if (!article.url) return false
+        if (!article?.title || !String(article.title).trim()) return false
+        if (!article?.url) return false
 
         if (!useExplicitSources) {
-          const articleUrl = article.url.toLowerCase()
+          const articleUrl = String(article.url).toLowerCase()
           const matchesDomain = domains.some((domain) =>
             articleUrl.includes(domain.toLowerCase())
           )
           if (!matchesDomain) return false
         }
 
-        const articleUrl = article.url.toLowerCase()
+        const articleUrl = String(article.url).toLowerCase()
         if (articleUrl.includes('/opinion') || articleUrl.includes('/blog')) return false
 
         return true
@@ -169,7 +152,7 @@ export async function GET(req: Request) {
         publishedAt: article.publishedAt || '',
         imageUrl: article.urlToImage || null
       }))
-      .slice(0, 10) // Limit to 10 articles
+      .slice(0, 10)
 
     return NextResponse.json(
       {
@@ -184,16 +167,7 @@ export async function GET(req: Request) {
         }
       }
     )
-  } catch (err: unknown) {
-    console.error('Error in official news API:', err)
-    return NextResponse.json(
-      {
-        ideology: 'center',
-        mode: 'aligned',
-        domains: [],
-        articles: []
-      },
-      { status: 500 }
-    )
+  } catch {
+    return NextResponse.json(emptyPayload(ideology, mode, domains))
   }
 }

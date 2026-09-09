@@ -22,11 +22,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'bioguide.congress.gov',
-        pathname: '/bioguide/photo/**'
-      },
-      {
-        protocol: 'https',
         hostname: 'www.spdfraktion.de'
       },
       {

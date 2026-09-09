@@ -169,7 +169,7 @@ export default async function RepresentativePage({ params }: { params: { bioguid
              <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
                Family Connections
              </h2>
-             <FamilyTree senatorName={profile.name} />
+             <FamilyTree bioguideId={bioguideId} memberName={profile.name} />
            </section>
 
            <section>

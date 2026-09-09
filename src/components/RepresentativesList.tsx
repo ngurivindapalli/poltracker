@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import SenatorImage from "@/components/SenatorImage";
 
 interface Representative {
   bioguideId: string;
@@ -12,13 +13,6 @@ interface Representative {
   district?: string | number;
   imageUrl?: string;
 }
-
-// Get official Congressional photo URL
-const getImageUrl = (bioguideId: string) => {
-  if (!bioguideId) return "";
-  const firstLetter = bioguideId[0]?.toUpperCase() || "A";
-  return `https://bioguide.congress.gov/bioguide/photo/${firstLetter}/${bioguideId}.jpg`;
-};
 
 interface RepresentativesListProps {
   representatives: Representative[];
@@ -49,14 +43,13 @@ export default function RepresentativesList({ representatives = [], limit }: Rep
             className="block h-full group"
           >
             <Card className="h-full flex flex-col items-center text-center p-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-              <div className="relative mb-4 w-24 h-24 rounded-full overflow-hidden border-2 border-[#E2E8F0] shadow-sm">
-                <img
-                  src={getImageUrl(representative.bioguideId)}
-                  alt={representative.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
+              <div className="relative mb-4">
+                <SenatorImage
+                  bioguideId={representative.bioguideId}
+                  imageUrl={representative.imageUrl}
+                  name={representative.name}
+                  width={96}
+                  height={96}
                 />
               </div>
 

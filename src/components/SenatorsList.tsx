@@ -5,6 +5,7 @@ import type { SenatorSummaryRow } from "@/lib/senators/types";
 import { formatUsdCompact } from "@/lib/format";
 import { PartyBadge } from "@/components/politics/PartyBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { MEMBER_PHOTO_PLACEHOLDER, safeMemberImageUrl } from "@/lib/images";
 
 interface SenatorsListProps {
   senators: SenatorSummaryRow[];
@@ -37,15 +38,12 @@ export default function SenatorsList({
           <div className="relative aspect-[4/5] bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={
-                senator.imageUrl ||
-                `https://unitedstates.github.io/images/congress/225x275/${senator.bioguideId}.jpg`
-              }
+              src={safeMemberImageUrl(senator.bioguideId, senator.imageUrl)}
               alt=""
               className="h-full w-full object-cover object-top"
               loading="lazy"
               onError={(e) => {
-                e.currentTarget.src = "/images/placeholder-avatar.svg";
+                e.currentTarget.src = MEMBER_PHOTO_PLACEHOLDER;
               }}
             />
           </div>

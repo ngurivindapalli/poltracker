@@ -16,18 +16,60 @@ interface MemberTweetsProps {
 export default function MemberTweets({ bioguideId }: MemberTweetsProps) {
   const [tweets, setTweets] = useState<Tweet[]>([])
   const [loading, setLoading] = useState(true)
+  const [unavailable, setUnavailable] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/tweets/${bioguideId}`)
-      .then(res => res.json())
-      .then(data => {
-        setTweets(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error("Error fetching tweets:", err)
-        setLoading(false)
-      })
+    let cancelled = false
+
+    async function load() {
+      setLoading(true)
+      setUnavailable(false)
+      try {
+        const res = await fetch(`/api/tweets/${encodeURIComponent(bioguideId)}`, {
+          cache: "no-store",
+        })
+        if (!res.ok) {
+          if (!cancelled) {
+            setTweets([])
+            setUnavailable(true)
+          }
+          return
+        }
+        const contentType = res.headers.get("content-type") || ""
+        if (!contentType.includes("application/json")) {
+          if (!cancelled) {
+            setTweets([])
+            setUnavailable(true)
+          }
+          return
+        }
+        const data = await res.json()
+        const list = Array.isArray(data) ? data : Array.isArray(data?.tweets) ? data.tweets : []
+        const normalized: Tweet[] = list
+          .map((t: { text?: string; link?: string; url?: string; date?: string }) => ({
+            text: t.text || "",
+            link: t.link || t.url || "",
+            date: t.date || "",
+          }))
+          .filter((t: Tweet) => t.text)
+        if (!cancelled) {
+          setTweets(normalized)
+          setUnavailable(normalized.length === 0)
+        }
+      } catch {
+        if (!cancelled) {
+          setTweets([])
+          setUnavailable(true)
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [bioguideId])
 
   if (loading) {
@@ -38,8 +80,12 @@ export default function MemberTweets({ bioguideId }: MemberTweetsProps) {
     )
   }
 
-  if (tweets.length === 0) {
-    return null
+  if (unavailable || tweets.length === 0) {
+    return (
+      <Card className="p-4 text-sm text-muted-foreground">
+        Recent social activity unavailable.
+      </Card>
+    )
   }
 
   return (
@@ -54,14 +100,18 @@ export default function MemberTweets({ bioguideId }: MemberTweetsProps) {
               {t.text}
             </p>
             <div className="flex items-center justify-between">
-              <a
-                href={t.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[13px] font-medium text-[#2563EB] hover:underline"
-              >
-                View Tweet →
-              </a>
+              {t.link ? (
+                <a
+                  href={t.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[13px] font-medium text-[#2563EB] hover:underline"
+                >
+                  View Tweet →
+                </a>
+              ) : (
+                <span />
+              )}
               {t.date && (
                 <span className="text-[12px] text-[#94A3B8]">
                   {new Date(t.date).toLocaleDateString()}

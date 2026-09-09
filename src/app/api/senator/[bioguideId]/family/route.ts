@@ -30,12 +30,10 @@ export async function GET(
       family,
       bioguideId
     })
-  } catch (err: any) {
-    console.error('Error fetching family data:', err)
-    return NextResponse.json({ 
+  } catch {
+    return NextResponse.json({
       family: [],
       bioguideId: params.bioguideId,
-      error: err?.message ?? 'Failed to fetch family data'
-    }, { status: 500 })
+    })
   }
 }
