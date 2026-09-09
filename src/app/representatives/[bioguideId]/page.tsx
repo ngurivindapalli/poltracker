@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import type { Metadata } from 'next'
+import { getMemberProfile } from '@/lib/congress'
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
@@ -19,32 +20,23 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { CommentSection } from '@/components/comments/CommentSection'
 
-async function getJson(path: string) {
-  try {
-    const base = getBaseUrl()
-    const res = await fetch(`${base}${path}`, {
-      cache: "no-store"
-    })
-
-    if (!res.ok) {
-      console.error("API error", res.status, base + path)
-      return null
-    }
-
-    return await res.json()
-  } catch (e) {
-    console.error("Fetch error:", path, e)
-    return null
-  }
+export async function generateMetadata({
+  params,
+}: {
+  params: { bioguideId: string };
+}): Promise<Metadata> {
+  const representative = await getMemberProfile(params.bioguideId);
+  const name = representative?.profile?.name || params.bioguideId;
+  return {
+    title: `${name} | U.S. Representative`,
+    description: `Profile for ${name}, U.S. Representative. Legislation, financial disclosures, and news from public sources.`,
+  };
 }
 
 export default async function RepresentativePage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
 
-  const [representative, news] = await Promise.all([
-    getJson(`/api/representative/${bioguideId}`),
-    getJson(`/api/senator/${bioguideId}/news`).catch(() => null)
-  ])
+  const representative = await getMemberProfile(bioguideId)
 
   if (!representative || !representative.profile) {
     return (
@@ -66,8 +58,6 @@ export default async function RepresentativePage({ params }: { params: { bioguid
   }
 
   const profile = representative.profile
-  const newsArticles = news?.articles ?? []
-  const newsFailed = news === null
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
@@ -199,16 +189,10 @@ export default async function RepresentativePage({ params }: { params: { bioguid
                 <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
                   Latest Coverage
                 </h2>
-                {newsFailed ? (
-                <Card className="p-6 bg-amber-50 border-amber-100 text-amber-800 text-center">
-                    Unable to load recent news.
-                </Card>
-                ) : (
                 <OfficialNewsFeed
                     bioguideId={bioguideId}
                     defaultMode="aligned"
                 />
-                )}
             </section>
 
             {/* AFFILIATIONS */}

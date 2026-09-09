@@ -29,12 +29,12 @@ export function LandingHero() {
           >
             Explore U.S. politics
           </Link>
-          <Link
-            href="/uk"
-            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+          <span
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-5 py-2.5 text-sm font-medium text-muted-foreground/70"
+            aria-disabled="true"
           >
-            Explore global leaders
-          </Link>
+            Global coverage coming soon
+          </span>
           <SearchTrigger className="h-[42px] justify-start sm:ml-2 sm:min-w-[220px]" label="Search people, states, bills…" />
         </div>
       </div>

@@ -1,44 +1,32 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
+import { getRecentLegislation } from "@/lib/legislation/recent";
 
-export const runtime = 'nodejs'
+export const runtime = "nodejs";
+export const revalidate = 60;
 
 export async function GET() {
-  console.log('API bills loaded')
-  
-  const API_KEY = process.env.API_DATA_GOV_KEY
-  
-  if (!API_KEY) {
-    console.error('API_DATA_GOV_KEY not configured')
-    return NextResponse.json({ bills: [] })
-  }
-  
   try {
-    // Fetch recent bills from Congress.gov
-    const url = `https://api.congress.gov/v3/bill?api_key=${API_KEY}&limit=50&sort=updateDate+desc`
-    
-    const res = await fetch(url, { cache: 'no-store' })
-    
-    if (!res.ok) {
-      console.error('Congress API error:', res.status)
-      return NextResponse.json({ bills: [] })
-    }
-    
-    const data = await res.json()
-    
-    const bills = (data.bills || []).map((b: any) => ({
-      number: b.number,
-      type: b.type,
+    const result = await getRecentLegislation(50);
+    const bills = result.bills.map((b) => ({
+      number: b.billNumber,
+      type: b.billType,
       title: b.title,
       congress: b.congress,
       originChamber: b.originChamber,
-      latestAction: b.latestAction?.text || 'Introduced',
-      updateDate: b.updateDate
-    }))
-    
-    console.log('Loaded Bills:', bills.length)
-    return NextResponse.json({ bills })
-  } catch (err: any) {
-    console.error('Failed loading bills dataset:', err?.message ?? String(err))
-    return NextResponse.json({ bills: [] })
+      latestAction: b.latestAction,
+      updateDate: b.updateDate,
+      congressUrl: b.congressUrl,
+    }));
+
+    return NextResponse.json(
+      { bills },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      }
+    );
+  } catch {
+    return NextResponse.json({ bills: [] });
   }
 }

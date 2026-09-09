@@ -489,7 +489,12 @@ export async function getPortfolioSnapshot(bioguideId: string) {
 
   return {
     estimatedPortfolioUsd: nw?.netWorth ?? null,
-    tradeCount: nw?.tradeCount ?? trades.length,
+    tradeCount:
+      nw?.tradeCount != null
+        ? nw.tradeCount
+        : trades.length > 0
+          ? trades.length
+          : null,
     tradeVolume: nw?.tradeVolume ?? null,
     firstTradeDate: dates[0] ?? null,
     lastTradeDate: dates[dates.length - 1] ?? null,
@@ -511,7 +516,12 @@ export async function getFinancialOverview(bioguideId: string) {
   ]);
   return {
     estimatedNetWorth: nw?.netWorth ?? null,
-    tradeCount: nw?.tradeCount ?? snapshot.tradeCount,
+    tradeCount:
+      nw?.tradeCount != null
+        ? nw.tradeCount
+        : snapshot.tradeCount != null && snapshot.tradeCount > 0
+          ? snapshot.tradeCount
+          : null,
     tradeVolume: nw?.tradeVolume ?? null,
     lastUpdated: source.lastUpdated,
     source: source.source,

@@ -12,8 +12,9 @@ type Bill = {
   title: string;
   congress: number;
   originChamber?: string;
-  latestAction?: string;
+  latestAction?: string | null;
   updateDate?: string;
+  congressUrl?: string | null;
 };
 
 export default function BillsPage() {
@@ -53,20 +54,40 @@ export default function BillsPage() {
         />
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-          {bills.map((b) => (
-            <li key={`${b.congress}-${b.type}-${b.number}`} className="p-4">
-              <div className="label-caps">
-                {b.type}.{b.number} · {b.congress}th Congress
-                {b.originChamber ? ` · ${b.originChamber}` : ""}
-              </div>
-              <h2 className="mt-1 text-base font-semibold text-foreground">
-                {b.title}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {b.latestAction || "Introduced"}
-              </p>
-            </li>
-          ))}
+          {bills.map((b) => {
+            const inner = (
+              <>
+                <div className="label-caps">
+                  {b.type} {b.number} · {b.congress}th Congress
+                  {b.originChamber ? ` · ${b.originChamber}` : ""}
+                </div>
+                <h2 className="mt-1 text-base font-semibold text-foreground">
+                  {b.title}
+                </h2>
+                {b.latestAction ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {b.latestAction}
+                  </p>
+                ) : null}
+              </>
+            );
+            return (
+              <li key={`${b.congress}-${b.type}-${b.number}`} className="p-4">
+                {b.congressUrl ? (
+                  <a
+                    href={b.congressUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block hover:opacity-90"
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  inner
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>

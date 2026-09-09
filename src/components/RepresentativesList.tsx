@@ -9,7 +9,7 @@ interface Representative {
   name: string;
   party?: string;
   state?: string;
-  district?: string;
+  district?: string | number;
   imageUrl?: string;
 }
 

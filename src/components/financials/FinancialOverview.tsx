@@ -11,8 +11,8 @@ type Overview = {
   lastUpdated: string | null;
 };
 
-function money(n: number | null) {
-  if (n == null || Number.isNaN(n)) return "—";
+function money(n: number | null, unavailable = "Data unavailable") {
+  if (n == null || Number.isNaN(n)) return unavailable;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -75,13 +75,13 @@ export default function FinancialOverview({
               <div>
                 <div className="label-caps">Estimated net worth</div>
                 <div className="stat-num mt-1 text-2xl">
-                  {money(data?.estimatedNetWorth ?? null)}
+                  {money(data?.estimatedNetWorth ?? null, "Net worth data unavailable")}
                 </div>
               </div>
               <div>
                 <div className="label-caps">Trade count</div>
                 <div className="stat-num mt-1 text-2xl">
-                  {data?.tradeCount ?? "—"}
+                  {data?.tradeCount == null ? "Data unavailable" : data.tradeCount}
                 </div>
               </div>
               <div>

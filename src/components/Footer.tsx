@@ -29,6 +29,7 @@ const INTELLIGENCE = [
 
 const RESOURCES = [
   { href: "/about", label: "About" },
+  { href: "/donate", label: "Donate" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
 ];
@@ -50,7 +51,7 @@ export function Footer() {
         </div>
 
         <FooterCol title="Explore" items={EXPLORE} />
-        <FooterCol title="Global" items={GLOBAL} />
+        <FooterCol title="Global" items={GLOBAL} comingSoon />
         <FooterCol title="Intelligence" items={INTELLIGENCE} />
         <div>
           <h4 className="mb-3 text-sm font-semibold text-foreground">Resources</h4>
@@ -82,19 +83,30 @@ export function Footer() {
 function FooterCol({
   title,
   items,
+  comingSoon,
 }: {
   title: string;
   items: { href: string; label: string }[];
+  comingSoon?: boolean;
 }) {
   return (
     <div>
       <h4 className="mb-3 text-sm font-semibold text-foreground">{title}</h4>
+      {comingSoon ? (
+        <p className="-mt-2 mb-3 text-xs text-muted-foreground/70">Coming Soon</p>
+      ) : null}
       <ul className="space-y-2 text-sm text-muted-foreground">
         {items.map((item) => (
           <li key={item.href}>
-            <Link href={item.href} className="hover:text-foreground">
-              {item.label}
-            </Link>
+            {comingSoon ? (
+              <span className="cursor-default text-muted-foreground/55">
+                {item.label}
+              </span>
+            ) : (
+              <Link href={item.href} className="hover:text-foreground">
+                {item.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

@@ -20,7 +20,7 @@ export async function GET(
 
   return NextResponse.json({
     bioguideId,
-    totalNetWorth: nw?.netWorth ?? snapshot.estimatedPortfolioUsd ?? 0,
+    totalNetWorth: nw?.netWorth ?? snapshot.estimatedPortfolioUsd ?? null,
     tradeCount: nw?.tradeCount ?? snapshot.tradeCount,
     tradeVolume: nw?.tradeVolume ?? null,
     holdings: snapshot.topHoldings,

@@ -1,7 +1,6 @@
 export type SearchGroup =
   | "People"
   | "States"
-  | "Countries"
   | "Intelligence"
   | "Pages";
 
@@ -26,17 +25,4 @@ export const STATIC_SEARCH_HITS: SearchHit[] = [
   { id: "chat", title: "Ask Politeia", subtitle: "Politicians, legislation, and policy", href: "/chat", group: "Intelligence" },
   { id: "donate", title: "Support Politeia", subtitle: "Venmo and Buy Me a Coffee", href: "/donate", group: "Pages" },
   { id: "trump-trades", title: "Trump stock trades", href: "/trump-trades", group: "Intelligence" },
-  {
-    id: "donald-trump",
-    title: "Donald Trump",
-    subtitle: "Profile and stock trading",
-    href: "/global/donald-trump",
-    group: "People",
-  },
-  { id: "uk", title: "United Kingdom", href: "/uk", group: "Countries" },
-  { id: "germany", title: "Germany", href: "/germany", group: "Countries" },
-  { id: "india", title: "India", href: "/india", group: "Countries" },
-  { id: "europe", title: "Europe", href: "/europe", group: "Countries" },
-  { id: "canada", title: "Canada", href: "/canada", group: "Countries" },
-  { id: "latam", title: "Latin America", href: "/latin-america", group: "Countries" },
 ];

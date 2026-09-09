@@ -1,61 +1,56 @@
 import { NextResponse } from "next/server";
+import {
+  fetchCosponsoredLegislation,
+  fetchSponsoredLegislation,
+} from "@/lib/congress";
 
 export const runtime = "nodejs";
+export const revalidate = 600;
+
+function cleanBills(bills: any[]) {
+  if (!Array.isArray(bills)) return [];
+  return bills
+    .filter(
+      (b) => b && b.number && b.type && (b.titles?.length || b.title)
+    )
+    .map((b) => ({
+      number: b.number,
+      type: b.type,
+      congress: b.congress,
+      title: b.titles?.[0]?.title || b.title,
+      latestAction: b.latestAction?.text || null,
+    }));
+}
 
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: { bioguideId: string } }
 ) {
-  const API_KEY = process.env.API_DATA_GOV_KEY;
   const bioguide = params.bioguideId;
 
+  if (!process.env.API_DATA_GOV_KEY) {
+    return NextResponse.json({ sponsored: [], cosponsored: [] });
+  }
+
   try {
-    console.log("Congress call:", bioguide);
-
-    const sponsoredURL =
-      `https://api.congress.gov/v3/member/${bioguide}/sponsored-legislation?api_key=${API_KEY}`;
-
-    const cosponsoredURL =
-      `https://api.congress.gov/v3/member/${bioguide}/cosponsored-legislation?api_key=${API_KEY}`;
-
-    const [sRes, cRes] = await Promise.all([
-      fetch(sponsoredURL, { cache: "no-store" }),
-      fetch(cosponsoredURL, { cache: "no-store" })
+    const [sponsoredResult, cosponsoredResult] = await Promise.allSettled([
+      fetchSponsoredLegislation(bioguide, 20),
+      fetchCosponsoredLegislation(bioguide, 20),
     ]);
 
-    const sJson = await sRes.json();
-    const cJson = await cRes.json();
-
-    console.log("Sponsored:", sJson.sponsoredLegislation?.length);
-    console.log("Cosponsored:", cJson.cosponsoredLegislation?.length);
-
-    const cleanBills = (bills: any[]) => {
-      return bills
-        .filter(b =>
-          b &&
-          b.number &&
-          b.type &&
-          (b.titles?.length || b.title)
-        )
-        .map(b => ({
-          number: b.number,
-          type: b.type,
-          title: b.titles?.[0]?.title || b.title,
-          latestAction: b.latestAction?.text || "Introduced"
-        }));
-    };
+    const sponsoredData =
+      sponsoredResult.status === "fulfilled" ? sponsoredResult.value : null;
+    const cosponsoredData =
+      cosponsoredResult.status === "fulfilled" ? cosponsoredResult.value : null;
 
     return NextResponse.json({
-      sponsored: cleanBills(sJson.sponsoredLegislation || []),
-      cosponsored: cleanBills(cJson.cosponsoredLegislation || [])
+      sponsored: cleanBills(sponsoredData?.sponsoredLegislation || []),
+      cosponsored: cleanBills(cosponsoredData?.cosponsoredLegislation || []),
     });
-
-  } catch (e) {
-    console.error("Congress Error:", e);
-
+  } catch {
     return NextResponse.json({
       sponsored: [],
-      cosponsored: []
+      cosponsored: [],
     });
   }
 }

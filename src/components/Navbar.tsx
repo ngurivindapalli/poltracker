@@ -17,10 +17,12 @@ function NavDropdown({
   label,
   active,
   items,
+  comingSoon,
 }: {
   label: string;
   active: boolean;
   items: NavItem[];
+  comingSoon?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -47,9 +49,11 @@ function NavDropdown({
         type="button"
         className={clsx(
           "rounded-md px-2 py-1 text-sm font-medium transition",
-          active
-            ? "text-foreground"
-            : "text-muted-foreground hover:text-foreground"
+          comingSoon
+            ? "text-muted-foreground/70"
+            : active
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
         )}
         aria-expanded={open}
         aria-controls={id}
@@ -62,16 +66,30 @@ function NavDropdown({
           id={id}
           className="absolute left-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 shadow-elevated"
         >
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {comingSoon ? (
+            <>
+              <p className="label-caps px-3 py-2">Coming Soon</p>
+              {items.map((item) => (
+                <span
+                  key={item.href}
+                  className="block cursor-default rounded-md px-3 py-2 text-sm text-muted-foreground/60"
+                >
+                  {item.label}
+                </span>
+              ))}
+            </>
+          ) : (
+            items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -149,10 +167,9 @@ export function Navbar() {
             />
             <NavDropdown
               label="Global"
-              active={["/uk", "/germany", "/india", "/europe", "/canada", "/latin-america"].some(
-                isActive
-              )}
+              active={false}
               items={global}
+              comingSoon
             />
             <NavDropdown
               label="Intelligence"
@@ -195,7 +212,7 @@ export function Navbar() {
         <div className="border-t border-border bg-background lg:hidden">
           <div className="mx-auto flex max-w-[1200px] flex-col gap-5 px-4 py-5 text-sm sm:px-6">
             <MobileGroup title="Explore" items={explore} />
-            <MobileGroup title="Global" items={global} />
+            <MobileGroup title="Global" items={global} comingSoon />
             <MobileGroup title="Intelligence" items={intelligence} />
             <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
               <SupportPoliteia variant="navbar" />
@@ -210,20 +227,44 @@ export function Navbar() {
   );
 }
 
-function MobileGroup({ title, items }: { title: string; items: NavItem[] }) {
+function MobileGroup({
+  title,
+  items,
+  comingSoon,
+}: {
+  title: string;
+  items: NavItem[];
+  comingSoon?: boolean;
+}) {
   return (
     <div>
-      <p className="label-caps mb-2">{title}</p>
+      <p className="label-caps mb-2">
+        {title}
+        {comingSoon ? (
+          <span className="ml-2 font-medium normal-case tracking-normal text-muted-foreground/70">
+            Coming Soon
+          </span>
+        ) : null}
+      </p>
       <div className="grid grid-cols-2 gap-1">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="rounded-md px-2 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            {item.label}
-          </Link>
-        ))}
+        {items.map((item) =>
+          comingSoon ? (
+            <span
+              key={item.href}
+              className="cursor-default rounded-md px-2 py-2 text-muted-foreground/55"
+            >
+              {item.label}
+            </span>
+          ) : (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-md px-2 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          )
+        )}
       </div>
     </div>
   );

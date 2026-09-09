@@ -15,6 +15,7 @@ import { GOVERNOR_BY_STATE } from "@/data/governorsByState"
 import { getMayorImage } from "@/lib/getMayorImage"
 import { getSenatorSummaries } from '@/lib/senators/summaries'
 import { getBaseUrl } from '@/lib/getBaseUrl'
+import { representatives } from '@/data/representatives'
 
 export const revalidate = 600
 
@@ -22,53 +23,37 @@ export default async function StatePage({ params }: { params: { stateCode: strin
   const state = params.stateCode.toUpperCase()
   const base = getBaseUrl()
   
-  const [{ senators: allSenators }, repsRes, stateDataRes] = await Promise.all([
+  const [{ senators: allSenators }, stateDataRes] = await Promise.all([
     getSenatorSummaries(),
-    fetch(`${base}/api/representatives`, {
-      next: { revalidate: 3600 }
-    }),
     fetch(`${base}/api/state/${state}`, {
       next: { revalidate: 3600 }
-    })
+    }).catch(() => null)
   ])
 
-  const repsData = repsRes.ok ? await repsRes.json() : { representatives: [] }
-  const stateData = stateDataRes.ok ? await stateDataRes.json() : null
+  const stateData = stateDataRes && 'ok' in stateDataRes && stateDataRes.ok
+    ? await stateDataRes.json().catch(() => null)
+    : null
 
-  const stateSenators = allSenators.filter(
-    (s) => (s.state || "").toUpperCase() === state
-  )
-  const stateReps = (repsData.representatives || [])
-    .filter((r: any) => r.state === state)
+  const fullStateName = STATE_CODE_TO_NAME[state] || state
+  const stateSenators = allSenators.filter((s) => {
+    const value = (s.state || "").toUpperCase()
+    return value === state || value === fullStateName.toUpperCase()
+  })
+  const stateReps = representatives
+    .filter((r) => {
+      const value = String(r.state || "").toUpperCase()
+      return value === state || value === fullStateName.toUpperCase()
+    })
     .sort((a: any, b: any) => {
       const distA = typeof a.district === 'number' ? a.district : parseInt(a.district) || 999
       const distB = typeof b.district === 'number' ? b.district : parseInt(b.district) || 999
       return distA - distB
     })
   
-  const { stateName, bills = {} } = stateData || {}
-  const fullStateName = STATE_CODE_TO_NAME[state] || stateName || state
+  const { stateName, bills = {} } = stateData && !stateData.error ? stateData : { stateName: fullStateName, bills: {} }
+  const displayStateName = stateName || fullStateName
   const mayor = MAYORS.find((m) => m.state === state)
   const governor = GOVERNOR_BY_STATE[state]
-
-  if (stateData?.error) {
-    return (
-      <main className="max-w-[1000px] mx-auto px-6 py-12">
-        <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Home
-        </Link>
-        <Card className="p-12 text-center bg-red-50 border-red-100">
-          <h2 className="text-[20px] font-bold text-red-800 mb-2">
-            {stateData?.error || 'Unable to load state data right now.'}
-          </h2>
-          <p className="text-red-600">Please try again later.</p>
-        </Card>
-      </main>
-    )
-  }
 
   return (
     <main className="max-w-[1300px] mx-auto px-6 py-12">
@@ -80,7 +65,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       </Link>
 
       <PageHeader 
-        title={stateName || fullStateName} 
+        title={displayStateName} 
         subtitle="State Overview: Legislation, Elections, Local Government, and Political News"
         action={
           <Button variant="outline">
@@ -101,7 +86,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
 
       {/* Senators Section */}
       {stateSenators.length > 0 && (
-        <Section title="U.S. Senators" subtitle={`${stateSenators.length} Senator${stateSenators.length !== 1 ? 's' : ''} representing ${fullStateName}`}>
+        <Section title="U.S. Senators" subtitle={`${stateSenators.length} Senator${stateSenators.length !== 1 ? 's' : ''} representing ${displayStateName}`}>
           <SenatorsList senators={stateSenators} />
         </Section>
       )}
@@ -109,7 +94,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       {/* House Representatives Section */}
       {stateReps.length > 0 && (
         <Section title="House Representatives" subtitle={`${stateReps.length} Representative${stateReps.length !== 1 ? 's' : ''} by district`}>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {stateReps.map((rep) => (
               <Link
                 key={rep.bioguideId}
@@ -242,7 +227,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
 
             {(!bills?.sponsored?.length && !bills?.cosponsored?.length) && (
               <Card className="p-6 text-center text-[#64748B] italic bg-[#F8FAFC]">
-                No recent legislation data available for {stateName || fullStateName}.
+                No recent legislation data available for {displayStateName}.
               </Card>
             )}
         </div>

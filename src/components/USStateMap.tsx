@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { STATE_CODE_TO_NAME } from "@/lib/localData/usCounties";
+import type { StatePartyControl } from "@/lib/states/partyControl";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -21,7 +23,18 @@ const FIPS_TO_STATE: Record<string, string> = {
   "56": "WY",
 };
 
-export default function USStateMap() {
+const FILL: Record<string, string> = {
+  democrat: "hsl(var(--party-d))",
+  republican: "hsl(var(--party-r))",
+  split: "hsl(var(--muted-foreground) / 0.45)",
+  unknown: "hsl(var(--muted-foreground) / 0.22)",
+};
+
+export default function USStateMap({
+  controlByState = {},
+}: {
+  controlByState?: Record<string, StatePartyControl>;
+}) {
   const router = useRouter();
   const [hovered, setHovered] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -43,13 +56,16 @@ export default function USStateMap() {
     : states;
 
   const go = (code: string) => router.push(`/state/${code}`);
-  const hoveredName = hovered ? STATE_CODE_TO_NAME[hovered] || hovered : null;
+  const hoveredMeta = hovered ? controlByState[hovered] : null;
+  const hoveredName = hovered
+    ? hoveredMeta?.name || STATE_CODE_TO_NAME[hovered] || hovered
+    : null;
 
   return (
     <div>
-      <div className="relative hidden md:block">
+      <div className="relative">
         <div
-          className="h-[460px] w-full overflow-hidden rounded-lg bg-muted/40"
+          className="h-[240px] w-full overflow-hidden rounded-lg bg-muted/40 sm:h-[340px] md:h-[460px]"
           role="img"
           aria-label="Map of the United States. Select a state to explore."
         >
@@ -62,6 +78,9 @@ export default function USStateMap() {
                 geographies.map((geo) => {
                   const fipsCode = geo.id ? String(geo.id).padStart(2, "0") : "";
                   const stateCode = fipsCode ? FIPS_TO_STATE[fipsCode] : undefined;
+                  const control = stateCode
+                    ? controlByState[stateCode]?.control || "unknown"
+                    : "unknown";
                   const active = hovered === stateCode;
                   return (
                     <Geography
@@ -70,12 +89,16 @@ export default function USStateMap() {
                       onMouseEnter={() => stateCode && setHovered(stateCode)}
                       onMouseLeave={() => setHovered(null)}
                       onClick={() => stateCode && go(stateCode)}
-                      fill={active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground) / 0.28)"}
+                      fill={FILL[control] || FILL.unknown}
                       stroke="hsl(var(--background))"
-                      strokeWidth={0.8}
+                      strokeWidth={active ? 1.4 : 0.8}
                       style={{
-                        default: { outline: "none", cursor: "pointer" },
-                        hover: { outline: "none", cursor: "pointer" },
+                        default: {
+                          outline: "none",
+                          cursor: stateCode ? "pointer" : "default",
+                          opacity: active ? 0.85 : 1,
+                        },
+                        hover: { outline: "none", cursor: "pointer", opacity: 0.85 },
                         pressed: { outline: "none" },
                       }}
                     />
@@ -85,21 +108,35 @@ export default function USStateMap() {
             </Geographies>
           </ComposableMap>
         </div>
-        <div className="pointer-events-none absolute left-4 top-4 rounded-md border border-border bg-card/95 px-3 py-2 text-sm shadow-subtle">
+        <div className="pointer-events-none absolute left-3 top-3 rounded-md border border-border bg-card/95 px-3 py-2 text-sm shadow-subtle sm:left-4 sm:top-4">
           {hoveredName ? (
             <>
               <div className="font-medium text-foreground">{hoveredName}</div>
               <div className="text-xs text-muted-foreground">
-                Open state profile
+                {hoveredMeta?.label || "Open state profile"}
               </div>
             </>
           ) : (
-            <div className="text-muted-foreground">Hover a state to preview</div>
+            <div className="text-muted-foreground">Select a state</div>
           )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-party-d" /> Democratic
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-party-r" /> Republican
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-muted-foreground/45" /> Split
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-muted-foreground/30" /> Unavailable
+          </span>
         </div>
       </div>
 
-      <div className="md:mt-4">
+      <div className="mt-4">
         <label className="sr-only" htmlFor="state-filter">
           Find a state
         </label>
@@ -110,16 +147,15 @@ export default function USStateMap() {
           placeholder="Find a state…"
           className="mb-3 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none md:max-w-xs"
         />
-        <ul className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto text-sm sm:grid-cols-3 md:max-h-none md:grid-cols-4 lg:grid-cols-6">
+        <ul className="grid max-h-48 grid-cols-2 gap-1 overflow-y-auto text-sm sm:grid-cols-3 md:max-h-none md:grid-cols-4 lg:grid-cols-6">
           {filtered.map(([code, name]) => (
             <li key={code}>
-              <button
-                type="button"
-                onClick={() => go(code)}
-                className="w-full rounded-md px-2 py-1.5 text-left text-muted-foreground hover:bg-muted hover:text-foreground"
+              <Link
+                href={`/state/${code}`}
+                className="block w-full rounded-md px-2 py-1.5 text-left text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 {name}
-              </button>
+              </Link>
             </li>
           ))}
         </ul>

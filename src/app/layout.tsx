@@ -32,7 +32,7 @@ export const metadata = {
       "Public data on politicians, legislation, financial activity, and news.",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
   },
 };
 

@@ -126,20 +126,30 @@ export default async function SenatorPage({
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
           label="Estimated net worth"
-          value={formatUsdCompact(summary?.estimatedNetWorth)}
+          value={
+            summary?.estimatedNetWorth == null
+              ? "Net worth data unavailable"
+              : formatUsdCompact(summary.estimatedNetWorth)
+          }
           hint="Quiver estimate"
         />
         <StatCard
           label="Disclosed trades"
-          value={summary?.tradeCount ?? "—"}
+          value={
+            summary?.tradeCount == null ? "Data unavailable" : summary.tradeCount
+          }
         />
         <StatCard
           label="Trade volume"
-          value={formatUsdCompact(summary?.tradeVolume)}
+          value={
+            summary?.tradeVolume == null
+              ? "Data unavailable"
+              : formatUsdCompact(summary.tradeVolume)
+          }
         />
         <StatCard
           label="Latest trade"
-          value={summary?.latestTradeDate || "—"}
+          value={summary?.latestTradeDate || "Data unavailable"}
         />
       </div>
 

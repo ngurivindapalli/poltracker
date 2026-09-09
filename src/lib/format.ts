@@ -1,5 +1,5 @@
 export function formatUsdCompact(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return "Data unavailable";
   const abs = Math.abs(n);
   if (abs >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
   if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -12,7 +12,7 @@ export function formatUsdCompact(n: number | null | undefined): string {
 }
 
 export function formatUsd(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return "Data unavailable";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -47,4 +47,21 @@ export function relativeTime(iso?: string | null): string | null {
   if (hours < 48) return `Updated ${hours} hours ago`;
   const days = Math.round(hours / 24);
   return `Updated ${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+export function formatRelativeAgo(
+  iso?: string | null,
+  nowMs: number = Date.now()
+): string | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  const sec = Math.max(0, Math.round((nowMs - t) / 1000));
+  if (sec < 45) return "just now";
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min} minute${min === 1 ? "" : "s"} ago`;
+  const hours = Math.round(min / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
 }

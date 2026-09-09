@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
+import { buildBillLink } from "@/lib/bills/linkBuilder";
+
 interface Bill {
   number: string;
   type: string;
+  congress?: string | number;
   title: string;
-  latestAction: string;
+  latestAction: string | null;
 }
 
 interface SenatorBillsSectionProps {
@@ -29,7 +32,6 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
       try {
         const res = await fetch(`/api/congress/${bioguideId}`);
         const data = await res.json();
-        console.log("Congress data:", data);
         setSponsored(data.sponsored || []);
         setCosponsored(data.cosponsored || []);
       } catch (e) {
@@ -85,17 +87,11 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
           {activeBills.map((bill) => {
             const id = bill.type + bill.number;
             const open = openBill === id;
-            const billTypeMap: Record<string, string> = {
-              "HR": "house-bill",
-              "S": "senate-bill",
-              "HRES": "house-resolution",
-              "SRES": "senate-resolution",
-              "HJRES": "house-joint-resolution",
-              "SJRES": "senate-joint-resolution",
-              "HCONRES": "house-concurrent-resolution",
-              "SCONRES": "senate-concurrent-resolution"
-            };
-            const typeSlug = billTypeMap[bill.type?.toUpperCase()] || "bill";
+            const congressUrl = buildBillLink({
+              congress: bill.congress || "",
+              type: bill.type,
+              number: bill.number,
+            });
 
             return (
               <div
@@ -103,24 +99,38 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
                 className="p-4 hover:bg-[#F8FAFC] group transition-colors"
               >
                 <div className="flex justify-between items-start gap-4">
-                  <div 
-                    className="flex-1 cursor-pointer"
-                    onClick={() => {
-                      const targetUrl = `https://www.congress.gov/bill/119th-congress/${typeSlug}/${bill.number}`;
-                      window.open(targetUrl, "_blank");
-                    }}
-                  >
-                    <div className="font-bold text-[#1E3A5F] group-hover:text-[#2563EB] transition-colors">
-                      {bill.type.toUpperCase()} {bill.number}
-                    </div>
-                    <div className="text-[14px] text-[#1E3A5F] mt-1 leading-snug line-clamp-2">
-                      {bill.title}
-                    </div>
-                    <div className="mt-2">
-                      <Badge variant="neutral" className="text-[12px]">
-                        {bill.latestAction}
-                      </Badge>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    {congressUrl ? (
+                      <a
+                        href={congressUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="font-bold text-[#1E3A5F] group-hover:text-[#2563EB] transition-colors">
+                          {bill.type.toUpperCase()} {bill.number}
+                        </div>
+                        <div className="text-[14px] text-[#1E3A5F] mt-1 leading-snug line-clamp-2">
+                          {bill.title}
+                        </div>
+                      </a>
+                    ) : (
+                      <>
+                        <div className="font-bold text-[#1E3A5F]">
+                          {bill.type.toUpperCase()} {bill.number}
+                        </div>
+                        <div className="text-[14px] text-[#1E3A5F] mt-1 leading-snug line-clamp-2">
+                          {bill.title}
+                        </div>
+                      </>
+                    )}
+                    {bill.latestAction ? (
+                      <div className="mt-2">
+                        <Badge variant="neutral" className="text-[12px]">
+                          {bill.latestAction}
+                        </Badge>
+                      </div>
+                    ) : null}
                   </div>
 
                   <button

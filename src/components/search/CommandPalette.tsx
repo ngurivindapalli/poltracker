@@ -8,7 +8,6 @@ import { cn } from "@/lib/cn";
 const GROUP_ORDER: SearchGroup[] = [
   "People",
   "States",
-  "Countries",
   "Intelligence",
   "Pages",
 ];
