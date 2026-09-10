@@ -109,7 +109,7 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-start justify-center bg-foreground/40 px-4 pt-[12vh] backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-[hsl(var(--foreground)/0.45)] px-4 pt-[12vh]"
       onClick={close}
       role="presentation"
     >
@@ -117,7 +117,7 @@ export function CommandPalette() {
         role="dialog"
         aria-modal="true"
         aria-label="Search Politeia"
-        className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-card shadow-elevated animate-fade-up"
+        className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-[hsl(var(--card))] text-card-foreground shadow-elevated animate-fade-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 border-b border-border px-4">

@@ -64,7 +64,7 @@ function NavDropdown({
       {open && (
         <div
           id={id}
-          className="absolute left-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 shadow-elevated"
+          className="absolute left-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-lg border border-border bg-[hsl(var(--card))] p-2 text-card-foreground shadow-elevated"
         >
           {comingSoon ? (
             <>
@@ -141,7 +141,7 @@ export function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/80 bg-background/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 isolate border-b border-border bg-[hsl(var(--background))]">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Link
@@ -209,7 +209,7 @@ export function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-border bg-background lg:hidden">
+        <div className="border-t border-border bg-[hsl(var(--background))] lg:hidden">
           <div className="mx-auto flex max-w-[1200px] flex-col gap-5 px-4 py-5 text-sm sm:px-6">
             <MobileGroup title="Explore" items={explore} />
             <MobileGroup title="Global" items={global} comingSoon />

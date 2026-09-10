@@ -5,7 +5,8 @@ const CONGRESS_API_BASE = 'https://api.congress.gov/v3'
 type FetchParams = Record<string, string | number | boolean | undefined>
 
 type CongressFetchOptions = {
-  revalidate?: number
+  /** Seconds. Set false to bypass the Next.js Data Cache (required for Vercel + abort). */
+  revalidate?: number | false
   timeoutMs?: number
 }
 
@@ -49,29 +50,37 @@ async function congressFetch<T>(
   }
 
   const timeoutMs = options.timeoutMs ?? 10000
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  // Abort + next.revalidate together can hang indefinitely on Vercel Data Cache.
+  const bypassCache = options.revalidate === false
+  const fetchInit: RequestInit & { next?: { revalidate: number } } = {
+    headers: {
+      'User-Agent': 'Politeia/1.0 (https://politeia.co)',
+      Accept: 'application/json',
+    },
+  }
+  if (bypassCache) {
+    fetchInit.cache = 'no-store'
+    fetchInit.signal = AbortSignal.timeout(timeoutMs)
+  } else {
+    fetchInit.next = {
+      revalidate: typeof options.revalidate === "number" ? options.revalidate : 3600,
+    }
+  }
 
   let res: Response
   try {
-    res = await fetch(url.toString(), {
-      headers: {
-        'User-Agent': 'Politeia/1.0 (https://politeia.co)',
-        Accept: 'application/json',
-      },
-      signal: controller.signal,
-      next: { revalidate: options.revalidate ?? 3600 },
-    })
+    res = await fetch(url.toString(), fetchInit)
   } catch (err) {
     const aborted =
       err instanceof Error &&
-      (err.name === 'AbortError' || err.message.includes('abort'))
+      (err.name === 'AbortError' ||
+        err.name === 'TimeoutError' ||
+        err.message.includes('abort') ||
+        err.message.includes('timeout'))
     throw new CongressApiError(
       aborted ? 504 : 503,
       aborted ? 'Congress.gov API timeout' : 'Congress.gov API network error'
     )
-  } finally {
-    clearTimeout(timeout)
   }
 
   if (!res.ok) {
@@ -171,14 +180,16 @@ export async function fetchMembersByState(stateCode: string): Promise<any[]> {
  */
 export async function fetchSponsoredLegislation(
   bioguideId: string,
-  limit = 20
+  limit = 20,
+  options: CongressFetchOptions = { revalidate: false, timeoutMs: 12000 }
 ): Promise<any> {
   return congressFetch<any>(
     `/member/${encodeURIComponent(bioguideId)}/sponsored-legislation`,
     {
       limit,
       offset: 0
-    }
+    },
+    options
   )
 }
 
@@ -194,7 +205,8 @@ export async function fetchCosponsoredLegislation(
     {
       limit,
       offset: 0
-    }
+    },
+    { revalidate: false, timeoutMs: 12000 }
   )
 }
 

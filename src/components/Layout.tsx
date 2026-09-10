@@ -11,7 +11,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main id="main-content" className="flex-grow">
+      <main id="main-content" className="relative z-0 flex-grow">
         {children}
       </main>
       <Footer />

@@ -14,6 +14,8 @@ interface Bill {
   latestAction: string | null;
 }
 
+type LoadState = "loading" | "success" | "empty" | "error";
+
 interface SenatorBillsSectionProps {
   bioguideId: string;
 }
@@ -22,31 +24,81 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
   const [activeTab, setActiveTab] = useState<"sponsored" | "cosponsored">("sponsored");
   const [sponsored, setSponsored] = useState<Bill[]>([]);
   const [cosponsored, setCosponsored] = useState<Bill[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<LoadState>("loading");
   const [openBill, setOpenBill] = useState<string | null>(null);
   const [summary, setSummary] = useState<Record<string, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function requestBills() {
+      const res = await fetch(`/api/congress/${encodeURIComponent(bioguideId)}`, {
+        cache: "no-store",
+      });
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok || !contentType.includes("application/json")) {
+        return { kind: "error" as const };
+      }
+      const data = await res.json();
+      if (data?.status === "error" || data?.status === "unconfigured") {
+        return { kind: "error" as const };
+      }
+      const nextSponsored = Array.isArray(data?.sponsored) ? data.sponsored : [];
+      const nextCosponsored = Array.isArray(data?.cosponsored) ? data.cosponsored : [];
+      return {
+        kind: "ok" as const,
+        sponsored: nextSponsored,
+        cosponsored: nextCosponsored,
+      };
+    }
+
     async function fetchBills() {
+      setState("loading");
       try {
-        const res = await fetch(`/api/congress/${bioguideId}`);
-        const data = await res.json();
-        setSponsored(data.sponsored || []);
-        setCosponsored(data.cosponsored || []);
-      } catch (e) {
-        console.error("Failed to fetch bills", e);
-      } finally {
-        setLoading(false);
+        let result = await requestBills();
+        if (result.kind === "error") {
+          await new Promise((resolve) => setTimeout(resolve, 750));
+          if (cancelled) return;
+          result = await requestBills();
+        }
+        if (cancelled) return;
+        if (result.kind === "error") {
+          setSponsored([]);
+          setCosponsored([]);
+          setState("error");
+          return;
+        }
+        setSponsored(result.sponsored);
+        setCosponsored(result.cosponsored);
+        setState(
+          result.sponsored.length === 0 && result.cosponsored.length === 0
+            ? "empty"
+            : "success"
+        );
+      } catch {
+        if (!cancelled) setState("error");
       }
     }
+
     fetchBills();
+    return () => {
+      cancelled = true;
+    };
   }, [bioguideId]);
 
-  if (loading) {
+  if (state === "loading") {
     return (
       <Card className="p-8 text-center text-[#64748B]">
         Loading legislative records...
+      </Card>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <Card className="p-8 text-center text-sm text-muted-foreground">
+        Legislative records are temporarily unavailable. Please try again shortly.
       </Card>
     );
   }
@@ -137,7 +189,7 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
                     className="opacity-0 group-hover:opacity-100 transition-opacity bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-3 py-1.5 rounded text-[13px] font-medium whitespace-nowrap"
                     onClick={async (e) => {
                       e.stopPropagation();
-                      
+
                       if (open) {
                         setOpenBill(null);
                         return;
@@ -145,26 +197,29 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
 
                       setSummaryLoading(id);
 
-                      const res = await fetch("/api/bill-summary", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                          title: bill.title,
-                          action: bill.latestAction
-                        })
-                      });
-
-                      const data = await res.json();
-                      
-                      setSummary(prev => ({
-                        ...prev,
-                        [id]: data.summary
-                      }));
-                      
-                      setSummaryLoading(null);
-                      setOpenBill(id);
+                      try {
+                        const res = await fetch("/api/bill-summary", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                          },
+                          body: JSON.stringify({
+                            title: bill.title,
+                            action: bill.latestAction
+                          })
+                        });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        setSummary((prev) => ({
+                          ...prev,
+                          [id]: data.summary
+                        }));
+                        setOpenBill(id);
+                      } catch {
+                        /* keep the bill list usable if summary fails */
+                      } finally {
+                        setSummaryLoading(null);
+                      }
                     }}
                   >
                     {open ? "Hide" : "Summarize"}

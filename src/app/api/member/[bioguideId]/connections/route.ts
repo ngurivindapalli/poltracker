@@ -16,7 +16,9 @@ interface MatchedFiling {
  */
 async function fetchSponsoredBills(bioguideId: string): Promise<any[]> {
   try {
-    const data = await fetchSponsoredLegislation(bioguideId, 100);
+    const data = await fetchSponsoredLegislation(bioguideId, 100, {
+      revalidate: 3600,
+    });
     return data?.sponsoredLegislation || [];
   } catch (e) {
     console.log("Bills fetch error:", e);

@@ -3,7 +3,7 @@ import { SearchTrigger } from "@/components/search/SearchTrigger";
 
 export function LandingHero() {
   return (
-    <section className="relative overflow-hidden border-b border-border">
+    <section className="relative z-0 overflow-hidden border-b border-border">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         style={{
