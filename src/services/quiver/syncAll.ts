@@ -12,6 +12,7 @@ import { syncCorporateLobbying } from "./corporateLobbying";
 import { syncOffExchange } from "./offExchange";
 import { syncTrumpTrades } from "./trumpTrades";
 import { rebuildSenatorSummaries } from "./senatorSummaries";
+import { rebuildRepresentativeSummaries } from "./representativeSummaries";
 import { syncCongressHoldings } from "./congressHoldings";
 
 export type SyncAllOptions = {
@@ -87,8 +88,10 @@ export async function syncQuiverData(
     run("trades") ||
     run("networth");
   if (needSummaries) {
-    console.log("=== 9/9 Senator summaries (precompute) ===");
+    console.log("=== Senator summaries (precompute) ===");
     results.senator_summaries = await rebuildSenatorSummaries();
+    console.log("=== Representative summaries (precompute) ===");
+    results.representative_summaries = await rebuildRepresentativeSummaries();
   }
 
   return results;

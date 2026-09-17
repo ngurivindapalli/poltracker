@@ -164,6 +164,83 @@ model SenatorSummary {
   @@map("senator_summaries")
 }
 
+model RepresentativeSummary {
+  bioguideId            String    @id @map("bioguide_id")
+  name                  String
+  firstName             String?   @map("first_name")
+  lastName              String?   @map("last_name")
+  party                 String?
+  state                 String?
+  district              String?
+  imageUrl              String?   @map("image_url")
+  chamber               String    @default("house")
+  estimatedNetWorth     Float?    @map("estimated_net_worth")
+  tradeCount            Int?      @map("trade_count")
+  tradeVolume           Float?    @map("trade_volume")
+  latestTradeDate       DateTime? @map("latest_trade_date")
+  latestFinancialUpdate DateTime? @map("latest_financial_update")
+  dataUpdatedAt         DateTime  @map("data_updated_at")
+
+  @@index([state])
+  @@index([party])
+  @@index([chamber])
+  @@map("representative_summaries")
+}
+
+model MemberBill {
+  id           String   @id @default(uuid())
+  bioguideId   String   @map("bioguide_id")
+  role         String
+  congress     Int      @default(0)
+  billType     String   @map("bill_type")
+  billNumber   String   @map("bill_number")
+  title        String
+  latestAction String?  @map("latest_action")
+  congressUrl  String?  @map("congress_url")
+  fetchedAt    DateTime @map("fetched_at")
+
+  @@unique([bioguideId, role, congress, billType, billNumber])
+  @@index([bioguideId, role])
+  @@index([congress])
+  @@index([fetchedAt])
+  @@map("member_bills")
+}
+
+model RecentLegislationCache {
+  id        String   @id @default("latest")
+  billsJson String   @map("bills_json")
+  fetchedAt DateTime @map("fetched_at")
+
+  @@map("recent_legislation_cache")
+}
+
+model CachedNewsArticle {
+  id          String    @id @default(uuid())
+  bioguideId  String    @map("bioguide_id")
+  title       String
+  url         String
+  source      String?
+  description String?
+  publishedAt DateTime? @map("published_at")
+  imageUrl    String?   @map("image_url")
+  fetchedAt   DateTime  @map("fetched_at")
+
+  @@unique([bioguideId, url])
+  @@index([bioguideId, publishedAt])
+  @@map("cached_news_articles")
+}
+
+model DatasetFreshness {
+  dataset            String         @id
+  status             DataSyncStatus
+  lastSuccessfulSync DateTime?      @map("last_successful_sync")
+  lastAttemptAt      DateTime       @map("last_attempt_at")
+  recordCount        Int            @default(0) @map("record_count")
+  error              String?
+
+  @@map("dataset_freshness")
+}
+
 // ---------------------------------------------------------------------------
 // Quiver: Corporate Donors
 // ---------------------------------------------------------------------------

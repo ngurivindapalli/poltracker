@@ -21,6 +21,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getMemberByBioguide } from "@/lib/congressData";
 import { getSenatorSummary } from "@/lib/senators/summaries";
+import { getMemberLegislation } from "@/lib/legislation/store";
 import { safeMemberImageUrl } from "@/lib/images";
 import { formatUsdCompact } from "@/lib/format";
 import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
@@ -51,9 +52,10 @@ export default async function SenatorPage({
   const { bioguideId } = params;
   const bid = bioguideId.toUpperCase();
 
-  const [summary, memberLocal] = await Promise.all([
+  const [summary, memberLocal, legislation] = await Promise.all([
     getSenatorSummary(bid),
     Promise.resolve(getMemberByBioguide(bid) ?? getMemberByBioguide(bioguideId)),
+    getMemberLegislation(bid),
   ]);
 
   const name = summary?.name || memberLocal?.name || bioguideId;
@@ -174,9 +176,7 @@ export default async function SenatorPage({
 
       <section id="legislation" className="mt-10 scroll-mt-28">
         <h2 className="mb-4 text-xl font-semibold">Legislation</h2>
-        <LazySection minHeight={160}>
-          <SenatorBillsSection bioguideId={bid} />
-        </LazySection>
+        <SenatorBillsSection bioguideId={bid} initial={legislation} />
       </section>
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-3">

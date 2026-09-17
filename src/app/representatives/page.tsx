@@ -1,9 +1,11 @@
 import RepresentativesList from "@/components/RepresentativesList";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Section } from "@/components/ui/Section";
-import { representatives } from "@/data/representatives";
+import { getRepresentativeSummaries } from "@/lib/representatives/summaries";
 import Link from "next/link";
 import type { Metadata } from "next";
+
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "U.S. House of Representatives",
@@ -11,7 +13,9 @@ export const metadata: Metadata = {
     "Directory of current members of the U.S. House of Representatives.",
 };
 
-export default function RepresentativesPage() {
+export default async function RepresentativesPage() {
+  const { representatives, dataUpdatedAt } = await getRepresentativeSummaries();
+
   return (
     <main className="max-w-[1300px] mx-auto px-6 py-12">
       <Link
@@ -38,6 +42,12 @@ export default function RepresentativesPage() {
         title="U.S. House of Representatives"
         subtitle="Current members of the U.S. House."
       />
+
+      {dataUpdatedAt ? (
+        <p className="mb-6 text-sm text-muted-foreground">
+          Last updated {new Date(dataUpdatedAt).toLocaleString()}
+        </p>
+      ) : null}
 
       <Section>
         <RepresentativesList representatives={representatives} />

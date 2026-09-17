@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { fetchLDAFilings } from "@/lib/ldaService"
 import { buildLobbyGraph } from "@/lib/lobbying/buildLobbyGraph"
-import { fetchMember, fetchSponsoredLegislation } from "@/lib/congress"
+import { getLocalMember } from "@/lib/congressData"
+import { getMemberLegislation } from "@/lib/legislation/store"
 
 interface MatchedFiling {
   client: string;
@@ -16,10 +17,13 @@ interface MatchedFiling {
  */
 async function fetchSponsoredBills(bioguideId: string): Promise<any[]> {
   try {
-    const data = await fetchSponsoredLegislation(bioguideId, 100, {
-      revalidate: 3600,
-    });
-    return data?.sponsoredLegislation || [];
+    const data = await getMemberLegislation(bioguideId);
+    return data.sponsored.map((b) => ({
+      number: b.number,
+      type: b.type,
+      title: b.title,
+      latestAction: b.latestAction ? { text: b.latestAction } : null,
+    }));
   } catch (e) {
     console.log("Bills fetch error:", e);
     return [];
@@ -168,16 +172,9 @@ export async function GET(
   try {
     const id = params.bioguideId
 
-    // Fetch member name from Congress API
     let memberName = id
-    try {
-      const memberData = await fetchMember(id)
-      const member = memberData?.member ?? memberData
-      memberName = member?.directOrderName ?? member?.name ?? member?.fullName ?? id
-      console.log("Senator:", memberName)
-    } catch (e) {
-      console.log("Could not fetch member name, using bioguideId")
-    }
+    const local = getLocalMember(id)
+    if (local?.name) memberName = local.name
 
     // Fetch sponsored bills for this member
     const bills = await fetchSponsoredBills(id)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -14,91 +14,45 @@ interface Bill {
   latestAction: string | null;
 }
 
-type LoadState = "loading" | "success" | "empty" | "error";
+type LoadState = "success" | "empty" | "unsynced";
+
+export type MemberLegislationInitial = {
+  sponsored: Bill[];
+  cosponsored: Bill[];
+  status?: "ok" | "empty" | "unsynced" | string;
+  lastUpdated?: string | null;
+};
 
 interface SenatorBillsSectionProps {
   bioguideId: string;
+  initial?: MemberLegislationInitial;
 }
 
-export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionProps) {
+function resolveState(initial?: MemberLegislationInitial): LoadState {
+  if (!initial) return "unsynced";
+  if (initial.status === "unsynced") return "unsynced";
+  if ((initial.sponsored?.length || 0) + (initial.cosponsored?.length || 0) > 0) {
+    return "success";
+  }
+  if (initial.lastUpdated) return "empty";
+  return initial.status === "empty" ? "empty" : "unsynced";
+}
+
+export default function SenatorBillsSection({ initial }: SenatorBillsSectionProps) {
   const [activeTab, setActiveTab] = useState<"sponsored" | "cosponsored">("sponsored");
-  const [sponsored, setSponsored] = useState<Bill[]>([]);
-  const [cosponsored, setCosponsored] = useState<Bill[]>([]);
-  const [state, setState] = useState<LoadState>("loading");
+  const [sponsored] = useState<Bill[]>(() => initial?.sponsored ?? []);
+  const [cosponsored] = useState<Bill[]>(() => initial?.cosponsored ?? []);
+  const [state] = useState<LoadState>(() => resolveState(initial));
+  const lastUpdated = initial?.lastUpdated ?? null;
   const [openBill, setOpenBill] = useState<string | null>(null);
   const [summary, setSummary] = useState<Record<string, string>>({});
   const [summaryLoading, setSummaryLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function requestBills() {
-      const res = await fetch(`/api/congress/${encodeURIComponent(bioguideId)}`, {
-        cache: "no-store",
-      });
-      const contentType = res.headers.get("content-type") || "";
-      if (!res.ok || !contentType.includes("application/json")) {
-        return { kind: "error" as const };
-      }
-      const data = await res.json();
-      if (data?.status === "error" || data?.status === "unconfigured") {
-        return { kind: "error" as const };
-      }
-      const nextSponsored = Array.isArray(data?.sponsored) ? data.sponsored : [];
-      const nextCosponsored = Array.isArray(data?.cosponsored) ? data.cosponsored : [];
-      return {
-        kind: "ok" as const,
-        sponsored: nextSponsored,
-        cosponsored: nextCosponsored,
-      };
-    }
-
-    async function fetchBills() {
-      setState("loading");
-      try {
-        let result = await requestBills();
-        if (result.kind === "error") {
-          await new Promise((resolve) => setTimeout(resolve, 750));
-          if (cancelled) return;
-          result = await requestBills();
-        }
-        if (cancelled) return;
-        if (result.kind === "error") {
-          setSponsored([]);
-          setCosponsored([]);
-          setState("error");
-          return;
-        }
-        setSponsored(result.sponsored);
-        setCosponsored(result.cosponsored);
-        setState(
-          result.sponsored.length === 0 && result.cosponsored.length === 0
-            ? "empty"
-            : "success"
-        );
-      } catch {
-        if (!cancelled) setState("error");
-      }
-    }
-
-    fetchBills();
-    return () => {
-      cancelled = true;
-    };
-  }, [bioguideId]);
-
-  if (state === "loading") {
-    return (
-      <Card className="p-8 text-center text-[#64748B]">
-        Loading legislative records...
-      </Card>
-    );
-  }
-
-  if (state === "error") {
+  if (state === "unsynced") {
     return (
       <Card className="p-8 text-center text-sm text-muted-foreground">
-        Legislative records are temporarily unavailable. Please try again shortly.
+        Legislative records have not been synchronized yet. They appear after the next
+        background Congress.gov sync.
       </Card>
     );
   }
@@ -107,6 +61,11 @@ export default function SenatorBillsSection({ bioguideId }: SenatorBillsSectionP
 
   return (
     <Card className="mb-10 overflow-hidden">
+      {lastUpdated ? (
+        <div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-xs text-[#64748B]">
+          Last updated: {new Date(lastUpdated).toLocaleString()}
+        </div>
+      ) : null}
       <div className="flex border-b border-[#E2E8F0] bg-[#F8FAFC]">
         <button
           onClick={() => setActiveTab("sponsored")}

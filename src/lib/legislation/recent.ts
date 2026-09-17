@@ -1,4 +1,4 @@
-import { fetchRecentBills } from "@/lib/congress"
+import { getRecentLegislationFromDb } from "@/lib/legislation/store"
 import { buildBillLink } from "@/lib/bills/linkBuilder"
 
 export type RecentLegislationBill = {
@@ -65,30 +65,41 @@ function normalizeBill(raw: any): RecentLegislationBill | null {
 export async function getRecentLegislation(
   limit = 10
 ): Promise<RecentLegislationResult> {
-  const fetchedAt = new Date().toISOString()
-
-  if (!process.env.API_DATA_GOV_KEY) {
-    return { bills: [], fetchedAt, status: "unavailable" }
-  }
-
-  try {
-    const data = await fetchRecentBills(limit)
-    const rawBills = Array.isArray(data?.bills) ? data.bills : []
-    const bills = rawBills
-      .map(normalizeBill)
-      .filter((b: RecentLegislationBill | null): b is RecentLegislationBill => b !== null)
-      .slice(0, limit)
-
-    return {
-      bills,
-      fetchedAt,
-      status: bills.length === 0 ? "empty" : "ok",
-    }
-  } catch (err) {
-    console.error(
-      "Recent legislation fetch failed:",
-      err instanceof Error ? err.message : "unknown error"
+  const cached = await getRecentLegislationFromDb(limit)
+  const bills = (cached.bills || [])
+    .map((raw: any) =>
+      raw?.billType && raw?.billNumber
+        ? ({
+            id: raw.id || `${raw.congress}-${raw.billType}-${raw.billNumber}`,
+            congress: Number(raw.congress) || 0,
+            billType: String(raw.billType),
+            billNumber: String(raw.billNumber),
+            title: String(raw.title || ""),
+            originChamber: raw.originChamber || null,
+            latestAction: raw.latestAction || null,
+            updateDate: raw.updateDate || null,
+            congressUrl:
+              raw.congressUrl ||
+              buildBillLink({
+                congress: raw.congress,
+                type: raw.billType,
+                number: raw.billNumber,
+              }) ||
+              null,
+          } satisfies RecentLegislationBill)
+        : normalizeBill(raw)
     )
-    return { bills: [], fetchedAt, status: "unavailable" }
+    .filter((b: RecentLegislationBill | null): b is RecentLegislationBill => Boolean(b && b.title))
+    .slice(0, limit)
+
+  return {
+    bills,
+    fetchedAt: cached.fetchedAt,
+    status:
+      bills.length > 0
+        ? "ok"
+        : cached.status === "unavailable"
+          ? "unavailable"
+          : "empty",
   }
 }

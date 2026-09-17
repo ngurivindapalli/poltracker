@@ -14,25 +14,14 @@ import { MAYORS } from "@/data/mayors"
 import { GOVERNOR_BY_STATE } from "@/data/governorsByState"
 import { getMayorImage } from "@/lib/getMayorImage"
 import { getSenatorSummaries } from '@/lib/senators/summaries'
-import { getBaseUrl } from '@/lib/getBaseUrl'
+import { getBillsForMembers } from '@/lib/legislation/store'
 import { representatives } from '@/data/representatives'
 
 export const revalidate = 600
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const state = params.stateCode.toUpperCase()
-  const base = getBaseUrl()
-  
-  const [{ senators: allSenators }, stateDataRes] = await Promise.all([
-    getSenatorSummaries(),
-    fetch(`${base}/api/state/${state}`, {
-      next: { revalidate: 3600 }
-    }).catch(() => null)
-  ])
-
-  const stateData = stateDataRes && 'ok' in stateDataRes && stateDataRes.ok
-    ? await stateDataRes.json().catch(() => null)
-    : null
+  const { senators: allSenators } = await getSenatorSummaries()
 
   const fullStateName = STATE_CODE_TO_NAME[state] || state
   const stateSenators = allSenators.filter((s) => {
@@ -49,9 +38,15 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       const distB = typeof b.district === 'number' ? b.district : parseInt(b.district) || 999
       return distA - distB
     })
-  
-  const { stateName, bills = {} } = stateData && !stateData.error ? stateData : { stateName: fullStateName, bills: {} }
-  const displayStateName = stateName || fullStateName
+
+  const bills = await getBillsForMembers(
+    [
+      ...stateSenators.map((s) => s.bioguideId),
+      ...stateReps.map((r) => r.bioguideId),
+    ],
+    20
+  )
+  const displayStateName = fullStateName
   const mayor = MAYORS.find((m) => m.state === state)
   const governor = GOVERNOR_BY_STATE[state]
 
@@ -122,7 +117,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
            <StateElectionsSection stateCode={state} />
 
            {/* State Political News */}
-           <StateNewsSection stateCode={state} stateName={stateName || fullStateName} />
+           <StateNewsSection stateCode={state} stateName={fullStateName} />
 
            {/* Major City Mayor */}
            {mayor && (
@@ -195,7 +190,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
                   {(bills.sponsored || []).slice(0, 5).map((bill: any, i: number) => (
                     <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-2">
-                        <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>
+                        <Badge variant="neutral" className="text-[10px]">{bill.type ? `${String(bill.type).toUpperCase()} ${bill.number}` : 'BILL'}</Badge>
                         <span className="text-[10px] text-[#94A3B8]">{bill.date || 'Recent'}</span>
                       </div>
                       <h4 className="text-[14px] font-semibold text-[#1E3A5F] leading-snug group-hover:text-[#2563EB] line-clamp-2">
@@ -214,7 +209,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
                    {(bills.cosponsored || []).slice(0, 5).map((bill: any, i: number) => (
                     <Card key={i} className="p-4 hover:border-[#2563EB] transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-2">
-                        <Badge variant="neutral" className="text-[10px]">{bill.code || 'BILL'}</Badge>
+                        <Badge variant="neutral" className="text-[10px]">{bill.type ? `${String(bill.type).toUpperCase()} ${bill.number}` : 'BILL'}</Badge>
                         <span className="text-[10px] text-[#94A3B8]">{bill.date || 'Recent'}</span>
                       </div>
                       <h4 className="text-[14px] font-semibold text-[#1E3A5F] leading-snug group-hover:text-[#2563EB] line-clamp-2">

@@ -19,3 +19,15 @@ export function getRepresentatives() {
 export function getMemberByBioguide(id:string) {
   return getCongressMembers().find((m:any)=>m.bioguide_id===id)
 }
+
+export function getLocalMember(id: string) {
+  const upper = id.toUpperCase()
+  return (
+    getMemberByBioguide(upper) ||
+    getMemberByBioguide(id) ||
+    getCongressMembers().find(
+      (m: any) => String(m.bioguide_id || "").toUpperCase() === upper
+    ) ||
+    null
+  )
+}

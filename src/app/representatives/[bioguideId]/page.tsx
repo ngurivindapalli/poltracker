@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getMemberProfile } from '@/lib/congress'
 import OfficialNewsFeed from '@/components/news/OfficialNewsFeed'
 import SenatorImage from '@/components/SenatorImage'
 import ConnectionsPanel from '@/components/senator/ConnectionsPanel'
@@ -19,14 +18,18 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { CommentSection } from '@/components/comments/CommentSection'
+import { getRepresentativeSummary } from '@/lib/representatives/summaries'
+import { getMemberLegislation } from '@/lib/legislation/store'
+import { getMemberByBioguide } from '@/lib/congressData'
+import { safeMemberImageUrl } from '@/lib/images'
 
 export async function generateMetadata({
   params,
 }: {
   params: { bioguideId: string };
 }): Promise<Metadata> {
-  const representative = await getMemberProfile(params.bioguideId);
-  const name = representative?.profile?.name || params.bioguideId;
+  const representative = await getRepresentativeSummary(params.bioguideId);
+  const name = representative?.name || params.bioguideId;
   return {
     title: `${name} | U.S. Representative`,
     description: `Profile for ${name}, U.S. Representative. Legislation, financial disclosures, and news from public sources.`,
@@ -35,13 +38,18 @@ export async function generateMetadata({
 
 export default async function RepresentativePage({ params }: { params: { bioguideId: string } }) {
   const { bioguideId } = params
+  const bid = bioguideId.toUpperCase()
 
-  const representative = await getMemberProfile(bioguideId)
+  const [summary, local, legislation] = await Promise.all([
+    getRepresentativeSummary(bid),
+    Promise.resolve(getMemberByBioguide(bid) ?? getMemberByBioguide(bioguideId)),
+    getMemberLegislation(bid),
+  ])
 
-  if (!representative || !representative.profile) {
+  if (!summary && !local) {
     return (
       <main className="max-w-6xl mx-auto px-6 py-12">
-        <Link href="/" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
+        <Link href="/representatives" className="inline-flex items-center text-[#64748B] hover:text-[#1E3A5F] mb-8 font-medium transition-colors">
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -51,13 +59,21 @@ export default async function RepresentativePage({ params }: { params: { bioguid
           <h2 className="text-[20px] font-bold text-red-800 mb-2">
             Unable to load representative data right now.
           </h2>
-          <p className="text-red-600">Please try again later.</p>
+          <p className="text-red-600">Identity data is missing from the synchronized roster.</p>
         </Card>
       </main>
     )
   }
 
-  const profile = representative.profile
+  const profile = {
+    bioguideId: bid,
+    name: summary?.name || local?.name || bid,
+    party: summary?.party || local?.party || null,
+    state: summary?.state || local?.state || null,
+    imageUrl: safeMemberImageUrl(bid, summary?.imageUrl, '450x550'),
+    officialWebsiteUrl: local?.website || null,
+    phoneNumber: local?.phone || local?.phoneNumber || null,
+  }
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
@@ -108,13 +124,13 @@ export default async function RepresentativePage({ params }: { params: { bioguid
           </div>
 
           {/* Profile Info Grid */}
-          {representative.member && (
+          {profile.officialWebsiteUrl || profile.phoneNumber ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-[#F1F5F9]">
-              {representative.member.officialWebsiteUrl && (
+              {profile.officialWebsiteUrl && (
                 <div>
                   <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Official Website</div>
                   <a 
-                    href={representative.member.officialWebsiteUrl} 
+                    href={profile.officialWebsiteUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-[15px] font-medium text-[#2563EB] hover:underline"
@@ -123,16 +139,16 @@ export default async function RepresentativePage({ params }: { params: { bioguid
                   </a>
                 </div>
               )}
-              {(representative.member.addressInformation?.phoneNumber || representative.member.phoneNumber) && (
+              {profile.phoneNumber && (
                 <div>
                   <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-1">Contact</div>
                   <div className="text-[15px] text-[#111827]">
-                    {representative.member.addressInformation?.phoneNumber ?? representative.member.phoneNumber}
+                    {profile.phoneNumber}
                   </div>
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </section>
 
@@ -141,7 +157,7 @@ export default async function RepresentativePage({ params }: { params: { bioguid
         <h2 className="text-xl font-semibold text-[#1E3A5F] mb-4">
           Legislative Activity
         </h2>
-        <SenatorBillsSection bioguideId={bioguideId} />
+        <SenatorBillsSection bioguideId={bioguideId} initial={legislation} />
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
