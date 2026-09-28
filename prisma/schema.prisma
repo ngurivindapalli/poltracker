@@ -508,3 +508,61 @@ model FecDonor {
   @@index([bioguideId, cycle])
   @@map("fec_donors")
 }
+
+// ---------------------------------------------------------------------------
+// Local elections (ingested; empty until a state source is synced)
+// ---------------------------------------------------------------------------
+
+model LocalCounty {
+  id             String   @id @default(uuid())
+  state          String
+  countyName     String   @map("county_name")
+  normalizedName String   @map("normalized_name")
+  slug           String
+  sourceUrl      String?  @map("source_url")
+  sourceName     String?  @map("source_name")
+  lastVerified   DateTime? @map("last_verified")
+
+  elections LocalElection[]
+  events    LocalEvent[]
+
+  @@unique([state, slug])
+  @@index([state])
+  @@index([normalizedName])
+  @@map("local_counties")
+}
+
+model LocalElection {
+  id           String    @id @default(uuid())
+  countyId     String    @map("county_id")
+  county       LocalCounty @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  electionName String    @map("election_name")
+  electionType String?   @map("election_type")
+  electionDate DateTime? @map("election_date")
+  office       String?
+  description  String?
+  sourceUrl    String?   @map("source_url")
+  sourceName   String?   @map("source_name")
+  lastVerified DateTime? @map("last_verified")
+  status       String    @default("scheduled")
+  sourceKey    String?   @unique @map("source_key")
+
+  @@index([countyId, electionDate])
+  @@map("local_elections")
+}
+
+model LocalEvent {
+  id           String    @id @default(uuid())
+  countyId     String    @map("county_id")
+  county       LocalCounty @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  title        String
+  date         DateTime?
+  description  String?
+  sourceUrl    String?   @map("source_url")
+  sourceName   String?   @map("source_name")
+  lastVerified DateTime? @map("last_verified")
+  sourceKey    String?   @unique @map("source_key")
+
+  @@index([countyId, date])
+  @@map("local_events")
+}

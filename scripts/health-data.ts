@@ -85,6 +85,21 @@ async function main() {
     newsCount > 0 || Boolean(newsFresh?.lastSuccessfulSync),
     `  Records: ${newsCount}\n  Last successful sync: ${newsFresh?.lastSuccessfulSync || "never"}`
   );
+
+  const localFresh = await getDatasetFreshness("local_elections");
+  let localElectionCount = 0;
+  if (prisma?.localElection) {
+    try {
+      localElectionCount = await prisma.localElection.count();
+    } catch {
+      localElectionCount = 0;
+    }
+  }
+  line(
+    "LOCAL ELECTIONS",
+    localElectionCount > 0 || Boolean(localFresh?.lastSuccessfulSync),
+    `  Records: ${localElectionCount}\n  Last successful sync: ${localFresh?.lastSuccessfulSync || "never"}`
+  );
 }
 
 main().catch((e) => {

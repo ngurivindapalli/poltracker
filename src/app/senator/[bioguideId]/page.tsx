@@ -26,6 +26,7 @@ import { safeMemberImageUrl } from "@/lib/images";
 import { formatUsdCompact } from "@/lib/format";
 import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 import { CommentSection } from "@/components/comments/CommentSection";
+import { AiOverviewButton } from "@/components/politician/AiOverviewButton";
 
 export const revalidate = 600;
 
@@ -123,6 +124,7 @@ export default async function SenatorPage({
             ) : null}
           </div>
         </div>
+        <AiOverviewButton bioguideId={bid} />
       </section>
 
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">

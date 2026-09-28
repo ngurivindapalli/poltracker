@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { CommentSection } from '@/components/comments/CommentSection'
+import { AiOverviewButton } from '@/components/politician/AiOverviewButton'
 import { getRepresentativeSummary } from '@/lib/representatives/summaries'
 import { getMemberLegislation } from '@/lib/legislation/store'
 import { getMemberByBioguide } from '@/lib/congressData'
@@ -118,9 +119,12 @@ export default async function RepresentativePage({ params }: { params: { bioguid
                     </span>
                 </div>
             </div>
+          <div className="flex items-start gap-2">
+            <AiOverviewButton bioguideId={profile.bioguideId} />
             <div className="hidden md:block">
                  <Button variant="primary">Follow Updates</Button>
             </div>
+          </div>
           </div>
 
           {/* Profile Info Grid */}

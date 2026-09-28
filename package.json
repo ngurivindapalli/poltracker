@@ -24,6 +24,7 @@
     "sync:quiver": "tsx scripts/sync-quiver.ts",
     "sync:legislative": "tsx scripts/sync-legislative.ts",
     "sync:news": "tsx scripts/sync-news.ts",
+    "sync:local-elections": "tsx scripts/sync-local-elections.ts",
     "health:data": "tsx scripts/health-data.ts",
     "sync:quiver:trades": "tsx scripts/sync-quiver.ts trades",
     "sync:quiver:networth": "tsx scripts/sync-quiver.ts networth",
@@ -36,6 +37,7 @@
     "sync:quiver:summaries": "tsx scripts/sync-quiver.ts summaries",
     "validate:quiver": "tsx scripts/validate-quiver.ts",
     "test:quiver": "tsx scripts/test-quiver.ts",
+    "test:local-elections": "tsx scripts/test-local-elections.ts",
     "debug:quiver:politician": "tsx scripts/debug-quiver-politician.ts"
   },
   "dependencies": {

@@ -3,7 +3,8 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import StateElectionsSection from '@/components/state/StateElectionsSection'
 import StateNewsSection from '@/components/state/StateNewsSection'
-import CountySelector from '@/components/state/CountySelector'
+import { CountyDirectory } from '@/components/state/CountyDirectory'
+import { getCountyDirectory } from '@/lib/localData/directory'
 import FederalOfficialsList from '@/components/state/FederalOfficialsList'
 import { Section } from '@/components/ui/Section'
 import { Card } from '@/components/ui/Card'
@@ -22,6 +23,7 @@ export const revalidate = 600
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const state = params.stateCode.toUpperCase()
   const { senators: allSenators } = await getSenatorSummaries()
+  const countyDirectory = await getCountyDirectory(state)
 
   const fullStateName = STATE_CODE_TO_NAME[state] || state
   const stateSenators = allSenators.filter((s) => {
@@ -75,8 +77,17 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       </Section>
 
       {/* County Selector Section - counties lazy-loaded client-side */}
-      <Section title="Local Government" subtitle="Select a county to view local elections, events, and news">
-        <CountySelector stateCode={state} stateName={fullStateName} />
+      <Section title="Local Elections & Government" subtitle={`Find local elections, events, and government information across ${fullStateName}`}>
+        <CountyDirectory
+          stateCode={state}
+          stateName={countyDirectory.stateName}
+          counties={countyDirectory.counties}
+          hasAnyRecords={countyDirectory.hasAnyRecords}
+          showHeading={false}
+          coverage={countyDirectory.coverage}
+          authorityName={countyDirectory.authorityName}
+          authorityUrl={countyDirectory.authorityUrl}
+        />
       </Section>
 
       {/* Senators Section */}
