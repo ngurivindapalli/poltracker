@@ -1,7 +1,9 @@
 import { countySlug } from "@/lib/localData/countySearch";
 import { FEC_API_BASE, FEC_SOURCE_NAME, FEC_SOURCE_URL } from "../types";
+import { fecApiKey } from "../fecAuth";
 import type { AdapterResult, NormalizedElection } from "../types";
 import { electionSourceKey, electionStatus, parseIsoDate } from "../normalize";
+import { classifyElectionSubtype } from "../electionClassify";
 import { fetchOfficialJson } from "../fetchOfficial";
 import { toCountyRecord } from "../normalize";
 
@@ -67,11 +69,15 @@ export function normalizeFecStatewideDates(
         countySlug: slug,
         electionName: `${rec.year} ${rec.type}`,
         electionType: rec.type,
+        electionCategory: "FEDERAL",
+        subtype: classifyElectionSubtype(rec.type),
         electionDate: rec.date,
         office: null,
         description:
           rec.notes ||
           "Federal election date reported by the U.S. Federal Election Commission for this state.",
+        jurisdictionName: null,
+        jurisdictionType: null,
         sourceName: FEC_SOURCE_NAME,
         sourceUrl: FEC_SOURCE_URL,
         lastVerified: verified,
@@ -88,7 +94,7 @@ export async function fetchFecStatewideElections(
   year: number
 ): Promise<AdapterResult> {
   const code = stateCode.toUpperCase();
-  const apiKey = process.env.FEC_API_KEY;
+  const apiKey = fecApiKey();
   if (!apiKey) {
     return {
       adapter: "fec-statewide",

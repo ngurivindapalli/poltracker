@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
-import StateElectionsSection from '@/components/state/StateElectionsSection'
 import StateNewsSection from '@/components/state/StateNewsSection'
+import { UpcomingLocalElections } from '@/components/state/UpcomingLocalElections'
+import { StateElectionCoverage } from '@/components/state/StateElectionCoverage'
 import { CountyDirectory } from '@/components/state/CountyDirectory'
 import { getCountyDirectory } from '@/lib/localData/directory'
 import FederalOfficialsList from '@/components/state/FederalOfficialsList'
@@ -76,6 +77,8 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         <FederalOfficialsList stateCode={state} />
       </Section>
 
+      <StateElectionCoverage stateCode={state} />
+
       {/* County Selector Section - counties lazy-loaded client-side */}
       <Section title="Local Elections & Government" subtitle={`Find local elections, events, and government information across ${fullStateName}`}>
         <CountyDirectory
@@ -125,7 +128,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-12">
            {/* Upcoming Elections */}
-           <StateElectionsSection stateCode={state} />
+           <UpcomingLocalElections stateCode={state} />
 
            {/* State Political News */}
            <StateNewsSection stateCode={state} stateName={fullStateName} />

@@ -533,22 +533,59 @@ model LocalCounty {
 }
 
 model LocalElection {
-  id           String    @id @default(uuid())
-  countyId     String    @map("county_id")
-  county       LocalCounty @relation(fields: [countyId], references: [id], onDelete: Cascade)
-  electionName String    @map("election_name")
-  electionType String?   @map("election_type")
-  electionDate DateTime? @map("election_date")
-  office       String?
-  description  String?
-  sourceUrl    String?   @map("source_url")
-  sourceName   String?   @map("source_name")
-  lastVerified DateTime? @map("last_verified")
-  status       String    @default("scheduled")
-  sourceKey    String?   @unique @map("source_key")
+  id                String    @id @default(uuid())
+  countyId          String?   @map("county_id")
+  county            LocalCounty? @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  electionName      String    @map("election_name")
+  electionType      String?   @map("election_type")
+  electionCategory  String?   @map("election_category")
+  subtype           String?
+  electionDate      DateTime? @map("election_date")
+  office            String?
+  description       String?
+  jurisdictionName  String?   @map("jurisdiction_name")
+  jurisdictionType  String?   @map("jurisdiction_type")
+  sourceUrl         String?   @map("source_url")
+  sourceName        String?   @map("source_name")
+  lastVerified      DateTime? @map("last_verified")
+  status            String    @default("scheduled")
+  sourceKey         String?   @unique @map("source_key")
+  recordKind        String?   @map("record_kind")
+  state             String?
+  district          String?
+  chamber           String?
+  externalId        String?   @map("external_id")
+
+  candidates LocalCandidate[]
 
   @@index([countyId, electionDate])
+  @@index([electionDate])
+  @@index([state, electionDate])
+  @@index([recordKind])
   @@map("local_elections")
+}
+
+model LocalCandidate {
+  id               String    @id @default(uuid())
+  electionId       String    @map("election_id")
+  election         LocalElection @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  candidateName    String    @map("candidate_name")
+  candidateId      String?   @map("candidate_id")
+  office           String?
+  state            String?
+  district         String?
+  party            String?
+  electionYears    String?   @map("election_years")
+  candidateStatus  String?   @map("candidate_status")
+  incumbent        String?
+  sourceUrl        String?   @map("source_url")
+  sourceName       String?   @map("source_name")
+  lastVerified     DateTime? @map("last_verified")
+  sourceKey        String?   @unique @map("source_key")
+
+  @@index([electionId])
+  @@index([candidateId])
+  @@map("local_candidates")
 }
 
 model LocalEvent {
@@ -556,7 +593,9 @@ model LocalEvent {
   countyId     String    @map("county_id")
   county       LocalCounty @relation(fields: [countyId], references: [id], onDelete: Cascade)
   title        String
+  eventType    String?   @map("event_type")
   date         DateTime?
+  endDate      DateTime? @map("end_date")
   description  String?
   sourceUrl    String?   @map("source_url")
   sourceName   String?   @map("source_name")

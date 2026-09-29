@@ -22,7 +22,7 @@ export async function fetchOfficialText(
 ): Promise<{ ok: true; text: string; status: number } | { ok: false; status: number; error: string }> {
   const timeoutMs = options.timeoutMs ?? 15000;
   let lastError = "request failed";
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
     try {
       const res = await fetch(url, {
         cache: "no-store",
@@ -34,7 +34,7 @@ export async function fetchOfficialText(
       });
       if (res.status === 429 || res.status >= 500) {
         lastError = `HTTP ${res.status}`;
-        await sleep(500 * attempt);
+        await sleep(res.status === 429 ? 8000 * attempt : 500 * attempt);
         continue;
       }
       if (!res.ok) {

@@ -13,8 +13,10 @@ export type StateValidation = {
   missingSourceNames: number;
   duplicateCounties: number;
   duplicateElections: number;
+  duplicateEvents: number;
   invalidDates: number;
   invalidStateCodes: number;
+  invalidJurisdictionTypes: number;
   coverage: CoverageStatus;
 };
 
@@ -27,6 +29,7 @@ export function validateStateRecords(input: {
     sourceUrl?: string | null;
     electionDate?: Date | string | null;
     countySlug?: string;
+    jurisdictionType?: string | null;
   }>;
   events: Array<{ sourceKey?: string | null; sourceName?: string | null; sourceUrl?: string | null }>;
   coverage: CoverageStatus;
@@ -37,6 +40,25 @@ export function validateStateRecords(input: {
     (e) => e.sourceKey || `${e.countySlug}|${String(e.electionDate)}`
   );
   const duplicateElections = electionKeys.length - new Set(electionKeys).size;
+  const eventKeys = input.events.map((e) => e.sourceKey || `${e.sourceName}|${e.sourceUrl}`);
+  const duplicateEvents = eventKeys.length - new Set(eventKeys).size;
+  const allowedJurisdiction = new Set([
+    "COUNTY",
+    "PARISH",
+    "BOROUGH",
+    "CENSUS_AREA",
+    "INDEPENDENT_CITY",
+    "CITY",
+    "TOWN",
+    "TOWNSHIP",
+    "VILLAGE",
+    "MUNICIPALITY",
+    "SCHOOL_DISTRICT",
+    "OTHER",
+  ]);
+  const invalidJurisdictionTypes = input.elections.filter(
+    (e) => e.jurisdictionType && !allowedJurisdiction.has(e.jurisdictionType)
+  ).length;
   const officialSourceRecords = input.elections.filter(
     (e) => e.sourceName && e.sourceName !== COMPILED_SOURCE_NAME
   ).length;
@@ -67,8 +89,10 @@ export function validateStateRecords(input: {
     missingSourceNames,
     duplicateCounties,
     duplicateElections,
+    duplicateEvents,
     invalidDates,
     invalidStateCodes,
+    invalidJurisdictionTypes,
     coverage: input.coverage,
   };
 }
@@ -86,6 +110,8 @@ export function formatValidation(v: StateValidation): string {
     `Missing source names: ${v.missingSourceNames}`,
     `Duplicate counties: ${v.duplicateCounties}`,
     `Duplicate elections: ${v.duplicateElections}`,
+    `Duplicate events: ${v.duplicateEvents}`,
+    `Invalid jurisdiction types: ${v.invalidJurisdictionTypes}`,
     `Coverage: ${v.coverage}`,
   ].join("\n");
 }

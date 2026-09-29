@@ -25,6 +25,8 @@
     "sync:legislative": "tsx scripts/sync-legislative.ts",
     "sync:news": "tsx scripts/sync-news.ts",
     "sync:local-elections": "tsx scripts/sync-local-elections.ts",
+    "report:local-elections": "tsx scripts/report-local-elections.ts",
+    "discover:local-sources": "tsx scripts/discover-local-sources.ts",
     "health:data": "tsx scripts/health-data.ts",
     "sync:quiver:trades": "tsx scripts/sync-quiver.ts trades",
     "sync:quiver:networth": "tsx scripts/sync-quiver.ts networth",

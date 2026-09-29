@@ -27,14 +27,28 @@ export type CountyDetail = {
     date: string | null;
     description: string | null;
     type: string | null;
+    category: string | null;
+    subtype: string | null;
     office: string | null;
+    jurisdictionName: string | null;
     sourceName: string | null;
     sourceUrl: string | null;
     lastVerified: string | null;
+    recordKind: string | null;
+    district: string | null;
+    candidates: Array<{
+      name: string;
+      party: string | null;
+      status: string | null;
+      incumbent: string | null;
+      candidateId: string | null;
+    }>;
   }>;
   events: Array<{
     title: string;
     date: string | null;
+    endDate: string | null;
+    eventType: string | null;
     description: string | null;
     location: string | null;
     sourceName: string | null;
@@ -76,7 +90,9 @@ async function directoryFromDb(stateCode: string): Promise<{
     const rows = await prisma.localCounty.findMany({
       where: { state: stateCode },
       include: {
-        elections: true,
+        elections: {
+          include: { candidates: true },
+        },
         events: true,
       },
       orderBy: { countyName: "asc" },
@@ -203,7 +219,7 @@ export async function getCountyDetail(
     const prisma = await getPrisma();
     const county = await prisma?.localCounty?.findUnique({
       where: { state_slug: { state: stateCode.toUpperCase(), slug } },
-      include: { elections: true, events: true },
+      include: { elections: { include: { candidates: true } }, events: true },
     });
     if (county) {
       return {
@@ -217,25 +233,47 @@ export async function getCountyDetail(
         coverage: directory.coverage,
         authorityName: directory.authorityName,
         authorityUrl: directory.authorityUrl,
-        elections: (county.elections || []).map((e: any) => ({
-          title: e.electionName,
-          date: iso(e.electionDate),
-          description: e.description,
-          type: e.electionType,
-          office: e.office,
-          sourceName: e.sourceName,
-          sourceUrl: e.sourceUrl,
-          lastVerified: iso(e.lastVerified),
-        })),
-        events: (county.events || []).map((e: any) => ({
-          title: e.title,
-          date: iso(e.date),
-          description: e.description,
-          location: null,
-          sourceName: e.sourceName,
-          sourceUrl: e.sourceUrl,
-          lastVerified: iso(e.lastVerified),
-        })),
+        elections: (county.elections || [])
+          .map((e: any) => ({
+            title: e.electionName,
+            date: iso(e.electionDate),
+            description: e.description,
+            type: e.electionType,
+            category: e.electionCategory || null,
+            subtype: e.subtype || null,
+            office: e.office,
+            jurisdictionName: e.jurisdictionName || null,
+            sourceName: e.sourceName,
+            sourceUrl: e.sourceUrl,
+            lastVerified: iso(e.lastVerified),
+            recordKind: e.recordKind || "ELECTION",
+            district: e.district || null,
+            candidates: (e.candidates || []).map((c: any) => ({
+              name: c.candidateName,
+              party: c.party,
+              status: c.candidateStatus,
+              incumbent: c.incumbent,
+              candidateId: c.candidateId,
+            })),
+          }))
+          .sort((a: { date: string | null }, b: { date: string | null }) =>
+            (a.date || "").localeCompare(b.date || "")
+          ),
+        events: (county.events || [])
+          .map((e: any) => ({
+            title: e.title,
+            date: iso(e.date),
+            endDate: iso(e.endDate),
+            eventType: e.eventType || null,
+            description: e.description,
+            location: null,
+            sourceName: e.sourceName,
+            sourceUrl: e.sourceUrl,
+            lastVerified: iso(e.lastVerified),
+          }))
+          .sort((a: { date: string | null }, b: { date: string | null }) =>
+            (a.date || "").localeCompare(b.date || "")
+          ),
       };
     }
   }
@@ -258,14 +296,22 @@ export async function getCountyDetail(
       date: e.date,
       description: e.description,
       type: e.type || null,
+      category: null,
+      subtype: null,
       office: null,
+      jurisdictionName: null,
       sourceName: COMPILED_SOURCE_NAME,
       sourceUrl: null,
       lastVerified: null,
+      recordKind: "ELECTION",
+      district: null,
+      candidates: [],
     })),
     events: events.map((e) => ({
       title: e.title,
       date: e.date,
+      endDate: null,
+      eventType: null,
       description: e.description || null,
       location: e.location,
       sourceName: COMPILED_SOURCE_NAME,

@@ -35,9 +35,23 @@ export function compiledOverlayForState(
         countySlug: countySlugValue,
         electionName: row.title,
         electionType: row.type || null,
+        electionCategory: (row.type === "Municipal"
+          ? "MUNICIPAL"
+          : row.type === "School"
+            ? "SCHOOL"
+            : row.type === "County"
+              ? "COUNTY"
+              : null) as "MUNICIPAL" | "SCHOOL" | "COUNTY" | null,
+        subtype: null,
         electionDate: date,
         office: null,
         description: row.description || null,
+        jurisdictionName: countyName,
+        jurisdictionType: (row.type === "Municipal"
+          ? "CITY"
+          : row.type === "School"
+            ? "SCHOOL_DISTRICT"
+            : "COUNTY") as "CITY" | "SCHOOL_DISTRICT" | "COUNTY",
         sourceName: COMPILED_SOURCE_NAME,
         sourceUrl: null,
         lastVerified: null,
@@ -63,7 +77,9 @@ export function compiledOverlayForState(
         state: code,
         countySlug: countySlugValue,
         title: row.title,
+        eventType: null,
         date,
+        endDate: null,
         description: row.description || row.location || null,
         sourceName: COMPILED_SOURCE_NAME,
         sourceUrl: null,

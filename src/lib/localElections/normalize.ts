@@ -29,9 +29,9 @@ export function countySourceKey(state: string, slug: string): string {
   return `county:${state.toUpperCase()}:${slug}`;
 }
 
-export function electionSourceKey(parts: Array<string | null | undefined>): string {
+export function electionSourceKey(parts: Array<string | number | null | undefined>): string {
   return parts
-    .map((p) => String(p || "").trim().toLowerCase())
+    .map((p) => String(p ?? "").trim().toLowerCase())
     .join("|");
 }
 

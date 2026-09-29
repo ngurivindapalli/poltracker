@@ -20,10 +20,12 @@ export function parseCensusCountyFile(
     if (parts.length < 7) continue;
     const state = parts[0].trim().toUpperCase();
     const countyName = parts[4].trim();
+    const classfp = parts[5].trim().toUpperCase();
     const funcstat = parts[6].trim().toUpperCase();
     if (!STATE_CODE_TO_NAME[state]) continue;
     if (wanted.size && !wanted.has(state)) continue;
-    if (funcstat === "F") continue;
+    // Census marks independent cities FUNCSTAT F; they remain official county equivalents (CLASSFP C7).
+    if (funcstat === "F" && classfp !== "C7") continue;
     if (!countyName) continue;
     const rec = toCountyRecord(state, countyName);
     const key = `${rec.state}:${rec.slug}`;
