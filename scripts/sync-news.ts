@@ -2,19 +2,20 @@ import "dotenv/config";
 import { getSenators } from "../src/lib/congressData";
 import { getPrisma } from "../src/lib/db";
 import { recordDatasetFreshness } from "../src/lib/sync/freshness";
-import { ideologyFromParty } from "../src/lib/ideology";
-import { domainsForMode } from "../src/lib/newsSources";
+import { fetchNewsApiEverything } from "../src/lib/newsApi";
+import { upsertCachedNewsArticles } from "../src/lib/newsCache";
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
 async function main() {
-  const apiKey = process.env.NEWS_API_KEY;
-  if (!apiKey) {
-    console.error("Missing NEWS_API_KEY");
+  if (!process.env.NEWS_API_KEY?.trim()) {
+    console.info("NEWS_API_KEY present: false");
     process.exit(1);
   }
+  console.info("NEWS_API_KEY present: true");
+
   const prisma = await getPrisma();
   if (!prisma) {
     console.error("DATABASE_URL / Prisma unavailable");
@@ -24,57 +25,35 @@ async function main() {
   const senators = getSenators().slice(0, 100);
   let written = 0;
   const errors: string[] = [];
+  const cutoff = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
   for (const member of senators) {
     const bid = String(member.bioguide_id || "").toUpperCase();
-    if (!bid) continue;
-    const ideology = ideologyFromParty(member.party);
-    const domains = domainsForMode(ideology, "balanced");
-    const query = encodeURIComponent(`"${member.name}" ${member.state || ""}`.trim());
-    const newsApiUrl = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=8&domains=${domains.join(",")}&apiKey=${apiKey}`;
+    const name = String(member.name || "").trim();
+    if (!bid || !name) continue;
 
     try {
-      const response = await fetch(newsApiUrl, {
-        headers: { "User-Agent": "Politeia/1.0" },
-        signal: AbortSignal.timeout(8000),
+      const recent = await prisma.cachedNewsArticle.findFirst({
+        where: { bioguideId: bid, fetchedAt: { gt: cutoff } },
+        select: { id: true },
       });
-      if (!response.ok) {
-        errors.push(`${bid}: HTTP ${response.status}`);
+      if (recent) continue;
+
+      const query = `"${name}"`;
+      const live = await fetchNewsApiEverything({
+        q: query,
+        pageSize: 8,
+        context: `sync:${bid}`,
+      });
+      if (live.errorType && live.articles.length === 0) {
+        errors.push(`${bid}: ${live.errorType}`);
+        if (live.errorType === "rate_limited") break;
         await sleep(400);
         continue;
       }
-      const data = await response.json();
-      const articles = Array.isArray(data.articles) ? data.articles : [];
-      const fetchedAt = new Date();
-      for (const article of articles) {
-        if (!article?.url || !article?.title) continue;
-        await prisma.cachedNewsArticle.upsert({
-          where: {
-            bioguideId_url: { bioguideId: bid, url: String(article.url) },
-          },
-          create: {
-            bioguideId: bid,
-            title: String(article.title),
-            url: String(article.url),
-            source: article.source?.name || null,
-            description: article.description || null,
-            publishedAt: article.publishedAt ? new Date(article.publishedAt) : null,
-            imageUrl: article.urlToImage || null,
-            fetchedAt,
-          },
-          update: {
-            title: String(article.title),
-            source: article.source?.name || null,
-            description: article.description || null,
-            publishedAt: article.publishedAt ? new Date(article.publishedAt) : null,
-            imageUrl: article.urlToImage || null,
-            fetchedAt,
-          },
-        });
-        written += 1;
-      }
+      written += await upsertCachedNewsArticles(bid, live.articles);
     } catch (err) {
-      errors.push(`${bid}: ${err instanceof Error ? err.message : "error"}`);
+      errors.push(`${bid}: ${err instanceof Error ? err.name : "error"}`);
     }
     await sleep(350);
   }

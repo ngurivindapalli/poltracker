@@ -257,3 +257,24 @@ export function isDefaultNewsSourceSelection(ids: string[]): boolean {
   if (ids.length === 0) return true
   return newsSourceIdsEqual(ids, DEFAULT_NEWS_SOURCE_IDS)
 }
+
+/**
+ * Default source ids include outlets NewsAPI rejects or that return zero
+ * /everything hits on the developer plan. Only post-filter when the caller
+ * explicitly chose a non-default subset.
+ */
+export function shouldApplyNewsSourceFilter(
+  paramPresent: boolean,
+  ids: string[]
+): boolean {
+  return paramPresent && ids.length > 0 && !isDefaultNewsSourceSelection(ids)
+}
+
+export function applyRequestedSourceFilter<T extends { source?: unknown }>(
+  articles: T[],
+  paramPresent: boolean,
+  ids: string[]
+): T[] {
+  if (!shouldApplyNewsSourceFilter(paramPresent, ids)) return articles
+  return filterArticlesBySourceIds(articles, ids)
+}

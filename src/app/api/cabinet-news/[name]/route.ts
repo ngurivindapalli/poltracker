@@ -1,47 +1,39 @@
 import { NextResponse } from "next/server"
-import {
-  resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  filterArticlesBySourceIds,
-} from "@/lib/newsSources"
-
-const API_KEY = process.env.NEWS_API_KEY
+import { resolveNewsSourcesQuery, applyRequestedSourceFilter } from "@/lib/newsSources"
+import { fetchNewsApiEverything, newsApiKeyPresent } from "@/lib/newsApi"
 
 export async function GET(req: Request, { params }: { params: { name: string } }) {
   const name = decodeURIComponent(params.name)
   const urlObj = new URL(req.url)
-  const { ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
-  const sourcesQ = buildNewsApiSourcesQueryParam(sourceIds)
+  const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
 
-  if (!API_KEY) {
+  if (!newsApiKeyPresent()) {
     return NextResponse.json({ articles: [] })
   }
 
-  const newsUrl =
-    `https://newsapi.org/v2/everything?q=${encodeURIComponent(name)}` +
-    `&language=en&sortBy=publishedAt&pageSize=5&sources=${encodeURIComponent(sourcesQ)}&apiKey=${API_KEY}`
-
   try {
-    const res = await fetch(newsUrl, {
-      headers: { "User-Agent": "PolTracker/1.0" },
-      next: { revalidate: 900 },
+    const live = await fetchNewsApiEverything({
+      q: name,
+      pageSize: 5,
+      context: `cabinet:${name}`,
     })
+    const filtered = applyRequestedSourceFilter(
+      live.articles.map((article) => ({
+        ...article,
+        source: article.rawSource,
+      })),
+      paramPresent,
+      sourceIds
+    )
 
-    if (!res.ok) {
-      return NextResponse.json({ articles: [] })
-    }
-
-    const data = await res.json()
-    const raw = Array.isArray(data.articles) ? data.articles : []
-    const filtered = filterArticlesBySourceIds(raw, sourceIds)
-
-    const articles = filtered.map((a: any) => ({
-      title: a.title,
-      url: a.url,
-      description: a.description,
-      source: a.source?.name ? a.source : { name: String(a.source ?? "") },
-      publishedAt: a.publishedAt,
-      urlToImage: a.urlToImage,
+    const articles = filtered.map((article) => ({
+      title: article.title,
+      url: article.url,
+      description: article.description,
+      source: article.rawSource,
+      publishedAt: article.publishedAt,
+      urlToImage: article.urlToImage,
+      author: article.author,
     }))
 
     return NextResponse.json({ articles })

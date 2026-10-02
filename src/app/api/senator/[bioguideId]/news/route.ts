@@ -4,16 +4,11 @@ export const fetchCache = 'force-no-store'
 
 import { NextResponse } from 'next/server'
 import { fetchMember } from '@/lib/congress'
-import {
-  resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  filterArticlesBySourceIds,
-  getArticleSourceKey
-} from '@/lib/newsSources'
+import { resolveNewsSourcesQuery, applyRequestedSourceFilter } from '@/lib/newsSources'
+import { fetchNewsApiEverything } from '@/lib/newsApi'
 
-// In-memory cache: Map<cacheKey, { timestamp: number; articles: any[] }>
 const cache = new Map<string, { timestamp: number; articles: any[] }>()
-const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
+const CACHE_TTL_MS = 10 * 60 * 1000
 
 function normalizeTitle(title: string): string {
   return title
@@ -44,54 +39,6 @@ function deduplicateArticles(articles: any[]): any[] {
   return unique
 }
 
-function mapArticle(article: any) {
-  const src = article.source
-  const sourceName = typeof src === 'object' && src?.name ? src.name : String(src ?? '')
-  const sourceId = typeof src === 'object' && src?.id ? src.id : getArticleSourceKey(src ?? { name: sourceName })
-  return {
-    title: article.title || '',
-    description: article.description || '',
-    url: article.url || '',
-    source: sourceName,
-    sourceId: sourceId || undefined,
-    publishedAt: article.publishedAt || '',
-    urlToImage: article.urlToImage || undefined
-  }
-}
-
-function processArticlesMajor(
-  rawArticles: any[],
-  allowedSourceIds: string[]
-): any[] {
-  const allow = new Set(allowedSourceIds.map((x) => x.toLowerCase()))
-
-  return rawArticles
-    .filter((article: any) => {
-      const key = getArticleSourceKey(article.source)
-      if (!key || !allow.has(key)) return false
-      if (shouldFilterUrl(article.url)) return false
-      if (!article.title || !article.title.trim()) return false
-      return true
-    })
-    .map(mapArticle)
-    .sort((a, b) => {
-      const dateA = new Date(a.publishedAt).getTime()
-      const dateB = new Date(b.publishedAt).getTime()
-      return dateB - dateA
-    })
-}
-
-function processArticlesAll(rawArticles: any[], allowedSourceIds: string[]): any[] {
-  const filtered = filterArticlesBySourceIds(rawArticles, allowedSourceIds)
-  return filtered
-    .filter((article: any) => {
-      if (shouldFilterUrl(article.url)) return false
-      if (!article.title || !article.title.trim()) return false
-      return true
-    })
-    .map(mapArticle)
-}
-
 export async function GET(
   req: Request,
   { params }: { params: { bioguideId: string } }
@@ -100,6 +47,12 @@ export async function GET(
     const bioguideId = params.bioguideId
 
     if (!process.env.NEWS_API_KEY) {
+      console.info('[newsapi]', {
+        provider: 'newsapi',
+        endpoint: 'everything',
+        context: `senator:${bioguideId}`,
+        keyPresent: false,
+      })
       return NextResponse.json(
         { error: 'NEWS_API_KEY missing', sourceType: 'major', articles: [] },
         { status: 500 }
@@ -108,10 +61,9 @@ export async function GET(
 
     const url = new URL(req.url)
     const coverage = url.searchParams.get('coverage') || 'major'
-    const { ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
-    const sourcesKey = buildNewsApiSourcesQueryParam(sourceIds)
+    const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
 
-    const cacheKey = `${bioguideId}:${coverage}:src:${sourcesKey}`
+    const cacheKey = `${bioguideId}:${coverage}:src:${sourceIds.join(',')}`
     const cached = cache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return NextResponse.json({
@@ -122,7 +74,6 @@ export async function GET(
 
     const senatorData = await fetchMember(bioguideId)
     const member = senatorData?.member ?? senatorData
-
     const fullName = member?.directOrderName ?? member?.name ?? member?.fullName
 
     if (!fullName) {
@@ -144,43 +95,40 @@ export async function GET(
         familyNames = (familyData.family || []).map((f: any) => f.name).filter(Boolean)
       }
     } catch (err) {
-      console.error('Error fetching family data for news query:', err)
-    }
-
-    const apiKey = process.env.NEWS_API_KEY!
-    const allNames = [fullName, ...familyNames].filter(Boolean)
-    const queryParts = allNames.map((name) => `"${name}"`)
-    const query = encodeURIComponent(queryParts.join(' OR '))
-
-    const sourcesParam = `&sources=${encodeURIComponent(sourcesKey)}`
-    const newsApiUrl = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=20&apiKey=${apiKey}${sourcesParam}`
-
-    const response = await fetch(newsApiUrl, {
-      headers: {
-        'User-Agent': 'PolTracker/1.0'
-      }
-    })
-
-    if (!response.ok) {
-      return NextResponse.json({
-        sourceType: coverage,
-        articles: []
+      console.info('[newsapi]', {
+        provider: 'newsapi',
+        endpoint: 'family_lookup',
+        context: `senator:${bioguideId}`,
+        errorType: err instanceof Error ? err.name : 'family_fetch_failed',
       })
     }
 
-    const data = await response.json()
-    const rawArticles = data.articles || []
+    const allNames = [fullName, ...familyNames].filter(Boolean)
+    const query = allNames.map((name) => `"${name}"`).join(' OR ')
+    const live = await fetchNewsApiEverything({
+      q: query,
+      pageSize: 20,
+      context: `senator:${bioguideId}`,
+    })
 
-    let processedArticles: any[]
+    const withSource = live.articles.map((article) => ({
+      ...article,
+      source: article.rawSource,
+    }))
+    const filtered = applyRequestedSourceFilter(withSource, paramPresent, sourceIds)
+      .filter((article) => !shouldFilterUrl(article.url) && article.title.trim())
+      .map((article) => ({
+        title: article.title,
+        description: article.description,
+        url: article.url,
+        source: article.rawSource?.name || article.source,
+        sourceId: article.sourceId,
+        publishedAt: article.publishedAt,
+        urlToImage: article.urlToImage || undefined,
+        author: article.author,
+      }))
 
-    if (coverage === 'all') {
-      processedArticles = processArticlesAll(rawArticles, sourceIds)
-    } else {
-      processedArticles = processArticlesMajor(rawArticles, sourceIds)
-    }
-
-    processedArticles = deduplicateArticles(processedArticles)
-    processedArticles = processedArticles.slice(0, 10)
+    const processedArticles = deduplicateArticles(filtered).slice(0, 10)
 
     cache.set(cacheKey, {
       timestamp: Date.now(),
@@ -192,7 +140,12 @@ export async function GET(
       articles: processedArticles
     })
   } catch (err: unknown) {
-    console.error('Error fetching news:', err)
+    console.info('[newsapi]', {
+      provider: 'newsapi',
+      endpoint: 'everything',
+      context: 'senator_news',
+      errorType: err instanceof Error ? err.name : 'server_error',
+    })
     return NextResponse.json(
       { error: 'server_error', sourceType: 'major', articles: [] },
       { status: 500 }

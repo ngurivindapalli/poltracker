@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server"
 import { GLOBAL_LEADERS } from "@/data/globalLeaders"
-import {
-  resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  filterArticlesBySourceIds
-} from "@/lib/newsSources"
+import { resolveNewsSourcesQuery, applyRequestedSourceFilter } from "@/lib/newsSources"
+import { fetchNewsApiEverything, newsApiKeyPresent } from "@/lib/newsApi"
 
 export async function GET(
   req: Request,
@@ -16,35 +13,35 @@ export async function GET(
     return NextResponse.json([])
   }
 
-  const NEWS_KEY = process.env.NEWS_API_KEY
-  if (!NEWS_KEY) {
+  if (!newsApiKeyPresent()) {
     return NextResponse.json([])
   }
 
   const urlObj = new URL(req.url)
-  const { ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
-  const sourcesParam = `&sources=${encodeURIComponent(buildNewsApiSourcesQueryParam(sourceIds))}`
-
-  const query = encodeURIComponent(leader.name)
-
-  const apiUrl = `https://newsapi.org/v2/everything?q=${query}&sortBy=publishedAt&pageSize=12&language=en&apiKey=${NEWS_KEY}${sourcesParam}`
+  const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
 
   try {
-    const res = await fetch(apiUrl, {
-      cache: "no-store"
+    const live = await fetchNewsApiEverything({
+      q: leader.name,
+      pageSize: 12,
+      context: `leader:${leader.slug}`,
     })
-
-    if (!res.ok) {
-      return NextResponse.json([])
-    }
-
-    const json = await res.json()
-    const raw = json.articles || []
-    const filtered = filterArticlesBySourceIds(raw, sourceIds)
-
+    const filtered = applyRequestedSourceFilter(
+      live.articles.map((article) => ({
+        ...article,
+        source: article.rawSource,
+      })),
+      paramPresent,
+      sourceIds
+    )
     return NextResponse.json(filtered)
   } catch (e) {
-    console.error("Leader news error:", e)
+    console.info("[newsapi]", {
+      provider: "newsapi",
+      endpoint: "everything",
+      context: `leader:${params.id}`,
+      errorType: e instanceof Error ? e.name : "fetch_failed",
+    })
     return NextResponse.json([])
   }
 }

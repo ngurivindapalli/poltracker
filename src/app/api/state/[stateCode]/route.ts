@@ -5,9 +5,9 @@ import { NextResponse } from 'next/server'
 import { fetchMembersByState, fetchSponsoredLegislation, fetchCosponsoredLegislation } from '@/lib/congress'
 import {
   resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  getArticleSourceKey
+  applyRequestedSourceFilter
 } from '@/lib/newsSources'
+import { fetchNewsApiEverything } from '@/lib/newsApi'
 
 // State code to full name mapping
 const STATE_NAMES: Record<string, string> = {
@@ -30,48 +30,47 @@ const STATE_NAMES: Record<string, string> = {
  * Fetch news articles for a state
  * Uses member names + state name as search query
  */
-async function fetchStateNews(stateCode: string, memberNames: string[], allowedSourceIds: string[]): Promise<any[]> {
+async function fetchStateNews(
+  stateCode: string,
+  memberNames: string[],
+  paramPresent: boolean,
+  allowedSourceIds: string[]
+): Promise<any[]> {
   if (!process.env.NEWS_API_KEY) {
-    console.error('NEWS_API_KEY missing for state news')
+    console.info('[newsapi]', {
+      provider: 'newsapi',
+      endpoint: 'everything',
+      context: `state_aggregate:${stateCode}`,
+      keyPresent: false,
+    })
     return []
   }
 
   const stateName = STATE_NAMES[stateCode] || stateCode
-  const allow = new Set(allowedSourceIds.map((x) => x.toLowerCase()))
-  
-  // Build query: state name + member names (limit to first 5 to avoid query length issues)
   const nameQueries = memberNames.slice(0, 5).map(name => `"${name}"`).join(' OR ')
-  const query = encodeURIComponent(`${stateName} politics ${nameQueries}`)
-  
-  const sourcesParam = `&sources=${encodeURIComponent(buildNewsApiSourcesQueryParam(allowedSourceIds))}`
-  const newsApiUrl = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=30&apiKey=${process.env.NEWS_API_KEY}${sourcesParam}`
+  const query = `${stateName} politics ${nameQueries}`
 
   try {
-    const response = await fetch(newsApiUrl, {
-      headers: { 'User-Agent': 'PolTracker/1.0' },
-      next: { revalidate: 3600 }
+    const live = await fetchNewsApiEverything({
+      q: query,
+      pageSize: 30,
+      context: `state_aggregate:${stateCode}`,
     })
-
-    if (!response.ok) {
-      console.error(`NewsAPI error for state ${stateCode}: ${response.status}`)
-      return []
-    }
-
-    const data = await response.json()
-    const articles = (data.articles || []).filter((article: any) => {
-      // Filter out opinion pieces and blogs
+    const mapped = live.articles.map((article) => ({
+      ...article,
+      source: article.rawSource,
+    }))
+    const filtered = applyRequestedSourceFilter(mapped, paramPresent, allowedSourceIds)
+    const articles = filtered.filter((article) => {
       const url = (article.url || '').toLowerCase()
       if (url.includes('opinion') || url.includes('/blog')) return false
-      
-      // Must have title and be from selected sources
       if (!article.title || !article.title.trim()) return false
-      const key = getArticleSourceKey(article.source)
-      return !!key && allow.has(key)
-    }).map((article: any) => ({
+      return true
+    }).map((article) => ({
       title: article.title || '',
       description: article.description || '',
       url: article.url || '',
-      source: article.source?.name || article.source || '',
+      source: article.rawSource?.name || article.source || '',
       publishedAt: article.publishedAt || ''
     }))
 
@@ -153,7 +152,7 @@ export async function GET(
   try {
     const stateCode = params.stateCode.toUpperCase()
     const urlObj = new URL(req.url)
-    const { ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
+    const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(urlObj.searchParams)
     
     if (!STATE_NAMES[stateCode]) {
       return NextResponse.json(
@@ -191,7 +190,7 @@ export async function GET(
 
     // Fetch news and bills in parallel
     const [news, bills] = await Promise.all([
-      fetchStateNews(stateCode, memberNames, sourceIds),
+      fetchStateNews(stateCode, memberNames, paramPresent, sourceIds),
       aggregateStateBills(members)
     ])
 

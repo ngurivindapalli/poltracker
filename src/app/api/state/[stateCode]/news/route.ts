@@ -5,9 +5,9 @@ export const fetchCache = 'force-no-store'
 import { NextResponse } from 'next/server'
 import {
   resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  getArticleSourceKey
+  applyRequestedSourceFilter
 } from '@/lib/newsSources'
+import { fetchNewsApiEverything } from '@/lib/newsApi'
 
 // State code to full name mapping
 const STATE_NAMES: Record<string, string> = {
@@ -340,15 +340,13 @@ async function fetchNewsWithLocalQueries(
   stateCode: string,
   scope: string,
   locationValue: string | undefined,
+  paramPresent: boolean,
   allowedSourceIds: string[]
 ): Promise<any[]> {
   if (!process.env.NEWS_API_KEY) {
     return []
   }
-  
-  const allow = new Set(allowedSourceIds.map((x) => x.toLowerCase()))
-  const sourcesQuery = encodeURIComponent(buildNewsApiSourcesQueryParam(allowedSourceIds))
-  
+
   const stateMeta = STATE_METADATA[stateCode] || {
     name: stateName,
     capital: '',
@@ -393,35 +391,32 @@ async function fetchNewsWithLocalQueries(
   
   // Fetch all queries in parallel
   const fetchPromises = queries.map(async (query) => {
-    const encodedQuery = encodeURIComponent(query)
-    const sourcesParam = `&sources=${sourcesQuery}`
-    const newsApiUrl = `https://newsapi.org/v2/everything?q=${encodedQuery}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${process.env.NEWS_API_KEY}${sourcesParam}`
-    
     try {
-      const response = await fetch(newsApiUrl, {
-        headers: { 'User-Agent': 'PolTracker/1.0' }
+      const live = await fetchNewsApiEverything({
+        q: query,
+        pageSize: 10,
+        context: `state:${stateCode}`,
       })
-      
-      if (!response.ok) return []
-      
-      const data = await response.json()
-      return (data.articles || []).filter((article: any) => {
-        // Basic filtering
+      const mapped = live.articles.map((article) => ({
+        ...article,
+        source: article.rawSource,
+      }))
+      const filtered = applyRequestedSourceFilter(mapped, paramPresent, allowedSourceIds)
+      return filtered.filter((article) => {
         const url = (article.url || '').toLowerCase()
         if (url.includes('opinion') || url.includes('/blog')) return false
         if (!article.title || !article.title.trim()) return false
-        
-        const sourceKey = getArticleSourceKey(article.source)
-        if (!sourceKey || !allow.has(sourceKey)) return false
-        
-        // Deduplicate by URL
         if (seenUrls.has(article.url)) return false
         seenUrls.add(article.url)
-        
         return true
       })
     } catch (err) {
-      console.error(`Error fetching query "${query}":`, err)
+      console.info('[newsapi]', {
+        provider: 'newsapi',
+        endpoint: 'everything',
+        context: `state:${stateCode}`,
+        errorType: err instanceof Error ? err.name : 'fetch_failed',
+      })
       return []
     }
   })
@@ -630,8 +625,8 @@ export async function GET(
     const url = new URL(req.url)
     const scope = url.searchParams.get('scope') || 'state'
     const locationValue = url.searchParams.get('value') || undefined
-    const { ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
-    const sourcesKey = buildNewsApiSourcesQueryParam(sourceIds)
+    const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
+    const sourcesKey = sourceIds.join(',')
     
     // Build cache key
     const cacheKey = `${stateCode}:${scope}:${locationValue || 'statewide'}:src:${sourcesKey}`
@@ -657,7 +652,7 @@ export async function GET(
     }
     
     // Fetch news with local-focused queries
-    const allArticles = await fetchNewsWithLocalQueries(stateName, stateCode, scope, locationValue, sourceIds)
+    const allArticles = await fetchNewsWithLocalQueries(stateName, stateCode, scope, locationValue, paramPresent, sourceIds)
     
     // Apply strict ownership scoring and filtering
     const filteredArticles = allArticles.filter((article: any) => {

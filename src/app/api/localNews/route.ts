@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
-import {
-  resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  filterArticlesBySourceIds,
-} from "@/lib/newsSources"
+import { resolveNewsSourcesQuery, applyRequestedSourceFilter } from "@/lib/newsSources"
+import { fetchNewsApiEverything } from "@/lib/newsApi"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -17,50 +14,55 @@ export async function GET(request: Request) {
     )
   }
 
-  const apiKey = process.env.NEWS_API_KEY
-  if (!apiKey) {
+  if (!process.env.NEWS_API_KEY) {
+    console.info("[newsapi]", {
+      provider: "newsapi",
+      endpoint: "everything",
+      context: "localNews",
+      keyPresent: false,
+    })
     return NextResponse.json(
       { articles: [], error: "News API key not configured" },
       { status: 200 }
     )
   }
 
-  const { ids: sourceIds } = resolveNewsSourcesQuery(searchParams)
-  const sourcesQ = buildNewsApiSourcesQueryParam(sourceIds)
+  const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(searchParams)
 
   try {
-    const query = encodeURIComponent(
-      `${county} ${state} government OR politics OR election`
+    const live = await fetchNewsApiEverything({
+      q: `${county} ${state} government OR politics OR election`,
+      pageSize: 10,
+      context: `local:${state}:${county}`,
+    })
+
+    const filtered = applyRequestedSourceFilter(
+      live.articles.map((article) => ({
+        ...article,
+        source: article.rawSource,
+      })),
+      paramPresent,
+      sourceIds
     )
 
-    const response = await fetch(
-      `https://newsapi.org/v2/everything?q=${query}&sortBy=publishedAt&pageSize=10&language=en&sources=${encodeURIComponent(
-        sourcesQ
-      )}&apiKey=${apiKey}`,
-      { next: { revalidate: 3600 } }
-    )
-
-    if (!response.ok) {
-      console.error("News API error:", response.status)
-      return NextResponse.json({ articles: [] })
-    }
-
-    const data = await response.json()
-    const raw = data.articles || []
-    const afterSources = filterArticlesBySourceIds(raw, sourceIds)
-
-    const articles = afterSources.map((article: any) => ({
+    const articles = filtered.map((article) => ({
       title: article.title || "Untitled",
       description: article.description || "",
-      source: article.source?.name || "Unknown",
-      url: article.url || "#",
+      source: article.rawSource?.name || article.source || "Unknown",
+      url: article.url,
       urlToImage: article.urlToImage || null,
-      publishedAt: article.publishedAt || new Date().toISOString(),
+      publishedAt: article.publishedAt || "",
+      author: article.author,
     }))
 
     return NextResponse.json({ articles })
   } catch (error) {
-    console.error("Local news fetch error:", error)
+    console.info("[newsapi]", {
+      provider: "newsapi",
+      endpoint: "everything",
+      context: "localNews",
+      errorType: error instanceof Error ? error.name : "fetch_failed",
+    })
     return NextResponse.json({ articles: [] })
   }
 }

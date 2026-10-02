@@ -1,36 +1,22 @@
-export async function fetchUKNews(sort = "publishedAt") {
-  const apiKey = process.env.NEWS_API_KEY
+import { fetchNewsApiEverything } from "@/lib/newsApi"
 
+export async function fetchUKNews(sort = "publishedAt") {
   const query = `
     ("United Kingdom" OR UK OR Britain OR British OR Westminster)
     AND
     (government OR parliament OR politics OR election OR policy)
   `
 
-  const url =
-    `https://newsapi.org/v2/everything?` +
-    `q=${encodeURIComponent(query)}` +
-    `&language=en` +
-    `&sortBy=${sort}` +
-    `&pageSize=40` +
-    `&domains=bbc.co.uk,bbc.com,theguardian.com,telegraph.co.uk,independent.co.uk,sky.com,reuters.com` +
-    `&apiKey=${apiKey}`
-
   try {
-    const res = await fetch(url)
+    const live = await fetchNewsApiEverything({
+      q: query,
+      pageSize: 30,
+      sortBy: sort,
+      context: "uk",
+    })
 
-    const data = await res.json()
-
-    if (!data.articles) return []
-
-    // FILTER OUT NON-UK ARTICLES
-
-    const filtered = data.articles.filter((a: any) => {
-      const text = (
-        (a.title || "") +
-        (a.description || "")
-      ).toLowerCase()
-
+    const filtered = live.articles.filter((a) => {
+      const text = `${a.title || ""} ${a.description || ""}`.toLowerCase()
       return (
         text.includes("uk") ||
         text.includes("britain") ||
@@ -43,7 +29,15 @@ export async function fetchUKNews(sort = "publishedAt") {
       )
     })
 
-    return filtered.slice(0, 30)
+    return filtered.slice(0, 30).map((a) => ({
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      urlToImage: a.urlToImage,
+      publishedAt: a.publishedAt,
+      source: a.rawSource,
+      author: a.author,
+    }))
   } catch {
     return []
   }

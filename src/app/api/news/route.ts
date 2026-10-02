@@ -3,11 +3,8 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { getCache, setCache } from '@/lib/cache'
-import {
-  resolveNewsSourcesQuery,
-  buildNewsApiSourcesQueryParam,
-  filterArticlesBySourceIds
-} from '@/lib/newsSources'
+import { resolveNewsSourcesQuery, applyRequestedSourceFilter } from '@/lib/newsSources'
+import { fetchNewsApiEverything } from '@/lib/newsApi'
 
 export async function GET(req: Request) {
   try {
@@ -15,13 +12,9 @@ export async function GET(req: Request) {
     const query = url.searchParams.get('q')
     const scope = url.searchParams.get('scope')
     const state = url.searchParams.get('state')
-    const { ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
-    const sourcesKey = buildNewsApiSourcesQueryParam(sourceIds)
+    const { paramPresent, ids: sourceIds } = resolveNewsSourcesQuery(url.searchParams)
 
-    // Build cache key (include sources so different filters don't collide)
-    const cacheKey = `news-${scope || 'general'}-${state || ''}-${query || ''}-src-${sourcesKey}`
-
-    // Check cache first
+    const cacheKey = `news-${scope || 'general'}-${state || ''}-${query || ''}-src-${sourceIds.join(',')}`
     const cached = getCache(cacheKey)
     if (cached) {
       return NextResponse.json(cached)
@@ -31,42 +24,43 @@ export async function GET(req: Request) {
       return NextResponse.json({ articles: [] })
     }
 
-    const apiKey = process.env.NEWS_API_KEY
-
-    if (!apiKey) {
-      return NextResponse.json({ articles: [] })
-    }
-
-    // Build query
     const searchQuery = query || (state ? `${state} politics` : 'US politics')
-    const sourcesParam = `&sources=${encodeURIComponent(sourcesKey)}`
-    const newsApiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}${sourcesParam}`
-
-    const response = await fetch(newsApiUrl, {
-      headers: {
-        'User-Agent': 'PolTracker/1.0'
-      },
-      next: { revalidate: 900 } // Cache for 15 minutes
+    const live = await fetchNewsApiEverything({
+      q: searchQuery,
+      pageSize: 10,
+      context: `news:${scope || 'general'}`,
     })
 
-    if (!response.ok) {
-      return NextResponse.json({ articles: [] })
-    }
+    const filtered = applyRequestedSourceFilter(
+      live.articles.map((article) => ({
+        ...article,
+        source: article.rawSource,
+      })),
+      paramPresent,
+      sourceIds
+    )
 
-    const data = await response.json()
-    const raw = data.articles || []
-    const articles = filterArticlesBySourceIds(raw, sourceIds)
+    const articles = filtered.map((article) => ({
+      title: article.title,
+      description: article.description,
+      url: article.url,
+      source: article.rawSource || article.source,
+      publishedAt: article.publishedAt,
+      urlToImage: article.urlToImage,
+      imageUrl: article.imageUrl,
+      author: article.author,
+    }))
 
-    const result = {
-      articles
-    }
-
-    // Cache the result (15 minutes)
+    const result = { articles }
     setCache(cacheKey, result, 900000)
-
     return NextResponse.json(result)
   } catch (err: unknown) {
-    console.error('Error fetching news:', err)
+    console.info('[newsapi]', {
+      provider: 'newsapi',
+      endpoint: 'everything',
+      context: 'news_route',
+      errorType: err instanceof Error ? err.name : 'server_error',
+    })
     return NextResponse.json({ articles: [] })
   }
 }

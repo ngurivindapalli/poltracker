@@ -1,23 +1,21 @@
+import { fetchNewsApiEverything } from "@/lib/newsApi"
+
 export async function fetchGermanMemberNews(name: string) {
-  const apiKey = process.env.NEWS_API_KEY
-
-  const url =
-    `https://newsapi.org/v2/everything?` +
-    `q=${encodeURIComponent(name + " Germany politics")}` +
-    `&language=en` +
-    `&pageSize=20` +
-    `&sortBy=publishedAt` +
-    `&domains=dw.com,spiegel.de,reuters.com,politico.eu,bloomberg.com` +
-    `&apiKey=${apiKey}`
-
   try {
-    const res = await fetch(url)
-
-    const data = await res.json()
-
-    if (!data.articles) return []
-
-    return data.articles
+    const live = await fetchNewsApiEverything({
+      q: `${name} Germany politics`,
+      pageSize: 20,
+      context: `germany:${name}`,
+    })
+    return live.articles.map((a) => ({
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      urlToImage: a.urlToImage,
+      publishedAt: a.publishedAt,
+      source: a.rawSource,
+      author: a.author,
+    }))
   } catch {
     return []
   }

@@ -12,6 +12,7 @@ import {
   DEFAULT_NEWS_SOURCE_IDS,
   buildNewsApiSourcesQueryParam,
   filterArticlesBySourceIds,
+  isDefaultNewsSourceSelection,
 } from "@/lib/newsSources"
 import { NewsSourceFilter } from "./NewsSourceFilter"
 import NewsFeed from "./NewsFeed"
@@ -77,7 +78,9 @@ export function FilteredNewsFeed({
       const data = await res.json()
       const raw = data.articles ?? data ?? []
       const list = Array.isArray(raw) ? raw : []
-      const filtered = filterArticlesBySourceIds(list, effectiveSourceIds)
+      const filtered = isDefaultNewsSourceSelection(effectiveSourceIds)
+        ? list
+        : filterArticlesBySourceIds(list, effectiveSourceIds)
       setArticles(mapForNewsFeed(filtered))
     } catch {
       setError("Unable to load news right now.")

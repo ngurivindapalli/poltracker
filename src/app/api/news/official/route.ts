@@ -3,15 +3,11 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { ideologyFromParty } from '@/lib/ideology'
-import { domainsForMode } from '@/lib/newsSources'
+import { domainsForMode, resolveNewsSourcesQuery, applyRequestedSourceFilter } from '@/lib/newsSources'
 import type { Ideology } from '@/lib/ideology'
-import {
-  resolveNewsSourcesQuery,
-  filterArticlesBySourceIds
-} from '@/lib/newsSources'
 import { getLocalMember } from '@/lib/congressData'
-import { getPrisma } from '@/lib/db'
 import { getDatasetFreshness } from '@/lib/sync/freshness'
+import { getOrRefreshOfficialNews } from '@/lib/newsCache'
 
 function emptyPayload(ideology: Ideology, mode: string, domains: string[], lastUpdated: string | null = null) {
   return {
@@ -49,42 +45,27 @@ export async function GET(req: Request) {
 
     domains = domainsForMode(ideology, mode)
 
-    const prisma = await getPrisma()
-    if (!prisma?.cachedNewsArticle || !bioguideId) {
+    if (!bioguideId) {
       return NextResponse.json(emptyPayload(ideology, mode, domains, lastUpdated))
     }
 
-    const rows = await prisma.cachedNewsArticle.findMany({
-      where: { bioguideId: bioguideId.toUpperCase() },
-      orderBy: { publishedAt: 'desc' },
-      take: 20,
-    })
-
-    let articles = rows.map((r: any) => ({
-      title: r.title,
-      description: r.description || '',
-      url: r.url,
-      source: r.source || '',
-      publishedAt: r.publishedAt ? r.publishedAt.toISOString() : '',
-      imageUrl: r.imageUrl,
+    const { articles: cached } = await getOrRefreshOfficialNews(bioguideId)
+    const articles = applyRequestedSourceFilter(
+      cached.map((article) => ({
+        ...article,
+        source: { name: article.source, id: article.sourceId },
+      })),
+      paramPresent,
+      sourceIds
+    ).map((article) => ({
+      title: article.title,
+      description: article.description || '',
+      url: article.url,
+      source: article.source?.name || article.source,
+      publishedAt: article.publishedAt,
+      imageUrl: article.imageUrl,
+      author: article.author ?? null,
     }))
-
-    if (paramPresent) {
-      articles = filterArticlesBySourceIds(
-        articles.map((a: any) => ({
-          ...a,
-          source: { name: a.source }
-        })),
-        sourceIds
-      ).map((a: any) => ({
-        title: a.title,
-        description: a.description,
-        url: a.url,
-        source: a.source?.name || a.source,
-        publishedAt: a.publishedAt,
-        imageUrl: a.imageUrl,
-      }))
-    }
 
     return NextResponse.json(
       { ideology, mode, domains, articles, lastUpdated },
@@ -94,7 +75,12 @@ export async function GET(req: Request) {
         }
       }
     )
-  } catch {
+  } catch (err) {
+    console.info('[newsapi]', {
+      provider: 'newsapi',
+      endpoint: 'official_cache',
+      errorType: err instanceof Error ? err.name : 'server_error',
+    })
     return NextResponse.json(emptyPayload(ideology, mode, domains, lastUpdated))
   }
 }
