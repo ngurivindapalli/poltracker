@@ -12,18 +12,20 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { STATE_CODE_TO_NAME } from '@/lib/localData/usCounties'
 import SenatorsList from '@/components/SenatorsList'
+import RepresentativesList from '@/components/RepresentativesList'
 import { MAYORS } from "@/data/mayors"
 import { GOVERNOR_BY_STATE } from "@/data/governorsByState"
 import { getMayorImage } from "@/lib/getMayorImage"
 import { getSenatorSummaries } from '@/lib/senators/summaries'
+import { getRepresentativeSummaries } from '@/lib/representatives/summaries'
 import { getBillsForMembers } from '@/lib/legislation/store'
-import { representatives } from '@/data/representatives'
 
 export const revalidate = 600
 
 export default async function StatePage({ params }: { params: { stateCode: string } }) {
   const state = params.stateCode.toUpperCase()
-  const { senators: allSenators } = await getSenatorSummaries()
+  const [{ senators: allSenators }, { representatives: allRepresentatives }] =
+    await Promise.all([getSenatorSummaries(), getRepresentativeSummaries()])
   const countyDirectory = await getCountyDirectory(state)
 
   const fullStateName = STATE_CODE_TO_NAME[state] || state
@@ -31,14 +33,14 @@ export default async function StatePage({ params }: { params: { stateCode: strin
     const value = (s.state || "").toUpperCase()
     return value === state || value === fullStateName.toUpperCase()
   })
-  const stateReps = representatives
+  const stateReps = allRepresentatives
     .filter((r) => {
       const value = String(r.state || "").toUpperCase()
       return value === state || value === fullStateName.toUpperCase()
     })
-    .sort((a: any, b: any) => {
-      const distA = typeof a.district === 'number' ? a.district : parseInt(a.district) || 999
-      const distB = typeof b.district === 'number' ? b.district : parseInt(b.district) || 999
+    .sort((a, b) => {
+      const distA = parseInt(String(a.district ?? "999"), 10) || 999
+      const distB = parseInt(String(b.district ?? "999"), 10) || 999
       return distA - distB
     })
 
@@ -103,24 +105,7 @@ export default async function StatePage({ params }: { params: { stateCode: strin
       {/* House Representatives Section */}
       {stateReps.length > 0 && (
         <Section title="House Representatives" subtitle={`${stateReps.length} Representative${stateReps.length !== 1 ? 's' : ''} by district`}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {stateReps.map((rep) => (
-              <Link
-                key={rep.bioguideId}
-                href={`/representatives/${rep.bioguideId}`}
-                className="block"
-              >
-                <Card className="p-4 bg-white border border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-md transition-all duration-200 h-full">
-                  <div className="text-[12px] font-semibold text-[#64748B] uppercase tracking-wide mb-2">
-                    District {rep.district || 'At-Large'}
-                  </div>
-                  <div className="text-[15px] font-semibold text-[#1E3A5F] leading-tight">
-                    {rep.name}
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          <RepresentativesList representatives={stateReps} />
         </Section>
       )}
 

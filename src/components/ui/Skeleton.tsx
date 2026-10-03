@@ -14,12 +14,14 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <Skeleton className="aspect-[4/5] w-full rounded-none" />
-      <div className="space-y-2 p-4">
-        <Skeleton className="h-5 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="mt-3 h-6 w-24" />
+    <div className="flex h-full flex-col items-center rounded-lg border border-border bg-card p-5">
+      <Skeleton className="h-24 w-24 rounded-full" />
+      <Skeleton className="mt-4 h-5 w-3/4" />
+      <Skeleton className="mt-2 h-4 w-1/2" />
+      <div className="mt-4 w-full border-t border-border pt-3">
+        <Skeleton className="mx-auto h-3 w-32" />
+        <Skeleton className="mx-auto mt-2 h-6 w-16" />
+        <Skeleton className="mx-auto mt-2 h-3 w-24" />
       </div>
     </div>
   );

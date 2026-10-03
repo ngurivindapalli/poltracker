@@ -12,6 +12,8 @@ type Senator = {
   party?: string
   state?: string
   imageUrl?: string
+  estimatedNetWorth?: number | null
+  tradeCount?: number | null
 }
 
 export default function USPage() {
@@ -43,7 +45,9 @@ export default function USPage() {
     state: s.state || '',
     party: s.party,
     image: s.imageUrl || senatorImageUrl(s.bioguideId),
-    imageUrl: s.imageUrl || senatorImageUrl(s.bioguideId)
+    imageUrl: s.imageUrl || senatorImageUrl(s.bioguideId),
+    estimatedNetWorth: s.estimatedNetWorth,
+    tradeCount: s.tradeCount,
   }))
 
   return (

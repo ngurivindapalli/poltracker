@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import ClientImage from "@/components/ClientImage";
+import { CongressMemberCard } from "@/components/congress/CongressMemberCard";
 
 type Senator = {
   id?: string;
@@ -11,6 +8,8 @@ type Senator = {
   party?: string;
   image?: string;
   imageUrl?: string;
+  estimatedNetWorth?: number | null;
+  tradeCount?: number | null;
 };
 
 export default function SenatorGrid({ senators }: { senators: Senator[] }) {
@@ -18,42 +17,24 @@ export default function SenatorGrid({ senators }: { senators: Senator[] }) {
 
   return (
     <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-6">Senators</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <h2 className="mb-6 text-2xl font-bold">Senators</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {senators.map((senator) => {
           const id = senator.id || senator.bioguideId || "";
-          const image = senator.image || senator.imageUrl || "/images/placeholder-avatar.svg";
-          
           return (
-            <Link
+            <CongressMemberCard
               key={id}
-              href={`/senator/${id}`}
-              className="group"
-            >
-              <div className="rounded-xl border bg-white shadow-sm hover:shadow-md transition overflow-hidden">
-                <div className="relative h-44 w-full bg-gray-100">
-                  <ClientImage
-                    src={image}
-                    alt={senator.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    fallbackSrc="/images/placeholder-avatar.svg"
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="font-semibold text-lg group-hover:text-blue-600">
-                    {senator.name}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {senator.state}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {senator.party || "—"}
-                  </div>
-                </div>
-              </div>
-            </Link>
+              member={{
+                bioguideId: id,
+                name: senator.name,
+                party: senator.party,
+                state: senator.state,
+                imageUrl: senator.image || senator.imageUrl,
+                chamber: "senate",
+                estimatedNetWorth: senator.estimatedNetWorth,
+                tradeCount: senator.tradeCount,
+              }}
+            />
           );
         })}
       </div>

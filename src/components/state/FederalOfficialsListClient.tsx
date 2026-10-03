@@ -1,88 +1,72 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import { CongressMemberCard } from "@/components/congress/CongressMemberCard";
+import type { CongressMemberCardData } from "@/components/congress/CongressMemberCard";
 
 type FederalOfficialsListClientProps = {
-  stateCode: string
-}
+  stateCode: string;
+};
 
-export default function FederalOfficialsListClient({ stateCode }: FederalOfficialsListClientProps) {
-  const [senators, setSenators] = useState<any[]>([])
-  const [reps, setReps] = useState<any[]>([])
+export default function FederalOfficialsListClient({
+  stateCode,
+}: FederalOfficialsListClientProps) {
+  const [members, setMembers] = useState<CongressMemberCardData[]>([]);
 
   useEffect(() => {
     async function load() {
       try {
-        const senRes = await fetch("/api/senators")
-        const senData = await senRes.json()
+        const [senRes, repRes] = await Promise.all([
+          fetch("/api/senators"),
+          fetch("/api/representatives"),
+        ]);
+        const senData = senRes.ok ? await senRes.json() : { senators: [] };
+        const repData = repRes.ok ? await repRes.json() : { representatives: [] };
+        const code = stateCode.toUpperCase();
 
-        const repRes = await fetch("/api/representatives")
-        const repData = await repRes.json()
+        const senators = (senData.senators || [])
+          .filter((s: any) => String(s.state || "").toUpperCase() === code)
+          .map((s: any) => ({
+            bioguideId: s.bioguideId,
+            name: s.name,
+            party: s.party,
+            state: s.state,
+            imageUrl: s.imageUrl,
+            chamber: "senate" as const,
+            estimatedNetWorth: s.estimatedNetWorth,
+            tradeCount: s.tradeCount,
+          }));
 
-        const stateSenators = (senData.senators || []).filter(
-          (s: any) => s.state === stateCode.toUpperCase()
-        )
+        const reps = (repData.representatives || [])
+          .filter((r: any) => String(r.state || "").toUpperCase() === code)
+          .map((r: any) => ({
+            bioguideId: r.bioguideId,
+            name: r.name,
+            party: r.party,
+            state: r.state,
+            district: r.district,
+            imageUrl: r.imageUrl,
+            chamber: "house" as const,
+            estimatedNetWorth: r.estimatedNetWorth,
+            tradeCount: r.tradeCount,
+          }));
 
-        const stateReps = (repData.representatives || [])
-          .filter((r: any) => r.state === stateCode.toUpperCase())
-          .sort((a: any, b: any) => {
-            const distA = typeof a.district === "number" ? a.district : parseInt(a.district) || 999
-            const distB = typeof b.district === "number" ? b.district : parseInt(b.district) || 999
-            return distA - distB
-          })
-          .slice(0, 3)
-
-        setSenators(stateSenators)
-        setReps(stateReps)
+        setMembers([...senators, ...reps]);
       } catch (err) {
-        console.error("Error loading federal officials:", err)
+        console.error("Error loading federal officials:", err);
       }
     }
 
-    load()
-  }, [stateCode])
+    load();
+  }, [stateCode]);
 
-  if (senators.length === 0 && reps.length === 0) {
-    return null
-  }
+  if (members.length === 0) return null;
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4 text-[#1E3A5F]">
-        Federal Officials
-      </h2>
-
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          <h3 className="font-medium mb-2 text-[#64748B]">
-            U.S. Senators
-          </h3>
-          {senators.map((s: any) => (
-            <a
-              key={s.bioguideId}
-              href={`/senator/${s.bioguideId}`}
-              className="block border border-[#E2E8F0] p-3 rounded hover:shadow transition-all mb-2"
-            >
-              {s.name}
-            </a>
-          ))}
-        </div>
-
-        <div>
-          <h3 className="font-medium mb-2 text-[#64748B]">
-            House Representatives
-          </h3>
-          {reps.map((r: any) => (
-            <a
-              key={r.bioguideId}
-              href={`/representatives/${r.bioguideId}`}
-              className="block border border-[#E2E8F0] p-3 rounded hover:shadow transition-all mb-2"
-            >
-              {r.name} {r.district ? `(District ${r.district})` : ""}
-            </a>
-          ))}
-        </div>
-      </div>
+    <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {members.map((member) => (
+        <CongressMemberCard key={member.bioguideId} member={member} />
+      ))}
     </div>
-  )
+  );
 }
