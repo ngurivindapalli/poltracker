@@ -51,7 +51,7 @@ export function Footer() {
         </div>
 
         <FooterCol title="Explore" items={EXPLORE} />
-        <FooterCol title="Global" items={GLOBAL} comingSoon />
+        <FooterCol title="Global" items={GLOBAL} />
         <FooterCol title="Intelligence" items={INTELLIGENCE} />
         <div>
           <h4 className="mb-3 text-sm font-semibold text-foreground">Resources</h4>

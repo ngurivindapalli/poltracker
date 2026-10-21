@@ -1,8 +1,9 @@
 name: Quiver data sync
 
+# Scheduled Quiver refresh moved to .github/workflows/politeia-data-sync.yml
+# so Congress.gov and Quiver cannot overlap. Keep manual dispatch here for
+# one-dataset debugging.
 on:
-  schedule:
-    - cron: "30 7 * * *"
   workflow_dispatch:
     inputs:
       dataset:
@@ -10,9 +11,14 @@ on:
         required: false
         default: "all"
 
+concurrency:
+  group: politeia-data-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,18 +30,11 @@ jobs:
         run: npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      - name: Apply migrations (optional)
-        if: ${{ secrets.DATABASE_URL != '' }}
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Sync Quiver
         env:
           QUIVER_API_KEY: ${{ secrets.QUIVER_API_KEY }}
           QUIVER_BASE_URL: https://api.quiverquant.com/beta
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          QUIVER_TRADES_MAX_PAGES: "20"
-          QUIVER_DONORS_MAX_PAGES: "30"
         run: |
           if [ "${{ github.event.inputs.dataset }}" = "" ] || [ "${{ github.event.inputs.dataset }}" = "all" ]; then
             npm run sync:quiver

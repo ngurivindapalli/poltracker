@@ -1,129 +1,67 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useAuth } from "./AuthProvider"
-import {
-  normalizeUsername,
-  validateCredentials,
-  validateProfileFields,
-} from "@/lib/authValidation"
+import { useEffect, useState } from "react";
+import { useAuth } from "./AuthProvider";
 
-export type AuthModalMode = "signup" | "login" | "edit"
+export type AuthModalMode = "signup" | "login" | "edit";
 
 interface AuthModalProps {
-  open: boolean
-  mode: AuthModalMode
-  onClose: () => void
-  onModeChange: (mode: AuthModalMode) => void
+  open: boolean;
+  mode: AuthModalMode;
+  onClose: () => void;
+  onModeChange: (mode: AuthModalMode) => void;
 }
 
 const inputClass =
-  "w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-const labelClass = "text-[12px] font-medium text-muted-foreground block mb-1"
+  "w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
+const labelClass = "text-[12px] font-medium text-muted-foreground block mb-1";
 
 export function AuthModal({ open, mode, onClose, onModeChange }: AuthModalProps) {
-  const { signUp, signIn, updateProfile, profile } = useAuth()
+  const { signInWithGoogle, updateProfile, profile, isConfigured } = useAuth();
+  const [displayName, setDisplayName] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [displayName, setDisplayName] = useState("")
-  const [username, setUsername] = useState("")
-  const [avatarUrl, setAvatarUrl] = useState("")
-  const [error, setError] = useState("")
-  const [notice, setNotice] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-
-  // Reset / hydrate fields whenever the modal opens or the mode changes.
   useEffect(() => {
-    if (!open) return
-    setError("")
-    setNotice("")
-    setSubmitting(false)
-    if (mode === "edit" && profile) {
-      setDisplayName(profile.display_name ?? "")
-      setUsername(profile.username ?? "")
-      setAvatarUrl(profile.avatar_url ?? "")
-      setEmail("")
-      setPassword("")
-    } else {
-      setEmail("")
-      setPassword("")
-      setDisplayName("")
-      setUsername("")
-      setAvatarUrl("")
-    }
-  }, [open, mode, profile])
+    if (!open) return;
+    setError("");
+    setSubmitting(false);
+    setDisplayName(profile?.display_name ?? "");
+  }, [open, mode, profile]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") onClose();
     }
-    if (open) document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [open, onClose])
+    if (open) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
-  if (!open) return null
+  if (!open) return null;
 
-  async function handleSubmit() {
-    setError("")
-    setNotice("")
-
-    if (mode === "login") {
-      const credErr = validateCredentials(email, password)
-      if (credErr) return setError(credErr)
-      setSubmitting(true)
-      const { error } = await signIn(email.trim(), password)
-      setSubmitting(false)
-      if (error) return setError(error)
-      onClose()
-      return
+  async function handleGoogle() {
+    setError("");
+    setSubmitting(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      setError("Google sign-in could not be started.");
+      setSubmitting(false);
     }
+  }
 
-    if (mode === "signup") {
-      const credErr = validateCredentials(email, password)
-      if (credErr) return setError(credErr)
-      const profileErr = validateProfileFields({ displayName, username })
-      if (profileErr) return setError(profileErr)
-      setSubmitting(true)
-      const { error } = await signUp(email.trim(), password, {
-        display_name: displayName.trim(),
-        username: normalizeUsername(username),
-        avatar_url: avatarUrl.trim() || null,
-      })
-      setSubmitting(false)
-      if (error) return setError(error)
-      // If email confirmation is enabled there is no session yet.
-      onClose()
-      return
-    }
-
-    // mode === "edit"
-    const profileErr = validateProfileFields({ displayName, username })
-    if (profileErr) return setError(profileErr)
-    setSubmitting(true)
-    const { error } = await updateProfile({
-      display_name: displayName.trim(),
-      username: normalizeUsername(username),
-      avatar_url: avatarUrl.trim() || null,
-    })
-    setSubmitting(false)
-    if (error) return setError(error)
-    onClose()
+  async function handleSave() {
+    const name = displayName.trim();
+    if (!name) return setError("Display name is required.");
+    setSubmitting(true);
+    const { error: updateError } = await updateProfile({ display_name: name });
+    setSubmitting(false);
+    if (updateError) return setError(updateError);
+    onClose();
   }
 
   const title =
-    mode === "signup"
-      ? "Create Account"
-      : mode === "login"
-      ? "Log In"
-      : "Edit Profile"
-
-  const submitLabel =
-    mode === "signup"
-      ? "Create Account"
-      : mode === "login"
-      ? "Log In"
-      : "Save Changes"
+    mode === "edit" ? "Edit Profile" : mode === "login" ? "Sign in" : "Create account";
 
   return (
     <div
@@ -149,134 +87,108 @@ export function AuthModal({ open, mode, onClose, onModeChange }: AuthModalProps)
           </button>
         </div>
         <p className="text-[12px] text-muted-foreground mb-5">
-          {mode === "login"
-            ? "Log in to your cloud account to join the discussion."
-            : mode === "signup"
-            ? "Create a cloud account. Your comments sync across devices."
-            : "Update how you appear across Politeia."}
+          {mode === "edit"
+            ? "Update how you appear across Politeia."
+            : "Use your Google account to sign in or create a Politeia account."}
         </p>
 
-        <div className="space-y-4">
-          {(mode === "signup" || mode === "login") && (
-            <>
-              <div>
-                <label className={labelClass}>
-                  Email <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  autoFocus
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>
-                  Password <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  className={inputClass}
-                />
-              </div>
-            </>
-          )}
-
-          {(mode === "signup" || mode === "edit") && (
-            <>
-              <div>
-                <label className={labelClass}>
-                  Display Name <span className="text-destructive">*</span>
-                </label>
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your name"
-                  maxLength={40}
-                  autoFocus={mode === "edit"}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>
-                  Username <span className="text-destructive">*</span>
-                </label>
-                <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                  placeholder="username"
-                  maxLength={30}
-                  className={inputClass}
-                />
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Lowercase letters, numbers, underscores, and hyphens only.
-                </p>
-              </div>
-              <div>
-                <label className={labelClass}>
-                  Avatar URL <span className="text-muted-foreground/60">(optional)</span>
-                </label>
-                <input
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://..."
-                  className={inputClass}
-                />
-              </div>
-            </>
-          )}
-
-          {error && <p className="text-[12px] text-destructive">{error}</p>}
-          {notice && <p className="text-[12px] text-emerald-500">{notice}</p>}
-
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={onClose}
-              disabled={submitting}
-              className="flex-1 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? "Please wait..." : submitLabel}
-            </button>
+        {mode === "edit" ? (
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>
+                Display Name <span className="text-destructive">*</span>
+              </label>
+              <input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your name"
+                maxLength={40}
+                autoFocus
+                className={inputClass}
+              />
+            </div>
+            {error && <p className="text-[12px] text-destructive">{error}</p>}
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={onClose}
+                disabled={submitting}
+                className="flex-1 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={submitting}
+                className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {submitting ? "Please wait..." : "Save Changes"}
+              </button>
+            </div>
           </div>
-
-          {mode === "login" && (
-            <p className="text-[12px] text-muted-foreground text-center">
-              No account?{" "}
+        ) : (
+          <div className="space-y-4">
+            {isConfigured ? (
               <button
-                onClick={() => onModeChange("signup")}
-                className="text-primary font-medium hover:underline"
+                onClick={handleGoogle}
+                disabled={submitting}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
               >
-                Create one
+                <GoogleMark />
+                Continue with Google
               </button>
-            </p>
-          )}
-          {mode === "signup" && (
-            <p className="text-[12px] text-muted-foreground text-center">
-              Already have an account?{" "}
-              <button
-                onClick={() => onModeChange("login")}
-                className="text-primary font-medium hover:underline"
-              >
-                Log in
-              </button>
-            </p>
-          )}
-        </div>
+            ) : (
+              <p className="rounded-lg border border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground">
+                Google sign-in is not configured on this environment yet.
+              </p>
+            )}
+            {error && <p className="text-[12px] text-destructive">{error}</p>}
+            {mode === "login" ? (
+              <p className="text-[12px] text-muted-foreground text-center">
+                New to Politeia?{" "}
+                <button
+                  onClick={() => onModeChange("signup")}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Create an account
+                </button>
+              </p>
+            ) : (
+              <p className="text-[12px] text-muted-foreground text-center">
+                Already have an account?{" "}
+                <button
+                  onClick={() => onModeChange("login")}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Sign in
+                </button>
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.94 1 10.93 1 12s.43 3.06 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
 }

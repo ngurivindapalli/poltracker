@@ -167,9 +167,10 @@ export function Navbar() {
             />
             <NavDropdown
               label="Global"
-              active={false}
+              active={["/uk", "/germany", "/india", "/europe", "/canada", "/latin-america"].some(
+                isActive
+              )}
               items={global}
-              comingSoon
             />
             <NavDropdown
               label="Intelligence"
@@ -212,7 +213,7 @@ export function Navbar() {
         <div className="border-t border-border bg-[hsl(var(--background))] lg:hidden">
           <div className="mx-auto flex max-w-[1200px] flex-col gap-5 px-4 py-5 text-sm sm:px-6">
             <MobileGroup title="Explore" items={explore} />
-            <MobileGroup title="Global" items={global} comingSoon />
+            <MobileGroup title="Global" items={global} />
             <MobileGroup title="Intelligence" items={intelligence} />
             <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
               <SupportPoliteia variant="navbar" />

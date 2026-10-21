@@ -26,6 +26,7 @@ import { safeMemberImageUrl } from "@/lib/images";
 import { formatUsdCompact } from "@/lib/format";
 import { QuiverSourceLabel } from "@/components/financials/QuiverSourceLabel";
 import { CommentSection } from "@/components/comments/CommentSection";
+import { GoogleAdSlot } from "@/components/ads/GoogleAdSlot";
 import { AiOverviewButton } from "@/components/politician/AiOverviewButton";
 
 export const revalidate = 600;
@@ -264,6 +265,8 @@ export default async function SenatorPage({
           </section>
         </div>
       </div>
+
+      <GoogleAdSlot slot="CONTENT" />
 
       <section className="mt-12">
         <CommentSection

@@ -48,12 +48,12 @@ export function LandingHero() {
               className="h-[42px] justify-start sm:min-w-[260px]"
               label="Search politicians, states, bills..."
             />
-            <span
-              className="inline-flex items-center justify-center rounded-md border border-border bg-card px-5 py-2.5 text-sm font-medium text-muted-foreground/70"
-              aria-disabled="true"
+            <Link
+              href="/europe"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
             >
-              Global coverage coming soon
-            </span>
+              International coverage
+            </Link>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import CspanSchedule from "@/components/home/CspanSchedule";
 import USStateMap from "@/components/USStateMap";
 import { Section } from "@/components/ui/Section";
 import { getStatePartyControl } from "@/lib/states/partyControl";
+import { GoogleAdSlot } from "@/components/ads/GoogleAdSlot";
 import Link from "next/link";
 
 export const revalidate = 600;
@@ -23,6 +24,10 @@ export default function HomePage() {
           <USStateMap controlByState={controlByState} />
         </div>
       </Section>
+
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <GoogleAdSlot slot="HOME" />
+      </div>
 
       <LatestLegislation />
 

@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import type { CommentWithProfile } from "@/types/supabase"
+import type { PublicComment } from "@/lib/comments/service"
 import { useTranslation } from "@/components/i18n/I18nProvider"
 import { CommentForm } from "./CommentForm"
 
 interface CommentCardProps {
-  comment: CommentWithProfile
+  comment: PublicComment
   currentUserId: string | null
   onToggleLike: (id: string) => void | Promise<void>
   onDelete: (id: string) => void | Promise<void>
@@ -26,7 +26,7 @@ function timeAgo(isoString: string): string {
   return new Date(isoString).toLocaleDateString()
 }
 
-function authorName(comment: CommentWithProfile): string {
+function authorName(comment: PublicComment): string {
   return comment.profile?.display_name || comment.profile?.username || "Member"
 }
 

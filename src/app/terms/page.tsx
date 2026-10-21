@@ -22,6 +22,11 @@ export default function TermsPage() {
           You are responsible for verifying primary sources before relying on
           this information for reporting, research, or legal purposes.
         </p>
+        <p>
+          Accounts are created through Google sign-in. Community comments are
+          public, stored by Politeia, and may be removed if they are abusive or
+          unlawful. Do not impersonate others or post confidential information.
+        </p>
       </div>
     </main>
   );

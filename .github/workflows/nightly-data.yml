@@ -1,9 +1,9 @@
 name: Nightly data update
 
+# Legacy Python import pipeline. Congress.gov + Quiver now run from
+# .github/workflows/politeia-data-sync.yml. This job still applies Prisma
+# migrations; do not use it to refresh Quiver/Congress.gov data.
 on:
-  schedule:
-    # 06:00 UTC daily
-    - cron: "0 6 * * *"
   workflow_dispatch:
 
 jobs:

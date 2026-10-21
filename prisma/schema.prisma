@@ -605,3 +605,56 @@ model LocalEvent {
   @@index([countyId, date])
   @@map("local_events")
 }
+
+// ---------------------------------------------------------------------------
+// Accounts + community discussion (Google sign-in; comments in PostgreSQL)
+// ---------------------------------------------------------------------------
+
+model AppUser {
+  id        String   @id @default(uuid())
+  googleSub String?  @unique @map("google_sub")
+  email     String?  @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  comments DiscussionComment[]
+  likes    CommentLike[]
+
+  @@map("app_users")
+}
+
+model DiscussionComment {
+  id         String    @id @default(uuid())
+  body       String
+  entityType String    @map("entity_type")
+  entityId   String    @map("entity_id")
+  parentId   String?   @map("parent_id")
+  parent     DiscussionComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    DiscussionComment[] @relation("CommentReplies")
+  authorId   String    @map("author_id")
+  author     AppUser   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  likes      CommentLike[]
+
+  @@index([entityType, entityId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("discussion_comments")
+}
+
+model CommentLike {
+  id        String             @id @default(uuid())
+  commentId String             @map("comment_id")
+  comment   DiscussionComment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String             @map("user_id")
+  user      AppUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  @@unique([commentId, userId])
+  @@index([userId])
+  @@map("comment_likes")
+}

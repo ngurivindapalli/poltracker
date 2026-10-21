@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { CommentSection } from '@/components/comments/CommentSection'
+import { GoogleAdSlot } from '@/components/ads/GoogleAdSlot'
 import { AiOverviewButton } from '@/components/politician/AiOverviewButton'
 import { getRepresentativeSummary } from '@/lib/representatives/summaries'
 import { getMemberLegislation } from '@/lib/legislation/store'
@@ -230,6 +231,8 @@ export default async function RepresentativePage({ params }: { params: { bioguid
 
         </div>
       </div>
+
+      <GoogleAdSlot slot="CONTENT" />
 
       {/* COMMUNITY DISCUSSION */}
       <section className="mt-12">

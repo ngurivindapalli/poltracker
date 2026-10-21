@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MAX_COMMENT_LENGTH } from "@/lib/comments"
+import { MAX_COMMENT_LENGTH } from "@/lib/comments/constants"
 
 type SubmitResult = { error: string } | null | void
 

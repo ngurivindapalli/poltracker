@@ -1,0 +1,139 @@
+name: Politeia data sync
+
+# Congress.gov + Quiver Quantitative refresh against the existing production
+# PostgreSQL database. Does not use Docker and does not run migrations.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which existing sync scripts to run"
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - congress
+          - quiver
+  schedule:
+    # Conservative daily refresh after the first successful manual run.
+    - cron: "17 7 * * *"
+
+concurrency:
+  group: politeia-data-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      TARGET: ${{ github.event_name == 'schedule' && 'both' || inputs.target }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      API_DATA_GOV_KEY: ${{ secrets.API_DATA_GOV_KEY }}
+      QUIVER_API_KEY: ${{ secrets.QUIVER_API_KEY }}
+      QUIVER_BASE_URL: https://api.quiverquant.com/beta
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Check secrets and database host
+        run: |
+          set -euo pipefail
+          missing=0
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "Missing GitHub secret: DATABASE_URL"
+            missing=1
+          else
+            node <<'NODE'
+          const { URL } = require("url");
+          const raw = process.env.DATABASE_URL || "";
+          try {
+            const url = new URL(raw);
+            const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+            console.log(`database_host=${url.hostname}`);
+            console.log(`database_port=${url.port || "default"}`);
+            console.log(`database_name=${url.pathname}`);
+            console.log(`localhost=${local}`);
+            if (local) {
+              console.error("DATABASE_URL points at localhost. Use the production PostgreSQL secret, not Docker.");
+              process.exit(1);
+            }
+          } catch {
+            console.error("DATABASE_URL is not a valid connection URL.");
+            process.exit(1);
+          }
+          NODE
+          fi
+
+          if [ "$TARGET" = "congress" ] || [ "$TARGET" = "both" ]; then
+            if [ -z "${API_DATA_GOV_KEY:-}" ]; then
+              echo "Missing GitHub secret: API_DATA_GOV_KEY"
+              missing=1
+            else
+              echo "API_DATA_GOV_KEY: present (value hidden)"
+            fi
+          fi
+
+          if [ "$TARGET" = "quiver" ] || [ "$TARGET" = "both" ]; then
+            if [ -z "${QUIVER_API_KEY:-}" ]; then
+              echo "Missing GitHub secret: QUIVER_API_KEY"
+              missing=1
+            else
+              echo "QUIVER_API_KEY: present (value hidden)"
+            fi
+          fi
+
+          echo "sync_target=$TARGET"
+          if [ "$missing" -ne 0 ]; then
+            echo "Configure the named GitHub Actions secrets, then re-run this workflow."
+            exit 1
+          fi
+
+      - name: Run selected syncs
+        run: |
+          set -euo pipefail
+          status=0
+          echo "=== Politeia data sync start target=$TARGET ==="
+          date -u +"%Y-%m-%dT%H:%M:%SZ"
+
+          if [ "$TARGET" = "congress" ] || [ "$TARGET" = "both" ]; then
+            echo "=== Congress.gov legislative sync (npm run sync:legislative) ==="
+            if npm run sync:legislative; then
+              echo "Congress.gov sync finished"
+            else
+              echo "Congress.gov sync failed"
+              status=1
+            fi
+          fi
+
+          if [ "$TARGET" = "quiver" ] || [ "$TARGET" = "both" ]; then
+            echo "=== Quiver Quantitative sync (npm run sync:quiver) ==="
+            if npm run sync:quiver; then
+              echo "Quiver sync finished"
+              npm run validate:quiver || status=1
+            else
+              echo "Quiver sync failed"
+              status=1
+            fi
+          fi
+
+          echo "=== Dataset health ==="
+          npm run health:data || true
+          date -u +"%Y-%m-%dT%H:%M:%SZ"
+          echo "=== Politeia data sync end ==="
+          exit "$status"

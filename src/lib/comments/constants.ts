@@ -1,0 +1,4 @@
+export const MAX_COMMENT_LENGTH = 500;
+export const MAX_ENTITY_KEY_LENGTH = 64;
+export const COMMENT_RATE_LIMIT_WINDOW_MS = 60_000;
+export const COMMENT_RATE_LIMIT_MAX = 8;

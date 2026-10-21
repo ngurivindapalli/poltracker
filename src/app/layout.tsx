@@ -2,6 +2,8 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { Layout } from "@/components/Layout";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { GoogleConsentBoot } from "@/components/consent/GoogleConsentBoot";
+import { CookieConsent } from "@/components/consent/CookieConsent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className={`${inter.className} font-sans`}>
+        <GoogleConsentBoot />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
@@ -53,6 +56,7 @@ export default function RootLayout({
         </a>
         <AppProviders>
           <Layout>{children}</Layout>
+          <CookieConsent />
         </AppProviders>
       </body>
     </html>

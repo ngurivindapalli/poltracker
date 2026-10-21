@@ -1,8 +1,5 @@
-// Centralized Supabase configuration checks.
-//
-// Cloud accounts + comments are optional: if the environment variables are not
-// present the app gracefully falls back to the localStorage prototype. Every
-// Supabase entry point should consult these helpers before doing any work.
+// Legacy Supabase helpers. Account sign-in and comments now use NextAuth and
+// PostgreSQL. These checks remain so unused clients stay inert without env vars.
 
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

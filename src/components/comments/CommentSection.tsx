@@ -1,112 +1,118 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useState } from "react"
-import { useAuth } from "@/components/auth/AuthProvider"
-import { useTranslation } from "@/components/i18n/I18nProvider"
-import { AuthModal, type AuthModalMode } from "@/components/auth/AuthModal"
-import type { CommentWithProfile } from "@/types/supabase"
-import {
-  getCommentsForEntity,
-  createComment,
-  updateComment,
-  deleteComment,
-  toggleCommentLike,
-} from "@/lib/supabase/comments"
-import { CommentCard } from "./CommentCard"
-import { CommentForm } from "./CommentForm"
-import { LocalCommentSection } from "./LocalCommentSection"
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslation } from "@/components/i18n/I18nProvider";
+import { AuthModal, type AuthModalMode } from "@/components/auth/AuthModal";
+import type { PublicComment } from "@/lib/comments/service";
+import { CommentCard } from "./CommentCard";
+import { CommentForm } from "./CommentForm";
 
 interface CommentSectionProps {
-  entityType: string
-  entityId: string
-  title?: string
+  entityType: string;
+  entityId: string;
+  title?: string;
 }
 
-function countAll(comments: CommentWithProfile[]): number {
-  return comments.reduce((sum, c) => sum + 1 + countAll(c.replies), 0)
+function countAll(comments: PublicComment[]): number {
+  return comments.reduce((sum, comment) => sum + 1 + countAll(comment.replies), 0);
 }
 
-export function CommentSection(props: CommentSectionProps) {
-  const { isConfigured } = useAuth()
-
-  // No Supabase env vars -> localStorage prototype fallback.
-  if (!isConfigured) {
-    return <LocalCommentSection {...props} />
-  }
-  return <SupabaseCommentSection {...props} />
-}
-
-function SupabaseCommentSection({
+export function CommentSection({
   entityType,
   entityId,
   title = "Community Discussion",
 }: CommentSectionProps) {
-  const { user, profile } = useAuth()
-  const { t } = useTranslation()
-  const [comments, setComments] = useState<CommentWithProfile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [authMode, setAuthMode] = useState<AuthModalMode | null>(null)
+  const { user, profile, isConfigured } = useAuth();
+  const { t } = useTranslation();
+  const [comments, setComments] = useState<PublicComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<AuthModalMode | null>(null);
 
   const load = useCallback(async () => {
-    const { data, error } = await getCommentsForEntity(entityType, entityId)
-    setComments(data)
-    setLoadError(error)
-    setLoading(false)
-  }, [entityType, entityId])
+    try {
+      const res = await fetch(
+        `/api/comments?entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}`
+      );
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setComments([]);
+        setLoadError(payload.error || "Unable to load comments.");
+        return;
+      }
+      setComments(payload.comments || []);
+      setLoadError(null);
+    } catch {
+      setComments([]);
+      setLoadError("Unable to load comments.");
+    } finally {
+      setLoading(false);
+    }
+  }, [entityType, entityId]);
 
   useEffect(() => {
-    setLoading(true)
-    load()
-  }, [load])
+    setLoading(true);
+    void load();
+  }, [load]);
 
   const handleCreate = useCallback(
     async (body: string, parentId?: string) => {
-      const { error } = await createComment({
-        entity_type: entityType,
-        entity_id: entityId,
-        body,
-        parent_id: parentId ?? null,
-      })
-      if (error) return { error }
-      await load()
-      return null
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entityType,
+          entityId,
+          body,
+          parentId: parentId ?? null,
+        }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) return { error: payload.error || "Unable to post comment." };
+      setComments(payload.comments || []);
+      return null;
     },
-    [entityType, entityId, load]
-  )
+    [entityType, entityId]
+  );
 
   const handleReply = useCallback(
     (parentId: string, body: string) => handleCreate(body, parentId),
     [handleCreate]
-  )
+  );
 
   const handleEdit = useCallback(
     async (id: string, body: string) => {
-      const { error } = await updateComment(id, body)
-      if (error) return { error }
-      await load()
-      return null
+      const res = await fetch(`/api/comments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) return { error: payload.error || "Unable to update comment." };
+      await load();
+      return null;
     },
     [load]
-  )
+  );
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const { error } = await deleteComment(id)
-      if (!error) await load()
+      const res = await fetch(`/api/comments/${id}`, { method: "DELETE" });
+      if (res.ok) await load();
     },
     [load]
-  )
+  );
 
   const handleToggleLike = useCallback(
     async (id: string) => {
-      const { error } = await toggleCommentLike(id)
-      if (!error) await load()
+      const res = await fetch(`/api/comments/${id}/like`, { method: "POST" });
+      if (res.ok) await load();
     },
     [load]
-  )
+  );
 
-  const total = countAll(comments)
+  const total = countAll(comments);
 
   return (
     <section className="space-y-5">
@@ -117,41 +123,27 @@ function SupabaseCommentSection({
         </span>
       </div>
 
-      <p className="text-[11px] text-muted-foreground italic border border-border rounded-lg px-3 py-2 bg-muted/30">
-        Comments are saved to the cloud.
-      </p>
-
       {user && profile ? (
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold uppercase shrink-0">
-              {(profile.display_name || profile.username || "M").charAt(0)}
+              {(profile.display_name || "M").charAt(0)}
             </span>
             <span className="text-sm font-medium text-foreground truncate">
-              {profile.display_name || profile.username}
+              {profile.display_name}
             </span>
           </div>
           <CommentForm onSubmit={(body) => handleCreate(body)} />
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card p-6 text-center">
-          <p className="text-sm text-foreground mb-3">
-            Create an account or log in to join the discussion.
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            <button
-              onClick={() => setAuthMode("signup")}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              Create Account
-            </button>
-            <button
-              onClick={() => setAuthMode("login")}
-              className="px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-            >
-              Log In
-            </button>
-          </div>
+          <p className="text-sm text-foreground mb-3">Join the discussion.</p>
+          <button
+            onClick={() => setAuthMode("login")}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            {isConfigured ? "Sign in with Google" : "Sign in"}
+          </button>
         </div>
       )}
 
@@ -189,10 +181,10 @@ function SupabaseCommentSection({
 
       <AuthModal
         open={authMode !== null}
-        mode={authMode ?? "signup"}
+        mode={authMode ?? "login"}
         onClose={() => setAuthMode(null)}
         onModeChange={(m) => setAuthMode(m)}
       />
     </section>
-  )
+  );
 }
