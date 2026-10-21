@@ -27,6 +27,7 @@ import type {
 export type TradeRow = {
   id?: string;
   bioguideId: string | null;
+  politicianName?: string | null;
   ticker: string | null;
   asset: string;
   assetType: string | null;
@@ -138,6 +139,7 @@ function mapNormalizedTrade(t: NormalizedCongressTrade): TradeRow {
   return {
     id: t.sourceHash,
     bioguideId: t.bioguideId,
+    politicianName: t.politicianName,
     ticker: t.ticker,
     asset: t.companyName || t.ticker || "",
     assetType: t.tickerType,
@@ -159,6 +161,56 @@ function mapNormalizedTrade(t: NormalizedCongressTrade): TradeRow {
   };
 }
 
+function mapDbTrade(r: {
+  sourceHash: string;
+  bioguideId: string | null;
+  politicianName?: string | null;
+  ticker: string | null;
+  companyName: string | null;
+  tickerType: string | null;
+  transaction: string;
+  amountRange: string | null;
+  amount: string | null;
+  transactionDate: Date | string | null;
+  reportDate: Date | string | null;
+  owner: string | null;
+  description: string | null;
+  source: string | null;
+  party: string | null;
+  chamber: string | null;
+  excessReturn: number | null;
+  priceChange: number | null;
+  spyChange: number | null;
+}): TradeRow {
+  return {
+    id: r.sourceHash,
+    bioguideId: r.bioguideId,
+    politicianName: r.politicianName || null,
+    ticker: r.ticker,
+    asset: r.companyName || r.ticker || "",
+    assetType: r.tickerType,
+    txType: r.transaction,
+    buySell: buySellSide(r.transaction),
+    amountLow: null,
+    amountHigh: null,
+    amountLabel: r.amountRange || r.amount,
+    tradeDate: r.transactionDate
+      ? new Date(r.transactionDate).toISOString().slice(0, 10)
+      : null,
+    filingDate: r.reportDate
+      ? new Date(r.reportDate).toISOString().slice(0, 10)
+      : null,
+    owner: r.owner,
+    comment: r.description,
+    source: r.source || "quiver",
+    party: r.party,
+    chamber: r.chamber,
+    excessReturn: r.excessReturn,
+    priceChange: r.priceChange,
+    spyChange: r.spyChange,
+  };
+}
+
 export async function getTradesForMember(
   bioguideId: string,
   limit = 100
@@ -175,32 +227,7 @@ export async function getTradesForMember(
         take,
       });
       if (rows.length > 0) {
-        return rows.map((r) => ({
-          id: r.sourceHash,
-          bioguideId: r.bioguideId,
-          ticker: r.ticker,
-          asset: r.companyName || r.ticker || "",
-          assetType: r.tickerType,
-          txType: r.transaction,
-          buySell: buySellSide(r.transaction),
-          amountLow: null,
-          amountHigh: null,
-          amountLabel: r.amountRange || r.amount,
-          tradeDate: r.transactionDate
-            ? new Date(r.transactionDate).toISOString().slice(0, 10)
-            : null,
-          filingDate: r.reportDate
-            ? new Date(r.reportDate).toISOString().slice(0, 10)
-            : null,
-          owner: r.owner,
-          comment: r.description,
-          source: r.source || "quiver",
-          party: r.party,
-          chamber: r.chamber,
-          excessReturn: r.excessReturn,
-          priceChange: r.priceChange,
-          spyChange: r.spyChange,
-        }));
+        return rows.map(mapDbTrade);
       }
       // Only treat empty DB as definitive when warehouse is large.
       const total = await prisma.congressTrade.count();
@@ -219,6 +246,69 @@ export async function getTradesForMember(
       String(b.transactionDate || "").localeCompare(
         String(a.transactionDate || "")
       )
+    )
+    .slice(0, take)
+    .map(mapNormalizedTrade);
+}
+
+function jsonTradesNewestFirst(): NormalizedCongressTrade[] {
+  return [...tradesAll()].sort((a, b) =>
+    String(b.transactionDate || "").localeCompare(String(a.transactionDate || ""))
+  );
+}
+
+/**
+ * Recent congressional trades across members. Used by Ask Politeia and
+ * `/api/trades` when no bioguide is supplied. Postgres first, JSON fallback.
+ */
+export async function getRecentCongressTrades(limit = 12): Promise<TradeRow[]> {
+  const take = Math.max(1, Math.min(limit || 12, 50));
+  try {
+    const prisma = await getPrismaOptional();
+    if (prisma) {
+      const rows = await prisma.congressTrade.findMany({
+        where: { active: true },
+        orderBy: [{ transactionDate: "desc" }, { reportDate: "desc" }],
+        take,
+      });
+      if (rows.length > 0) return rows.map(mapDbTrade);
+    }
+  } catch (e) {
+    console.warn(
+      "[profileFinancials] recent trade read failed, JSON fallback:",
+      (e as Error).message
+    );
+  }
+  return jsonTradesNewestFirst().slice(0, take).map(mapNormalizedTrade);
+}
+
+export async function getCongressTradesForTicker(
+  ticker: string,
+  limit = 12
+): Promise<TradeRow[]> {
+  const symbol = ticker.toUpperCase().replace(/[^A-Z.]/g, "");
+  const take = Math.max(1, Math.min(limit || 12, 50));
+  if (!symbol) return [];
+  try {
+    const prisma = await getPrismaOptional();
+    if (prisma) {
+      const rows = await prisma.congressTrade.findMany({
+        where: { active: true, ticker: symbol },
+        orderBy: [{ transactionDate: "desc" }, { reportDate: "desc" }],
+        take,
+      });
+      if (rows.length > 0) return rows.map(mapDbTrade);
+    }
+  } catch (e) {
+    console.warn(
+      "[profileFinancials] ticker trade read failed, JSON fallback:",
+      (e as Error).message
+    );
+  }
+  return tradesAll()
+    .filter((t) => (t.ticker || "").toUpperCase() === symbol)
+    .sort((a, b) =>
+      String(b.transactionDate || "").localeCompare(String(a.transactionDate || ""))
     )
     .slice(0, take)
     .map(mapNormalizedTrade);

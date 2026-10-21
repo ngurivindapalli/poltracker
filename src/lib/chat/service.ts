@@ -69,12 +69,34 @@ export async function generateChatAnswer(
     };
   }
 
+  if (bundle.retrievalStatus === "query_error") {
+    console.error(
+      "[chat] retrieval query_error",
+      bundle.queryError || "query failed"
+    );
+    return {
+      status: 503,
+      body: chatErrorResponse(
+        "retrieval",
+        cannedUnverifiedAnswer(bundle),
+        true
+      ),
+    };
+  }
+
   const skipModel =
     bundle.intent.requiresRecords &&
+    bundle.retrievalStatus !== "ok" &&
     bundle.coverage === "none" &&
     !bundle.intent.general;
 
   if (skipModel) {
+    console.info("[chat] skip_model", {
+      retrievalStatus: bundle.retrievalStatus,
+      coverage: bundle.coverage,
+      trades: bundle.intent.trades,
+      tradeCount: bundle.trades.length,
+    });
     return {
       status: 200,
       body: {

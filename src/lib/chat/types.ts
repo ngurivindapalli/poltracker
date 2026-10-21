@@ -31,7 +31,8 @@ export type ChatErrorCode =
   | "invalid"
   | "rate_limited"
   | "unavailable"
-  | "quota";
+  | "quota"
+  | "retrieval";
 
 export type ChatResponseBody = {
   answer: string;
@@ -46,6 +47,7 @@ export type ChatIntent = {
   contracts: boolean;
   news: boolean;
   financial: boolean;
+  trades: boolean;
   netWorth: boolean;
   general: boolean;
   injection: boolean;
@@ -89,11 +91,16 @@ export type ChatNewsRecord = {
 };
 
 export type ChatTradeRecord = {
+  politicianName?: string | null;
+  bioguideId?: string | null;
+  chamber?: string | null;
   ticker: string | null;
+  company?: string | null;
   transaction: string;
   amount: string | null;
   tradeDate: string | null;
   filingDate: string | null;
+  source?: string | null;
 };
 
 export type ChatContractRecord = {
@@ -107,6 +114,13 @@ export type ChatContractRecord = {
 
 export type RetrievalCoverage = "records" | "partial" | "none";
 
+export type RetrievalStatus =
+  | "ok"
+  | "empty"
+  | "not_found"
+  | "query_error"
+  | "none";
+
 export type RetrievalBundle = {
   intent: ChatIntent;
   members: ChatMember[];
@@ -118,4 +132,6 @@ export type RetrievalBundle = {
   sources: ChatSource[];
   coverage: RetrievalCoverage;
   freshness: Record<string, string | null>;
+  retrievalStatus: RetrievalStatus;
+  queryError?: string | null;
 };

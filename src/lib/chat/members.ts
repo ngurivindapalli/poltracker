@@ -104,21 +104,40 @@ const LAST_NAME_STOPWORDS = new Set([
   "congress",
 ]);
 
+function nameParts(member: ChatMember): { first: string; last: string; full: string } {
+  const raw = member.name || "";
+  if (member.firstName && member.lastName) {
+    return {
+      first: normalize(member.firstName),
+      last: normalize(member.lastName),
+      full: normalize(`${member.firstName} ${member.lastName}`),
+    };
+  }
+  if (raw.includes(",")) {
+    const [lastRaw, ...rest] = raw.split(",");
+    const firstRaw = rest.join(" ").trim();
+    return {
+      first: normalize(firstRaw),
+      last: normalize(lastRaw),
+      full: normalize(`${firstRaw} ${lastRaw}`),
+    };
+  }
+  const tokens = normalize(raw).split(" ").filter(Boolean);
+  return {
+    first: tokens.slice(0, -1).join(" "),
+    last: tokens.slice(-1)[0] || "",
+    full: tokens.join(" "),
+  };
+}
+
 function scoreMember(query: string, member: ChatMember): number {
   const q = normalize(query);
   if (!q) return 0;
   const name = normalize(member.name || "");
-  const last = normalize(member.lastName || name.split(" ").slice(-1)[0] || "");
-  const first = normalize(
-    member.firstName ||
-      name
-        .split(" ")
-        .filter((part) => part && part.length > 1 && part !== last)[0] ||
-      ""
-  );
-  const full = `${first} ${last}`.trim();
+  const { first, last, full } = nameParts(member);
   let score = 0;
   if (name && name.length > 4 && q.includes(name)) score += 12;
+  if (full && full.length > 4 && q.includes(full)) score += 12;
   if (full && first && last && q.includes(full)) score += 10;
   if (last && last.length > 3 && !LAST_NAME_STOPWORDS.has(last)) {
     const titled = new RegExp(

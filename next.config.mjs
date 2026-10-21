@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    outputFileTracingIncludes: {
+      "/api/chat": ["./data/quiver/**/*"],
+      "/api/trades": ["./data/quiver/**/*"],
+    },
+  },
   images: {
     domains: ["upload.wikimedia.org"],
     remotePatterns: [

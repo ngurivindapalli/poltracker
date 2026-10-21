@@ -21,8 +21,10 @@ import { CHAT_RATE_LIMIT_MAX_ANON } from "../src/lib/chat/limits";
 import { matchChatMembers } from "../src/lib/chat/members";
 import {
   cannedUnverifiedAnswer,
+  detectIntent,
   formatRecordsForPrompt,
   parseBillRefs,
+  parseTicker,
   retrieveChatContext,
 } from "../src/lib/chat/retrieve";
 import { answerChat } from "../src/lib/chat/service";
@@ -73,9 +75,110 @@ const markey: ChatMember = {
   profilePath: "/senator/M000133",
 };
 
+const khanna: ChatMember = {
+  ...warren,
+  bioguideId: "K000389",
+  name: "Ro Khanna",
+  firstName: "Ro",
+  lastName: "Khanna",
+  party: "D",
+  state: "CA",
+  district: "17",
+  chamber: "house",
+  estimatedNetWorth: null,
+  tradeCount: 27262,
+  latestTradeDate: "2026-09-01",
+  profilePath: "/representatives/K000389",
+};
+
+const pelosi: ChatMember = {
+  ...warren,
+  bioguideId: "P000197",
+  name: "Nancy Pelosi",
+  firstName: "Nancy",
+  lastName: "Pelosi",
+  party: "D",
+  state: "CA",
+  district: "11",
+  chamber: "house",
+  estimatedNetWorth: null,
+  tradeCount: 195,
+  latestTradeDate: "2026-07-28",
+  profilePath: "/representatives/P000197",
+};
+
+/** Shapes taken from data/quiver/congress-trades.json (Khanna/MIR, Pelosi/BE, NVDA). */
+const khannaMirTrade = {
+  ticker: "MIR",
+  asset: "MIR",
+  assetType: "Stock",
+  txType: "Purchase",
+  buySell: "buy",
+  amountLow: null,
+  amountHigh: null,
+  amountLabel: "1001.0",
+  tradeDate: "2026-09-01",
+  filingDate: "2026-09-04",
+  owner: "Self",
+  comment: null,
+  source: "quiver",
+  bioguideId: "K000389",
+  politicianName: "Ro Khanna",
+  chamber: "Representatives",
+};
+
+const pelosiBeTrade = {
+  ticker: "BE",
+  asset: "BE",
+  assetType: "Stock",
+  txType: "Purchase",
+  buySell: "buy",
+  amountLow: null,
+  amountHigh: null,
+  amountLabel: "500001.0",
+  tradeDate: "2026-07-28",
+  filingDate: "2026-08-21",
+  owner: "Self",
+  comment: null,
+  source: "quiver",
+  bioguideId: "P000197",
+  politicianName: "Nancy Pelosi",
+  chamber: "Representatives",
+};
+
+const nvdaTrade = {
+  ticker: "NVDA",
+  asset: "NVDA",
+  assetType: "Stock",
+  txType: "Purchase",
+  buySell: "buy",
+  amountLow: null,
+  amountHigh: null,
+  amountLabel: "1001.0",
+  tradeDate: "2026-08-18",
+  filingDate: "2026-09-02",
+  owner: "Self",
+  comment: null,
+  source: "quiver",
+  bioguideId: "M001239",
+  politicianName: "John J Mr Mcguire Iii",
+  chamber: "Representatives",
+};
+
+const liveTradeMeta = {
+  source: "Quiver Quantitative" as const,
+  meta: null,
+  lastUpdated: "2026-09-17T21:51:22.603Z",
+  tradesSyncStatus: "success",
+  tradesSyncComplete: true,
+  tradesRecordCount: 102488,
+  tradesCoverageStart: "2012-02-27",
+  tradesCoverageEnd: "2026-09-01",
+};
+
 function mockRetrieveDeps(overrides: Record<string, unknown> = {}) {
   return {
-    loadMembers: async () => [warren, sanders, markey],
+    loadMembers: async () => [warren, sanders, markey, khanna, pelosi],
     getLegislation: async () => ({
       sponsored: [
         {
@@ -104,24 +207,40 @@ function mockRetrieveDeps(overrides: Record<string, unknown> = {}) {
       ],
       fetchedAt: new Date("2024-11-21T00:00:00.000Z"),
     }),
-    getTrades: async () => [
-      {
-        ticker: "AAPL",
-        asset: "Apple",
-        assetType: "Stock",
-        txType: "Purchase",
-        buySell: "buy",
-        amountLow: null,
-        amountHigh: null,
-        amountLabel: "$1,001-$15,000",
-        tradeDate: "2024-10-01",
-        filingDate: "2024-10-12",
-        owner: "Self",
-        comment: null,
-        source: "quiver",
-        bioguideId: "W000817",
-      },
-    ],
+    getTrades: async (bioguideId: string) => {
+      if (bioguideId === "K000389") return [khannaMirTrade];
+      if (bioguideId === "P000197") return [pelosiBeTrade];
+      if (bioguideId === "W000817") {
+        return [
+          {
+            ticker: "AAPL",
+            asset: "Apple",
+            assetType: "Stock",
+            txType: "Purchase",
+            buySell: "buy",
+            amountLow: null,
+            amountHigh: null,
+            amountLabel: "$1,001-$15,000",
+            tradeDate: "2024-10-01",
+            filingDate: "2024-10-12",
+            owner: "Self",
+            comment: null,
+            source: "quiver",
+            bioguideId: "W000817",
+          },
+        ];
+      }
+      return [];
+    },
+    getRecentTrades: async () => [khannaMirTrade, pelosiBeTrade, nvdaTrade],
+    getTradesForTicker: async (ticker: string) => {
+      const symbol = ticker.toUpperCase();
+      if (symbol === "NVDA") return [nvdaTrade];
+      if (symbol === "MIR") return [khannaMirTrade];
+      if (symbol === "BE") return [pelosiBeTrade];
+      return [];
+    },
+    getTradeMeta: () => liveTradeMeta,
     getContracts: async () => [
       {
         ticker: "AAPL",
@@ -218,6 +337,18 @@ function testMemberMatch() {
     matchChatMembers("What is the status of S. 999999?", members, {}),
     []
   );
+  const rosterKhanna: ChatMember = {
+    ...khanna,
+    name: "Khanna, Ro",
+    firstName: null,
+    lastName: null,
+  };
+  const matchedRoster = matchChatMembers(
+    "What recent stock trades has Ro Khanna reported?",
+    [rosterKhanna],
+    {}
+  );
+  assert.strictEqual(matchedRoster[0]?.bioguideId, "K000389");
 }
 
 function testBillParse() {
@@ -402,6 +533,253 @@ async function testModelPin() {
   assert.strictEqual(GROQ_CHAT_MODEL, "openai/gpt-oss-120b");
 }
 
+function testTradeIntent() {
+  assert.strictEqual(
+    detectIntent("What do Politeia's records say about congressional stock trades?")
+      .trades,
+    true
+  );
+  assert.strictEqual(
+    detectIntent("What recent stock trades has Ro Khanna reported?").trades,
+    true
+  );
+  assert.strictEqual(detectIntent("Show recent trades for NVDA").trades, true);
+  assert.strictEqual(detectIntent("What is the source for this trade?").trades, true);
+  assert.strictEqual(
+    detectIntent("What bills has Elizabeth Warren sponsored recently?").trades,
+    false
+  );
+  assert.strictEqual(parseTicker("Show recent trades for NVDA"), "NVDA");
+  assert.strictEqual(parseTicker("congressional stock trades"), null);
+}
+
+async function testCongressionalTradeRetrieval() {
+  const general = await retrieveChatContext(
+    "What do Politeia's records say about congressional stock trades?",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.strictEqual(general.intent.trades, true);
+  assert.ok(general.trades.length > 0, "general trade question must retrieve rows before the model");
+  assert.ok(general.trades.some((t) => t.ticker === "MIR" && t.politicianName === "Ro Khanna"));
+  assert.strictEqual(general.retrievalStatus, "ok");
+  assert.strictEqual(general.coverage, "records");
+  assert.ok(
+    general.sources.some(
+      (s) => s.type === "financial" && (s.url || "").includes("/investments")
+    )
+  );
+
+  const member = await retrieveChatContext(
+    "What recent stock trades has Ro Khanna reported?",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.ok(member.members.some((m) => m.bioguideId === "K000389"));
+  assert.ok(member.trades.length > 0);
+  assert.ok(member.trades.every((t) => t.bioguideId === "K000389"));
+  assert.ok(member.trades.some((t) => t.ticker === "MIR"));
+  assert.ok(
+    member.sources.some((s) => (s.url || "").includes("/representatives/K000389"))
+  );
+
+  const ticker = await retrieveChatContext(
+    "Show recent trades for NVDA",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.ok(ticker.trades.length > 0);
+  assert.ok(ticker.trades.every((t) => t.ticker === "NVDA"));
+  assert.strictEqual(ticker.retrievalStatus, "ok");
+
+  const source = await retrieveChatContext(
+    "What is the source for this trade?",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.ok(source.trades.length > 0);
+  assert.ok(source.notes.some((n) => n.includes("Quiver Quantitative")));
+  assert.ok(source.sources.some((s) => (s.url || "").includes("/investments")));
+
+  const missingTicker = await retrieveChatContext(
+    "Show recent trades for ZZQQQ",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.strictEqual(missingTicker.trades.length, 0);
+  assert.strictEqual(missingTicker.retrievalStatus, "not_found");
+  assert.doesNotMatch(
+    cannedUnverifiedAnswer(missingTicker),
+    /does not have a verified record for that in the current database/i
+  );
+  assert.match(cannedUnverifiedAnswer(missingTicker), /none matched/i);
+
+  const missingMember = await retrieveChatContext(
+    "What recent stock trades has Bernie Sanders reported?",
+    {},
+    mockRetrieveDeps()
+  );
+  assert.ok(missingMember.members.some((m) => m.bioguideId === "S000033"));
+  assert.strictEqual(missingMember.trades.length, 0);
+  assert.strictEqual(missingMember.retrievalStatus, "not_found");
+
+  const emptyDataset = await retrieveChatContext(
+    "What do Politeia's records say about congressional stock trades?",
+    {},
+    mockRetrieveDeps({
+      getRecentTrades: async () => [],
+      getTradeMeta: () => ({
+        ...liveTradeMeta,
+        lastUpdated: null,
+        tradesRecordCount: 0,
+        tradesCoverageStart: null,
+        tradesCoverageEnd: null,
+      }),
+    })
+  );
+  assert.strictEqual(emptyDataset.trades.length, 0);
+  assert.strictEqual(emptyDataset.retrievalStatus, "empty");
+  assert.match(cannedUnverifiedAnswer(emptyDataset), /empty/i);
+
+  const staleDataset = await retrieveChatContext(
+    "What do Politeia's records say about congressional stock trades?",
+    {},
+    mockRetrieveDeps({
+      getTradeMeta: () => ({
+        ...liveTradeMeta,
+        lastUpdated: "2020-01-15T00:00:00.000Z",
+      }),
+    })
+  );
+  assert.ok(staleDataset.trades.length > 0);
+  assert.strictEqual(staleDataset.retrievalStatus, "ok");
+  assert.strictEqual(staleDataset.coverage, "partial");
+  assert.ok(staleDataset.notes.some((n) => n.toLowerCase().includes("older than 180 days")));
+
+  const queryFailed = await retrieveChatContext(
+    "What do Politeia's records say about congressional stock trades?",
+    {},
+    mockRetrieveDeps({
+      getRecentTrades: async () => {
+        throw new Error("congress_trades relation is unavailable");
+      },
+    })
+  );
+  assert.strictEqual(queryFailed.trades.length, 0);
+  assert.strictEqual(queryFailed.retrievalStatus, "query_error");
+  assert.match(cannedUnverifiedAnswer(queryFailed), /database query failed/i);
+}
+
+async function testLiveTradeWarehouse() {
+  const { getRecentCongressTrades, getCongressTradesForTicker, getTradesForMember } =
+    await import("../src/lib/profileFinancials");
+  const recent = await getRecentCongressTrades(5);
+  assert.ok(recent.length > 0, "Quiver warehouse should have congressional trades");
+  assert.ok(recent[0].ticker || recent[0].politicianName);
+  const nvda = await getCongressTradesForTicker("NVDA", 3);
+  assert.ok(nvda.length > 0, "NVDA trades exist in the warehouse");
+  assert.ok(nvda.every((row) => (row.ticker || "").toUpperCase() === "NVDA"));
+  const khannaRows = await getTradesForMember("K000389", 3);
+  assert.ok(khannaRows.length > 0, "Ro Khanna trades exist in the warehouse");
+  assert.ok(khannaRows.every((row) => (row.bioguideId || "").toUpperCase() === "K000389"));
+}
+
+async function testCongressionalTradeService() {
+  let called = false;
+  let prompt = "";
+  const client: Client = {
+    complete: async ({ messages }) => {
+      called = true;
+      prompt = JSON.stringify(messages);
+      return "Politeia's Quiver Quantitative records include a Purchase of MIR by Ro Khanna on 2026-09-01. Source: https://politeia.co/investments";
+    },
+  };
+
+  const general = await answerChat(
+    { message: "What do Politeia's records say about congressional stock trades?" },
+    { configured: true, client, retrieveDeps: mockRetrieveDeps() }
+  );
+  assert.strictEqual(called, true, "model should run only after trade rows are retrieved");
+  assert.ok(prompt.includes("MIR"));
+  assert.ok(prompt.includes("Ro Khanna"));
+  assert.ok(general.body.sources?.some((s) => (s.url || "").includes("/investments")));
+  assert.match(general.body.answer, /MIR|Quiver/i);
+  assert.notStrictEqual(general.body.error, "retrieval");
+
+  called = false;
+  const member = await answerChat(
+    { message: "What recent stock trades has Ro Khanna reported?" },
+    { configured: true, client, retrieveDeps: mockRetrieveDeps() }
+  );
+  assert.strictEqual(called, true);
+  assert.ok(prompt.includes("K000389"));
+  assert.ok(member.body.sources?.some((s) => (s.url || "").includes("K000389")));
+
+  called = false;
+  const ticker = await answerChat(
+    { message: "Show recent trades for NVDA" },
+    { configured: true, client, retrieveDeps: mockRetrieveDeps() }
+  );
+  assert.strictEqual(called, true);
+  assert.ok(prompt.includes("NVDA"));
+  assert.ok(ticker.body.sources?.some((s) => s.type === "financial"));
+
+  called = false;
+  const source = await answerChat(
+    { message: "What is the source for this trade?" },
+    { configured: true, client, retrieveDeps: mockRetrieveDeps() }
+  );
+  assert.strictEqual(called, true);
+  assert.ok(prompt.includes("Quiver Quantitative"));
+  assert.ok(source.body.sources?.some((s) => (s.url || "").includes("/investments")));
+
+  called = false;
+  const missing = await answerChat(
+    { message: "Show recent trades for ZZQQQ" },
+    { configured: true, client, retrieveDeps: mockRetrieveDeps() }
+  );
+  assert.strictEqual(called, false);
+  assert.match(missing.body.answer, /none matched/i);
+  assert.strictEqual(missing.body.unverified, true);
+
+  called = false;
+  const dbFail = await answerChat(
+    { message: "What do Politeia's records say about congressional stock trades?" },
+    {
+      configured: true,
+      client,
+      retrieveDeps: mockRetrieveDeps({
+        getRecentTrades: async () => {
+          throw new Error("congress_trades relation is unavailable");
+        },
+      }),
+    }
+  );
+  assert.strictEqual(called, false);
+  assert.strictEqual(dbFail.status, 503);
+  assert.strictEqual(dbFail.body.error, "retrieval");
+  assert.match(dbFail.body.answer, /database query failed/i);
+
+  called = false;
+  const empty = await answerChat(
+    { message: "What do Politeia's records say about congressional stock trades?" },
+    {
+      configured: true,
+      client,
+      retrieveDeps: mockRetrieveDeps({
+        getRecentTrades: async () => [],
+        getTradeMeta: () => ({
+          ...liveTradeMeta,
+          lastUpdated: null,
+          tradesRecordCount: 0,
+        }),
+      }),
+    }
+  );
+  assert.strictEqual(called, false);
+  assert.match(empty.body.answer, /empty/i);
+}
+
 async function maybeSmokeTest() {
   if (!process.env.GROQ_API_KEY) {
     console.log("live provider smoke: skipped (GROQ_API_KEY not set in process)");
@@ -427,9 +805,13 @@ async function run() {
   testMemberMatch();
   testBillParse();
   testModelPin();
+  testTradeIntent();
   await testRetrievalAndCitations();
   await testMissingRecords();
+  await testCongressionalTradeRetrieval();
+  await testLiveTradeWarehouse();
   await testChatService();
+  await testCongressionalTradeService();
   await testPromptIsolation();
   await maybeSmokeTest();
   console.log("test-chat: ok");
